@@ -1,60 +1,65 @@
-NAME	= allocator
+HOSTTYPE ?= $(shell uname -m)_$(shell uname -s)
 
-SRCS	= srcs/main.c \
-		  srcs/malloc.c 
-		#   srcs/free.c
-		#   srcs/realloc.c
+NAME = libft_malloc_$(HOSTTYPE).so
 
-HEADER	= includes/malloc.h
-		#   includes/free.h
-		#   includes/realloc.h
+CC = gcc
 
-OBJS	= $(SRCS:srcs/%.c=obj/%.o)
+CFLAGS = -Wall -Wextra -Werror
 
-CC		= clang
+SRCS_PATH = srcs/
+LIB_PATH  = libc/
+INC_PATH  = includes/
 
-CFLAGS	= -Wall -Wextra -Werror -g3
+SRCS_NAME = main.c \
+			malloc.c 
 
-all:	obj $(NAME)
+LIB_NAME =  ft_atoi.c \
+			ft_bzero.c \
+			ft_itoa.c \
+			ft_memchr.c \
+			ft_memcmp.c \
+			ft_memcpy.c \
+			ft_memmove.c \
+			ft_memset.c \
+			ft_putchar_fd.c \
+			ft_putendl_fd.c \
+			ft_putstr_fd.c 
+
+INCLUDES =  malloc.h 
+
+SRCS = $(addprefix $(SRCS_PATH), $(SRCS_NAME))
+OBJS_PATH = objs/
+OBJS_NAME = $(SRCS_NAME:.c=.o)
+OBJS = $(addprefix $(OBJS_PATH), $(OBJS_NAME))
+
+LIBRARY = $(addprefix $(LIB_PATH), $(LIB_NAME))
+INCLUDE_PATH = $(addprefix $(INC_PATH), $(INCLUDES))
+
+all: odir $(NAME)
 
 $(NAME): $(OBJS)
-		@ $(CC) $(CFLAGS) -o $(NAME) $^
+	@echo " - Making $(NAME)"
+	@$(CC) $(CFLAGS) -o $(NAME) $^ $(LIBRARY)
+	@ln -sf $(NAME) libft_malloc.so
 
-obj:
-		@mkdir -p obj
+odir:
+	@mkdir -p $(OBJS_PATH)
 
-obj/%.o:	srcs/%.c
-		${CC} ${CFLAGS} -I. -c $< -o $@
+$(OBJS_PATH)%.o: $(SRCS_PATH)%.c $(INCLUDE_PATH)
+	@echo " - Compiling $<"
+	@$(CC) $(CFLAGS) -fPIC -o $@ -c $< -I $(INC_PATH)
 
 valgrind:
-	make && clear && valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all --track-fds=yes ./allocator
-
+	make && clear && valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all ./libft_malloc_x86_64_Linux.so 
 clean:
-	@printf "%b" "\t    $(_PURPLE)[Cleaning] $(_PURPLE)[all]$(_PINK_ORANGE)\n";
-	rm -rf obj
+	@echo " - Cleaning objs"
+	@rm -f $(OBJS)
 
 fclean: clean
-	@printf "%b" "\t    $(_ORANGE)[Cleaning] $(_ORANGE)[all]$(_RED)\n";
-	rm -f $(NAME)
+	@echo " - Cleaning executable"
+	@rm -f $(NAME)
+	@rm -f libft_malloc.so
 
-re:		fclean all
+re: fclean all
 
-.PHONY:		all clean fclean re
-
-# -------------- Syntaxing -------------- #
-
-_NO                    =        \033[0m
-_BOLD                =        \033[1m
-_BLUE                =        \033[34m
-_CYAN                =        \033[36m
-_RED                =        \033[31m
-_PURPLE             =        \033[35m
-_PINK_ORANGE        =        \033[38;5;215m
-_GREY                 =        \033[38;5;234m
-_STARLIGHT_BLUE     =        \033[38;5;158m
-_STARLIGHT_GREEN    =        \033[38;5;157m
-_DEEP_BLUE            =        \033[38;5;69m
-_YELLOW             =        \033[38;5;226m
-_ORANGE                =         \033[38;5;209m\e[1m
-
-# -------------- Syntaxing -------------- #
+.PHONY: clean fclean re odir
