@@ -17,7 +17,6 @@ void *ptr = mmap(NULL, 4096, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS
 ```
 
 - `mmap` crée un nouveau mapping dans l'espace d'adressage virtuel du processus appelant.
-addr spécifie l'adresse de départ du nouveau mapping. Si addr est NULL, le noyau choisit l'adresse (alignée sur une page) où créer le mapping.
 - `addr` spécifie l'adresse de départ du nouveau mapping. Si addr est NULL, le noyau choisit l'adresse (alignée sur une page) où créer le mapping.
 - `length` spécifie la longueur du mapping.
 - `prot` décrit la protection mémoire désirée pour le mapping.
@@ -104,7 +103,7 @@ VOILA PQ ON UTILISE MMAP POUR SPECIFIER LA TAILLE
 
 1. Utilisation de mmap : La fonction malloc utilise le système call mmap pour allouer un nouveau `bloc de mémoire`. mmap est utilisée pour mapper la memoire physique vers des addresses virtuelles et il retourne un pointeur vers le début de cette zone.
 
-2. Structures de données : Le développeur utilise des structures pour gérer la mémoire allouée. Un bloc de mémoire alloué est appelé un "heap", et un heap est constitué de "blocks". Chacun de ces blocs et heaps a des métadonnées au début, ce qui aide à gérer efficacement la mémoire.
+2. Structures de données : On utilise des structures pour gérer la mémoire allouée. Un bloc de mémoire alloué est appelé un "heap", et un heap est constitué de "blocks". Chacun de ces blocs et heaps a des métadonnées au début, ce qui aide à gérer efficacement la mémoire.
 
 ![Screenshot](img/graph-0.png)
 
@@ -129,3 +128,25 @@ VOILA PQ ON UTILISE MMAP POUR SPECIFIER LA TAILLE
 3. Réutilisation de l'espace : Si la nouvelle taille est plus petite que l'ancienne, realloc peut réutiliser l'espace existant.
 
 4. Cas particulier : Si la taille demandée est zéro, le comportement est laissé à l'implémentation. Dans ce cas, il choisit de retourner simplement le pointeur sans effectuer d'allocation.
+
+### COMPREHENSION DE LA SEGMENTATION
+
+```txt
+La segmentation est une approche alternative à l'utilisation de la pagination pour allouer la mémoire, et elle peut également être utilisée en conjonction avec la pagination. Dans sa forme la plus pure, un programme est divisé en plusieurs segments, chacun étant une unité autonome, comprenant éventuellement une sous-routine ou une structure de données.
+
+Contrairement aux pages, les segments peuvent varier en taille. Cela nécessite que l'Unité de Gestion de la Mémoire (MMU) gère la mémoire segmentée de manière quelque peu différente de la gestion de la mémoire paginée. Une MMU segmentée contient une table de segments pour suivre les segments résidents en mémoire.
+
+Un segment peut être créé à l'une de plusieurs adresses et peut avoir n'importe quelle taille. Chaque entrée de la table des segments devrait contenir l'adresse de départ et la taille du segment. Certains systèmes permettent à un segment de commencer à n'importe quelle adresse, tandis que d'autres limitent l'adresse de départ. Une telle limite se trouve dans l'architecture Intel X86, qui exige qu'un segment commence à une adresse ayant 6000 comme ses quatre bits de faible ordre.
+
+Un système avec cette limitation n'aurait pas besoin de stocker ces quatre bits dans sa table des segments, car leur valeur est implicite. Comme le montre la figure, le texte décrit un schéma de traduction d'adresse simplifié pour la mémoire segmentée.
+
+L'offset est comparé à la taille du segment. Si l'offset est supérieur ou égal à la taille du segment, signifiant que l'emplacement ne fait pas partie du segment, une erreur est générée. Si l'offset a une valeur valide, il est ajouté au début de l'adresse du segment pour créer les bonnes adresses physiques de la mémoire. Tout comme la pagination, une MMU segmentée peut également avoir une Translation Lookaside Buffer (TLB) pour accélérer la génération des adresses de début et des tailles de segments.
+
+En pagination, le numéro de page est envoyé à la table des pages (et à la TLB) pour produire un numéro de trame. Cette valeur est concaténée avec l'offset pour produire l'adresse physique. Dans la segmentation, l'adresse de départ générée par la table des segments ou la TLB est ajoutée à l'offset, un processus beaucoup plus chronophage que la concaténation.
+
+Étant donné que les segments peuvent avoir des tailles différentes, cette méthode présente à la fois des avantages et des inconvénients par rapport à la pagination. Considérons l'exemple de la pagination pour un CPU relativement simple.
+
+Dans l'exécution de la mémoire paginée, chaque page a une taille de 4 Ko. Un programme de taille 4 Ko + 1 nécessiterait que la MMU alloue deux pages de mémoire, même si la deuxième page n'utiliserait qu'un seul de ses emplacements de 4 Ko. Cela est appelé fragmentation interne. Si la segmentation est utilisée, un segment de taille exacte de 4 Ko + 1 peut être alloué, évitant ainsi ce problème.
+
+La segmentation a un problème appelé fragmentation externe. Trois segments résident en mémoire et il y a 8 Ko d'espace libre. L'espace libre est subdivisé de telle sorte qu'aucun segment supérieur à 3 Ko ne peut être chargé en mémoire sans changer ou supprimer l'un des segments actuellement chargés. Cela introduit une surcharge en déplaçant des données vers le disque d'échange ou en les relocalisant en mémoire, ce qui réduit les performances du système.
+```
