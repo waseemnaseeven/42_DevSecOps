@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
-#include <stdlib.h>
+// #include <stdlib.h>
 #include <sys/mman.h>
 #include <sys/resource.h>
 #include <stdbool.h>
@@ -24,8 +24,8 @@
 #define SMALL_BLOCK_SIZE (SMALL_HEAP_ALLOCATION_SIZE / 100)
 
 typedef enum	e_bool {
-	TRUE,
-	FALSE
+	FALSE,
+	TRUE
 }				t_bool;
 
 typedef enum	e_heap_group {
@@ -33,6 +33,17 @@ typedef enum	e_heap_group {
 	SMALL,
 	LARGE
 }				t_heap_group;
+
+
+// Metadata structure for a block 
+typedef struct      s_block {
+
+    size_t          size;
+    bool            freed;
+    struct s_block  *prev;
+    struct s_block  *next;
+
+}                   t_block;
 
 // Naviguate around the heap during mmap calls and access any block
 typedef struct      s_heap {
@@ -43,22 +54,19 @@ typedef struct      s_heap {
     struct s_heap	*prev;
 	struct s_heap	*next;
 	t_heap_group	group;
+    t_block         *blocks;
 
 }                   t_heap;
-
-// Metadata structure for a block 
-typedef struct      s_block {
-
-    size_t          data_size;
-    bool            freed;
-    struct s_block  *prev;
-    struct s_block  *next;
-
-}                   t_block;
 
 extern t_heap           *g_heap;
 extern pthread_mutex_t  g_malloc_mutex;
 
-void    *malloc(size_t size);
+// Malloc functions
+void    *ft_malloc(size_t size);
+void    free(void *ptr);
+void    *realloc(void *ptr, size_t size);
+
+// Show functions
+void    show_alloc_mem(void);
 
 #endif
