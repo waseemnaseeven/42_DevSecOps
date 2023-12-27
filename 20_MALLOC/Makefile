@@ -8,6 +8,7 @@ CFLAGS = -Wall -Wextra -Werror
 
 SRCS_PATH = srcs/
 LIB_PATH  = libc/
+LOG_PATH  = log/
 INC_PATH  = includes/
 
 SRCS_NAME = main.c \
@@ -25,6 +26,8 @@ LIB_NAME =  ft_atoi.c \
 			ft_putendl_fd.c \
 			ft_putstr_fd.c 
 
+LOG_NAME =  show_alloc_mem.c 
+
 INCLUDES =  malloc.h 
 
 SRCS = $(addprefix $(SRCS_PATH), $(SRCS_NAME))
@@ -33,13 +36,14 @@ OBJS_NAME = $(SRCS_NAME:.c=.o)
 OBJS = $(addprefix $(OBJS_PATH), $(OBJS_NAME))
 
 LIBRARY = $(addprefix $(LIB_PATH), $(LIB_NAME))
+LOGS = $(addprefix $(LOG_PATH), $(LOG_NAME))
 INCLUDE_PATH = $(addprefix $(INC_PATH), $(INCLUDES))
 
 all: odir $(NAME)
 
 $(NAME): $(OBJS)
 	@echo " - Making $(NAME)"
-	@$(CC) $(CFLAGS) -o $(NAME) $^ $(LIBRARY)
+	@$(CC) $(CFLAGS) -o $(NAME) -lpthread $^ $(LIBRARY) $(LOGS) -I $(INC_PATH)
 	@ln -sf $(NAME) libft_malloc.so
 
 odir:
