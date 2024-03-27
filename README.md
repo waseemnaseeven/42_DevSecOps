@@ -1,4 +1,4 @@
-# 42 DevOps project 🧠
+# 42 DevSecOps project 🧠
 
 | Name  | Language      | End Date      |                       Description                 | Estimated effort (h)   | Difficulty (1 to 5) |
 | ----- |:-------------:| :-----------: | :------------------------------------------------:| :---------------------:| :------------------:|
