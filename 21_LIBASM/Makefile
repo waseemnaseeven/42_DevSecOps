@@ -1,17 +1,19 @@
-NAME	= allocator
+NAME	= libasm.a
 
-SRCS	= srcs/main.c \
-		  srcs/malloc.c 
-		#   srcs/free.c
-		#   srcs/realloc.c
+SRCS	= srcs/ft_strlen.s \
+		  srcs/ft_strcpy.s \
+		  srcs/ft_strcmp.s \
+		  srcs/ft_write.s \
+		  srcs/ft_read.s \
+		  srcs/ft_strdup.s
 
-HEADER	= includes/malloc.h
-		#   includes/free.h
-		#   includes/realloc.h
+HEADER	= libasm.h
 
-OBJS	= $(SRCS:srcs/%.c=obj/%.o)
+OBJS	= $(SRCS:srcs/%.s=obj/%.o)
 
-CC		= clang
+LIB 	= ar rcs
+
+CC		= gcc
 
 CFLAGS	= -Wall -Wextra -Werror -g3
 
@@ -27,7 +29,7 @@ obj/%.o:	srcs/%.c
 		${CC} ${CFLAGS} -I. -c $< -o $@
 
 valgrind:
-	make && clear && valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all --track-fds=yes ./allocator
+	make && clear && valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all --track-fds=yes 
 
 clean:
 	@printf "%b" "\t    $(_PURPLE)[Cleaning] $(_PURPLE)[all]$(_PINK_ORANGE)\n";
