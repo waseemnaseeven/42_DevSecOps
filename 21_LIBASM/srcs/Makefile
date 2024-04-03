@@ -1,20 +1,23 @@
-NAME	= libasm_tester
+NAME	= libasm.a
 
-SRCS	= test/ft_strlen_test.c \
-		  test/ft_strcpy_test.c \
-		  test/ft_strcmp_test.c \
-		  test/ft_write_test.c \
-		  test/ft_read_test.c \
-		  test/ft_strdup_test.c
+SRCS	= srcs/ft_strlen.s \
+		  srcs/ft_strcpy.s \
+		  srcs/ft_strcmp.s \
+		  srcs/ft_write.s \
+		  srcs/ft_read.s \
+		  srcs/ft_strdup.s
 
-BNS		= bonus/ft_list_push_front_test.c \
-		  bonus/ft_list_size_test.c \
-		  bonus/ft_list_sort_test.c \
-		  bonus/ft_list_remove_if_test.c
+BNS		= bonus/ft_list_push_front.s \
+		  bonus/ft_list_size.s \
+		  bonus/ft_list_sort.s \
+		  bonus/ft_list_remove_if.s
 
-HEADER	= libasm_tester.h
 
-OBJS	= $(SRCS:srcs/%.c=obj/%.o)
+HEADER	= libasm.h
+
+OBJS	= $(SRCS:srcs/%.s=obj/%.o)
+
+LIB 	= ar rcs
 
 CC		= gcc
 
