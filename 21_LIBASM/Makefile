@@ -1,16 +1,17 @@
 NAME	= libasm_tester
 
-SRCS	= test/ft_strlen_test.c \
-		  test/ft_strcpy_test.c \
-		  test/ft_strcmp_test.c \
-		  test/ft_write_test.c \
-		  test/ft_read_test.c \
-		  test/ft_strdup_test.c
+SRCS	= test/main.c \
+		  test/ft_strlen_tester.c \
+		#   test/ft_strcpy_tester.c \
+		#   test/ft_strcmp_tester.c \
+		#   test/ft_write_tester.c \
+		#   test/ft_read_tester.c \
+		#   test/ft_strdup_tester.c
 
 BNS		= bonus/ft_list_push_front_test.c \
 		  bonus/ft_list_size_test.c \
 		  bonus/ft_list_sort_test.c \
-		  bonus/ft_list_remove_if_test.c
+		  bonus/ft_list_remove_if_test.c 
 
 HEADER	= libasm_tester.h
 
