@@ -8,10 +8,15 @@ int main() {
     printf("_________________\n\n" RESET);
 
     ft_strlen_test();
-    // ft_strcpy_test();
-    // ft_strcmp_test();
+    printf(BOLDYELLOW "_________________\n\n" RESET);
+    ft_strcpy_test();
+    printf(BOLDYELLOW "_________________\n\n" RESET);
+    ft_strcmp_test();
+    printf(BOLDYELLOW "_________________\n\n" RESET);
     // ft_strdup_test();
+    printf(BOLDYELLOW "_________________\n\n" RESET);
     // ft_write_test();
+    printf(BOLDYELLOW "_________________\n\n" RESET);
     // ft_read_test();
 
     return (0);

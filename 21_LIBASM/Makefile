@@ -2,50 +2,56 @@ NAME	= libasm_tester
 
 SRCS	= test/main.c \
 		  test/ft_strlen_tester.c \
-		#   test/ft_strcpy_tester.c \
-		#   test/ft_strcmp_tester.c \
-		#   test/ft_write_tester.c \
-		#   test/ft_read_tester.c \
-		#   test/ft_strdup_tester.c
+		    test/ft_strcpy_tester.c \
+		    test/ft_strcmp_tester.c \
+		  #   test/ft_write_tester.c \
+		  #   test/ft_read_tester.c \
+		  #   test/ft_strdup_tester.c
 
-BNS		= bonus/ft_list_push_front_test.c \
-		  bonus/ft_list_size_test.c \
-		  bonus/ft_list_sort_test.c \
-		  bonus/ft_list_remove_if_test.c 
+BNS		= bonus/ft_list_push_front_tester.c \
+		  bonus/ft_list_size_tester.c \
+		  bonus/ft_list_sort_tester.c \
+		  bonus/ft_list_remove_if_tester.c 
 
-HEADER	= libasm_tester.h
+HEADER	= -I ./functions/includes/ \
+		  -I ./libasm_tester \
 
-OBJS	= $(SRCS:srcs/%.c=obj/%.o)
+OBJS	= $(SRCS:test/%.c=obj/%.o)
 
-CC		= gcc
+CC		= cc
 
 CFLAGS	= -Wall -Wextra -Werror -g3
 
 all:	obj $(NAME)
 
-$(NAME): $(OBJS)
-		@ $(CC) $(CFLAGS) -o $(NAME) $^
+$(NAME): $(OBJS) functions/libasm.a
+		@ $(CC) $(CFLAGS) -o $@ $^
 
 obj:
-		@mkdir -p obj
+		@ mkdir -p obj
 
-obj/%.o:	srcs/%.c
+obj/%.o:	test/%.c
 		${CC} ${CFLAGS} -I. -c $< -o $@
 
 valgrind:
 	make && clear && valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all --track-fds=yes 
 
+functions/libasm.a:
+	make -C functions/
+
 clean:
 	@printf "%b" "\t    $(_PURPLE)[Cleaning] $(_PURPLE)[all]$(_PINK_ORANGE)\n";
 	rm -rf obj
+	rm -rf functions/obj
 
 fclean: clean
 	@printf "%b" "\t    $(_ORANGE)[Cleaning] $(_ORANGE)[all]$(_RED)\n";
 	rm -f $(NAME)
+	rm -rf functions/libasm.a
 
 re:		fclean all
 
-.PHONY:		all clean fclean re
+.PHONY:		all clean fclean re valgrind
 
 # -------------- Syntaxing -------------- #
 

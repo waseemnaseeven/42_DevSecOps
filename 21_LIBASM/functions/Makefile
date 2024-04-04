@@ -3,51 +3,50 @@ NAME	= libasm.a
 SRCS	= srcs/ft_strlen.s \
 		  srcs/ft_strcpy.s \
 		  srcs/ft_strcmp.s \
-		  srcs/ft_write.s \
-		  srcs/ft_read.s \
-		  srcs/ft_strdup.s
+		#   srcs/ft_write.s \
+		#   srcs/ft_read.s \
+		#   srcs/ft_strdup.s
 
 BNS		= bonus/ft_list_push_front.s \
 		  bonus/ft_list_size.s \
 		  bonus/ft_list_sort.s \
 		  bonus/ft_list_remove_if.s
 
-
-HEADER	= libasm.h
+HEADER	= -I ./includes/
 
 OBJS	= $(SRCS:srcs/%.s=obj/%.o)
 
-LIB 	= ar rcs
+LIB 	= ar
+LIBFLAGS = -rcs
 
-CC		= gcc
+ASM		= nasm
+FLAGS	= -f elf64
 
-CFLAGS	= -Wall -Wextra -Werror -g3
-
-all:	obj $(NAME)
+all: obj $(NAME)
 
 $(NAME): $(OBJS)
-		@ $(CC) $(CFLAGS) -o $(NAME) $^
+	$(LIB) $(LIBFLAGS) $(NAME) $(OBJS)
 
 obj:
-		@mkdir -p obj
+	mkdir -p obj
 
-obj/%.o:	srcs/%.c
-		${CC} ${CFLAGS} -I. -c $< -o $@
+obj/%.o: srcs/%.s
+	$(ASM) $(FLAGS) $< -o $@ $(HEADER)
 
 valgrind:
 	make && clear && valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all --track-fds=yes 
 
 clean:
-	@printf "%b" "\t    $(_PURPLE)[Cleaning] $(_PURPLE)[all]$(_PINK_ORANGE)\n";
+	@printf "%b" "\t    $(_ORANGE)[Cleaning] $(_ORANGE)[all]$(_PINK_ORANGE)\n";
 	rm -rf obj
 
 fclean: clean
-	@printf "%b" "\t    $(_ORANGE)[Cleaning] $(_ORANGE)[all]$(_RED)\n";
+	@printf "%b" "\t    $(_STARLIGHT_BLUE)[Cleaning] $(_STARLIGHT_BLUE)[all]$(_BLUE)\n";
 	rm -f $(NAME)
 
-re:		fclean all
+re: fclean all
 
-.PHONY:		all clean fclean re
+.PHONY: all clean fclean re
 
 # -------------- Syntaxing -------------- #
 
