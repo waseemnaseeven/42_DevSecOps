@@ -13,11 +13,11 @@ int main() {
     printf(BOLDYELLOW "_________________\n\n" RESET);
     ft_strcmp_test();
     printf(BOLDYELLOW "_________________\n\n" RESET);
-    // ft_strdup_test();
+    ft_strdup_test();
     printf(BOLDYELLOW "_________________\n\n" RESET);
-    // ft_write_test();
+    ft_write_test();
     printf(BOLDYELLOW "_________________\n\n" RESET);
-    // ft_read_test();
+    ft_read_test();
 
     return (0);
 }

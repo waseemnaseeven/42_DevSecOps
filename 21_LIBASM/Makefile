@@ -4,9 +4,9 @@ SRCS	= test/main.c \
 		  test/ft_strlen_tester.c \
 		    test/ft_strcpy_tester.c \
 		    test/ft_strcmp_tester.c \
-		  #   test/ft_write_tester.c \
-		  #   test/ft_read_tester.c \
-		  #   test/ft_strdup_tester.c
+		    test/ft_write_tester.c \
+		    test/ft_read_tester.c \
+		    test/ft_strdup_tester.c
 
 BNS		= bonus/ft_list_push_front_tester.c \
 		  bonus/ft_list_size_tester.c \

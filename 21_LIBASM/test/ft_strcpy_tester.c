@@ -24,9 +24,8 @@ void    ft_strcpy_test(void) {
     
         printf("src1: %s\n", src1);
         printf("dst1: %s\n", dst1);
-        printf("dst: %s\n", dst);
+        printf("dst: %s\n\n", dst);
         strcpy(dst1, src1);
-        printf("now, lets try my ft_strcpy\n");
         ft_strcpy(dst, src1);
         printf("After strcpy dst1: %s\n", dst1);
         printf("After ft_strcpy dst: %s\n", dst);
