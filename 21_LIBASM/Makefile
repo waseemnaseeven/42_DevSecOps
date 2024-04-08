@@ -1,4 +1,5 @@
 NAME	= libasm_tester
+NAME_BONUS  = libasm_tester_bonus
 
 SRCS	= test/main.c \
 		  test/ft_strlen_tester.c \
@@ -6,17 +7,20 @@ SRCS	= test/main.c \
 		    test/ft_strcmp_tester.c \
 		    test/ft_write_tester.c \
 		    test/ft_read_tester.c \
-		    test/ft_strdup_tester.c
+		    test/ft_strdup_tester.c 
 
-BNS		= bonus/ft_list_push_front_tester.c \
-		  bonus/ft_list_size_tester.c \
-		  bonus/ft_list_sort_tester.c \
-		  bonus/ft_list_remove_if_tester.c 
+
+BONUS_SRCS = bonus/main_bonus.c \
+             bonus/ft_list_push_front_tester.c \
+             bonus/ft_list_size_tester.c 
 
 HEADER	= -I ./functions/includes/ \
 		  -I ./libasm_tester \
+		  -I ./bonus/libasm_tester_bonus \
 
 OBJS	= $(SRCS:test/%.c=obj/%.o)
+
+OBJS_BONUS =  $(BONUS_SRCS:bonus/%.c=obj_bonus/%.o)
 
 CC		= cc
 
@@ -25,29 +29,44 @@ CFLAGS	= -Wall -Wextra -Werror -g3
 all:	obj $(NAME)
 
 $(NAME): $(OBJS) functions/libasm.a
-		@ $(CC) $(CFLAGS) -o $@ $^
+	@ $(CC) $(CFLAGS) -o $@ $(OBJS) functions/libasm.a
+
+
+$(NAME_BONUS): $(OBJS_BONUS) functions/libasm_bonus.a
+	@ $(CC) $(CFLAGS) -o $@ $(OBJS_BONUS) functions/libasm_bonus.a
+
+bonus: obj_bonus $(NAME_BONUS)
 
 obj:
-		@ mkdir -p obj
+	@ mkdir -p obj
+
+obj_bonus:
+	@ mkdir -p obj_bonus
 
 obj/%.o:	test/%.c
 		${CC} ${CFLAGS} -I. -c $< -o $@
 
-valgrind:
-	make && clear && valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all --track-fds=yes 
+obj_bonus/%.o:    bonus/%.c
+		${CC} ${CFLAGS} -I. -c $< -o libasm_tester_bonus
 
 functions/libasm.a:
 	make -C functions/
 
+functions/libasm_bonus.a:
+	make bonus -C functions/
+
 clean:
 	@printf "%b" "\t    $(_PURPLE)[Cleaning] $(_PURPLE)[all]$(_PINK_ORANGE)\n";
 	rm -rf obj
+	rm -rf obj_bonus
 	rm -rf functions/obj
+	rm -rf functions/obj_bonus
 
 fclean: clean
 	@printf "%b" "\t    $(_ORANGE)[Cleaning] $(_ORANGE)[all]$(_RED)\n";
 	rm -f $(NAME)
 	rm -rf functions/libasm.a
+	rm -rf functions/libasm_bonus.a
 
 re:		fclean all
 

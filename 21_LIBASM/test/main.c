@@ -19,5 +19,7 @@ int main() {
     printf(BOLDYELLOW "_________________\n\n" RESET);
     ft_read_test();
 
+
+
     return (0);
 }

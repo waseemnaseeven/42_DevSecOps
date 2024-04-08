@@ -5,18 +5,18 @@
 void ft_strdup_test(void) {
 
     char *src = "Hello World!";
+    char *src1 = "Hello World!";
     char *dest;
-    char *dest1;
-    printf("Testing the Original strdup with my function\n");
+    char *dest1 = NULL;
+    printf(BOLDWHITE "Testing the Original strdup with my function\n" RESET);
     
     dest = strdup(src);
-    printf(BLUE "original strdup = %s\n", dest);
-    dest1 = ft_strdup(src);
-    printf("my ft_strdup =  %s\n", dest1);
-
-    if (dest == dest1)
-        printf(GREEN "\nPASSED\n" RESET);
-    else
-        printf(RED "\nFAILED\n" RESET);
+    if (dest == NULL)
+        printf(BOLDCYAN "NULL strdup\n");
+    printf(BLUE "Original strdup = %s\n", dest);
+    dest1 = ft_strdup(src1);
+    if (dest1 == NULL)
+        printf(BOLDCYAN "NULL ft_strdup\n" RESET);
+    printf("My ft_strdup =  %s\n", dest1);
 
 }

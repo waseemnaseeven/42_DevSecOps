@@ -9,12 +9,12 @@ SRCS	= srcs/ft_strlen.s \
 
 BNS		= bonus/ft_list_push_front.s \
 		  bonus/ft_list_size.s \
-		  bonus/ft_list_sort.s \
-		  bonus/ft_list_remove_if.s
 
 HEADER	= -I ./includes/
 
 OBJS	= $(SRCS:srcs/%.s=obj/%.o)
+
+OBJS_BONUS = $(SRCS:bonus/%.s=obj_bonus/%.o)
 
 LIB 	= ar
 LIBFLAGS = -rcs
@@ -22,27 +22,34 @@ LIBFLAGS = -rcs
 ASM		= nasm
 FLAGS	= -f elf64
 
-all: obj $(NAME)
+all: obj obj_bonus $(NAME)
 
-$(NAME): $(OBJS)
+$(NAME): $(OBJS) 
 	$(LIB) $(LIBFLAGS) $(NAME) $(OBJS)
+
+bonus: obj_bonus $(OBJS_BONUS)
+	$(LIB) $(LIBFLAGS) libasm_bonus.a $(OBJS_BONUS) 
 
 obj:
 	mkdir -p obj
 
+obj_bonus:
+	mkdir -p obj_bonus
+
 obj/%.o: srcs/%.s
 	$(ASM) $(FLAGS) $< -o $@ $(HEADER)
 
-valgrind:
-	make && clear && valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all --track-fds=yes 
+obj_bonus/%.o: bonus/%.s
+	$(ASM) $(FLAGS) $< -o $@ $(HEADER)
 
 clean:
 	@printf "%b" "\t    $(_ORANGE)[Cleaning] $(_ORANGE)[all]$(_PINK_ORANGE)\n";
-	rm -rf obj
+	rm -rf obj obj_bonus
 
 fclean: clean
 	@printf "%b" "\t    $(_STARLIGHT_BLUE)[Cleaning] $(_STARLIGHT_BLUE)[all]$(_BLUE)\n";
 	rm -f $(NAME)
+	rm -rf libasm_bonus.a
 
 re: fclean all
 

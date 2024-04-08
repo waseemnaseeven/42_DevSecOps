@@ -21,14 +21,17 @@ void    ft_strcpy_test(void) {
         char    src1[100] = "Hello, World!";
         char    dst1[100] = "Hello Tschou";
         char    dst[100] = "Hello Tschou";
+
+        printf(BOLDWHITE "Testing ft_strcpy with the original one\n\n" RESET);
     
         printf("src1: %s\n", src1);
         printf("dst1: %s\n", dst1);
         printf("dst: %s\n\n", dst);
         strcpy(dst1, src1);
         ft_strcpy(dst, src1);
-        printf("After strcpy dst1: %s\n", dst1);
+        printf(BLUE "After strcpy dst1: %s\n", dst1);
         printf("After ft_strcpy dst: %s\n", dst);
+        printf("\n" RESET);
         size_t len1 = strlen(dst1);
         size_t len = strlen(dst);
         printf("%lu == %lu\n", len1, len);
