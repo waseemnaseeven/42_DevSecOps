@@ -3,43 +3,83 @@
 #include "../colors.h"
 #include <stdlib.h>
 
-void list_push_front(t_list **begin_list, void *data)
+#include <string.h> // Pour utiliser strdup
+
+
+t_list *ft_create_elem(void *data)
 {
-    t_list *new = malloc(sizeof(t_list));
-    if (new == NULL)
-        return;
-    while (*begin_list != NULL) 
-    {
-        new->data = data;
-        new->next = *begin_list;
-        *begin_list = new;
-    }
+    t_list *new;
+
+    if (!(new = malloc(sizeof(t_list))))
+        return (NULL);
+    new->data = data;
+    new->next = NULL;
+    return (new);
 }
 
-void ft_list_push_front_test(void) {
+void list_push_front(t_list **begin_list, void *data)
+{
+    t_list *f;
 
+    if (*begin_list)
+    {
+        f = ft_create_elem(data);
+        f->next = *begin_list;
+        *begin_list = f;
+    }
+    else
+        *begin_list = ft_create_elem(data);
+}
+
+void ft_list_push_front_test(void)
+{
     printf(BOLDWHITE "Testing chain list function\n" RESET);
 
     t_list *lst = NULL;
-
-    int array[] = {6, 9, 8, 10, 7};
-    int size = sizeof(array) / sizeof(array[0]);
-    for (int i = 0; i < size; i++){
+    int array[] = {3, 4, 6 , 7, 8};
+    // list_push_front(&lst, strdup("Coucou"));
+    for (int i = 0; i < 5; i++)
+    {
         list_push_front(&lst, &array[i]);
     }
+    
 
-    printf(BOLDMAGENTA "Here is my list: {");
+    // Affichage de la liste
+    printf(BOLDMAGENTA "Here is my list from the C function: {");
+
     t_list *tmp = lst;
     while (tmp != NULL)
     {
         printf("%d, ", *(int *)(tmp->data));
         tmp = tmp->next;
-
     }
-    printf("}" RESET);
-    int arr[] = {5, 3, 1, 4, 2};
-    size = sizeof(arr) / sizeof(arr[0]);
-    for (int i = 0; i < size; i++){
-        ft_list_push_front(&lst, &arr[i]);
+    printf("}\n" RESET);
+
+    t_list *lst2 = NULL;
+    
+    ft_list_push_front(&lst2, strdup("Coucou2"));
+    printf(BOLDCYAN "Here is my list from my assembly function: {");
+    t_list *tmp2 = lst2;
+    while (tmp2 != NULL)
+    {
+        printf("%s, ", (char *)(tmp2->data));
+        tmp2 = tmp2->next;
+    }
+    printf("}\n" RESET);
+
+    // Libération de la mémoire
+    while (lst != NULL)
+    {
+        t_list *next = lst->next;
+        free(lst->data); // Libération de la mémoire allouée par strdup
+        free(lst);
+        lst = next;
+    }
+    while (lst2 != NULL)
+    {
+        t_list *next = lst2->next;
+        free(lst2->data); // Libération de la mémoire allouée par strdup
+        free(lst2);
+        lst2 = next;
     }
 }

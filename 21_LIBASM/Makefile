@@ -47,7 +47,7 @@ obj/%.o:	test/%.c
 		${CC} ${CFLAGS} -I. -c $< -o $@
 
 obj_bonus/%.o:    bonus/%.c
-		${CC} ${CFLAGS} -I. -c $< -o libasm_tester_bonus
+		${CC} ${CFLAGS} -I. -c $< -o $@
 
 functions/libasm.a:
 	make -C functions/
@@ -64,9 +64,10 @@ clean:
 
 fclean: clean
 	@printf "%b" "\t    $(_ORANGE)[Cleaning] $(_ORANGE)[all]$(_RED)\n";
-	rm -f $(NAME)
+	rm -f $(NAME) $(NAME_BONUS)
 	rm -rf functions/libasm.a
 	rm -rf functions/libasm_bonus.a
+
 
 re:		fclean all
 
@@ -89,3 +90,4 @@ _YELLOW             =        \033[38;5;226m
 _ORANGE                =         \033[38;5;209m\e[1m
 
 # -------------- Syntaxing -------------- #
+

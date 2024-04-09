@@ -1,34 +1,39 @@
-NAME	= libasm.a
+NAME        = libasm.a
+NAME_BONUS  = libasm_bonus.a
 
-SRCS	= srcs/ft_strlen.s \
-		  srcs/ft_strcpy.s \
-		  srcs/ft_strcmp.s \
-		  srcs/ft_write.s \
-		  srcs/ft_read.s \
-		  srcs/ft_strdup.s
+SRCS        = srcs/ft_strlen.s \
+              srcs/ft_strcpy.s \
+              srcs/ft_strcmp.s \
+              srcs/ft_write.s \
+              srcs/ft_read.s \
+              srcs/ft_strdup.s
 
-BNS		= bonus/ft_list_push_front.s \
-		  bonus/ft_list_size.s \
+BNS         = bonus/ft_list_push_front.s \
+              bonus/ft_list_size.s
 
-HEADER	= -I ./includes/
+HEADER      = -I ./includes/libasm
 
-OBJS	= $(SRCS:srcs/%.s=obj/%.o)
+HEADER_BONUS = -I ./includes/libasm_bonus
 
-OBJS_BONUS = $(SRCS:bonus/%.s=obj_bonus/%.o)
+OBJS        = $(SRCS:srcs/%.s=obj/%.o)
 
-LIB 	= ar
-LIBFLAGS = -rcs
+OBJS_BONUS  = $(BNS:bonus/%.s=obj_bonus/%.o)
 
-ASM		= nasm
-FLAGS	= -f elf64
+LIB         = ar
+LIBFLAGS    = -rcs
+
+ASM         = nasm
+FLAGS       = -f elf64
 
 all: obj obj_bonus $(NAME)
 
-$(NAME): $(OBJS) 
+$(NAME): $(OBJS)
 	$(LIB) $(LIBFLAGS) $(NAME) $(OBJS)
 
-bonus: obj_bonus $(OBJS_BONUS)
-	$(LIB) $(LIBFLAGS) libasm_bonus.a $(OBJS_BONUS) 
+$(NAME_BONUS): $(OBJS_BONUS) 
+	$(LIB) $(LIBFLAGS) $(NAME_BONUS) $(OBJS_BONUS)
+
+bonus: obj_bonus $(NAME_BONUS)
 
 obj:
 	mkdir -p obj
@@ -40,7 +45,7 @@ obj/%.o: srcs/%.s
 	$(ASM) $(FLAGS) $< -o $@ $(HEADER)
 
 obj_bonus/%.o: bonus/%.s
-	$(ASM) $(FLAGS) $< -o $@ $(HEADER)
+	$(ASM) $(FLAGS) $< -o $@ $(HEADER_BONUS)
 
 clean:
 	@printf "%b" "\t    $(_ORANGE)[Cleaning] $(_ORANGE)[all]$(_PINK_ORANGE)\n";
@@ -48,8 +53,7 @@ clean:
 
 fclean: clean
 	@printf "%b" "\t    $(_STARLIGHT_BLUE)[Cleaning] $(_STARLIGHT_BLUE)[all]$(_BLUE)\n";
-	rm -f $(NAME)
-	rm -rf libasm_bonus.a
+	rm -f $(NAME) $(NAME_BONUS)
 
 re: fclean all
 

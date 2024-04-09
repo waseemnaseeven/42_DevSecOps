@@ -1,6 +1,8 @@
 section .text
     global ft_list_push_front
 
+extern malloc
+
 ft_list_push_front:
     push    rbp               ; Sauvegarde de la base du pointeur
     mov     rbp, rsp          ; Initialisation de la base du pointeur

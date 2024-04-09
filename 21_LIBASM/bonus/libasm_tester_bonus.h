@@ -7,14 +7,10 @@
 # include <sys/stat.h>
 # include <fcntl.h>
 
-// typedef struct  s_list
-// {
-//     void *data;
-//     struct s_list *next;
 
-// }               t_list;
 
 void ft_list_size_test(void);
 void ft_list_push_front_test(void);
+void list_push_front(t_list **begin_list, void *data);
 
 #endif // LIBASM_TESTER_H

@@ -15,6 +15,7 @@ typedef struct  s_list
 }               t_list;
 
 void    ft_list_push_front(t_list **begin_lst, void *data);
+
 int     ft_list_size(t_list *begin_lst);
 
 #endif // LIBASM_BONUS_H

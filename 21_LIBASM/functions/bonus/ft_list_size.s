@@ -11,5 +11,5 @@ ft_list_size:
     inc rdi
     jmp .loop
 
-.done
+.done:
     ret
