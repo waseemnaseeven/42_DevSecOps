@@ -1,3 +1,5 @@
+; TODO : changer de registre + valgrind + lire char par char
+
 section .text
     global ft_strcpy
 

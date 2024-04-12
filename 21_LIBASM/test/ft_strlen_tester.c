@@ -17,4 +17,20 @@ void ft_strlen_test(void) {
         printf(GREEN "PASSED\n" RESET);
     else
         printf(RED "FAILED\n" RESET);
+
+    printf("Test with 0 \n");
+
+    size_t zero = strlen(0);
+    size_t myZero = ft_strlen(0);
+    
+    printf("Real strlen said : %lu\n", zero);
+    printf("My assembly strlen: %lu\n", myZero);
+    if (zero == myZero)
+        printf(GREEN "PASSED\n" RESET);
+    else
+        printf(RED "FAILED\n" RESET);
+
+    len = strlen(-1);
+    myLen = ft_strlen(-1);
+    
 }

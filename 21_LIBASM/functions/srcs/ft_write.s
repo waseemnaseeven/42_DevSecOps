@@ -1,5 +1,4 @@
-section .data
-    error_message db 'ft_write error', 0
+; TODO: Stocker errno 
 
 extern __errno_location
 
