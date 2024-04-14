@@ -1,5 +1,11 @@
 #include "malloc.h"
 
+/*
+    // In case im using threads
+    @$(CC) $(CFLAGS) -o $(NAME) -lpthread $^ $(LIBRARY) $(LOGS) -I $(INC_PATH)
+
+*/
+
 int main(void)
 {
     int* first = mmap((void *) 0xFEEDBEF, getpagesize(), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -8,7 +14,6 @@ int main(void)
 
     printf("First: %p\n", first);
     printf("Second: %p\n", second);
-
 
     int page_size = getpagesize();
 
@@ -39,6 +44,7 @@ int main(void)
     else
         printf("Hard stack limit: %ld\n", (long) stack_limit.rlim_max);
 
+    
     int *tab = ft_malloc(100000);
     printf("tab: %p\n", tab);
     free(tab);

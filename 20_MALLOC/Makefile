@@ -43,7 +43,7 @@ all: odir $(NAME)
 
 $(NAME): $(OBJS)
 	@echo " - Making $(NAME)"
-	@$(CC) $(CFLAGS) -o $(NAME) -lpthread $^ $(LIBRARY) $(LOGS) -I $(INC_PATH)
+	@$(CC) $(CFLAGS) -o $(NAME) $^ $(LIBRARY) $(LOGS) -I $(INC_PATH)
 	@ln -sf $(NAME) libft_malloc.so
 
 odir:
@@ -54,9 +54,10 @@ $(OBJS_PATH)%.o: $(SRCS_PATH)%.c $(INCLUDE_PATH)
 	@$(CC) $(CFLAGS) -fPIC -o $@ -c $< -I $(INC_PATH)
 
 valgrind:
-	make && clear && valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all ./libft_malloc_x86_64_Linux.so 
+	make && clear && valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all ./libft_malloc.so
 clean:
 	@echo " - Cleaning objs"
+	@rm -rf objs
 	@rm -f $(OBJS)
 
 fclean: clean

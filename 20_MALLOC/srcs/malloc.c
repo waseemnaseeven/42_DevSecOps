@@ -10,7 +10,7 @@ static size_t align_size(size_t size)
 
 void    *ft_malloc(size_t size)
 {
-    if (size == 0)
+    if (size < 0)
         return (NULL);
 
     pthread_mutex_lock(&g_malloc_mutex);
