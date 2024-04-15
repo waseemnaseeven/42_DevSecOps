@@ -1,0 +1,14 @@
+find / -user flag00
+
+cat /rofs/usr/sbin/john
+cat /usr/sbin/john
+
+cdiiddwpgswtgt
+
+trying offset this string with my function
+
+nottoohardhere
+
+getflag = x24ti5gi3x0ol2eh4esiuxias
+
+su level01

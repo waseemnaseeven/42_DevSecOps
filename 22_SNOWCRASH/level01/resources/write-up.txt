@@ -1,0 +1,15 @@
+cat /etc/passwd
+
+docker run -it debian:10 /bin/bash
+apt update
+
+apt-get install john -y
+
+cat > hash.txt
+mdp
+
+john hash.txt
+
+abcdefg
+
+f2av5il02puano7naaf6adaaf
