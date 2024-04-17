@@ -1,0 +1,23 @@
+scp -P 4242 level02@192.168.56.101:/home/user/level02/level02.pcap ~/Downloads/ (a partir du terminal host et non VM)
+
+chmod 777 level02.pcap
+
+use of wireshark
+
+Open folder -> level02.pcap
+
+go to line password
+
+sur la barre des taches, Analyze, puis Follow, TCP stream 
+
+go sur cryptii
+
+traduire l'hexadecimal en text: 66 74 5f 77 61 6e 64 72 7f 7f 7f 4e 44 52 65 6c 7f 4c 30 4c 0d
+
+ft_wandrNDRelL0L
+
+delete 3 fois donc :
+
+flag = ft_waNDReLOL
+
+token = kooda2puivaav1idi4f57q8iq

@@ -6,7 +6,7 @@ apt update
 apt-get install john -y
 
 cat > hash.txt
-mdp
+mdp trouve dans /etc/passwd
 
 john hash.txt
 

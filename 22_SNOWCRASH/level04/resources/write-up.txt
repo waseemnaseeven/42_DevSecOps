@@ -1,0 +1,13 @@
+perl est un langage pour le dev web, scripts systeme.
+
+Dans le script le $y n'est pas quote, et le print est entoure par des `` (operateur de interpolation ou operateur de retro-accentuation).
+
+cat level04.pl
+
+curl http://localhost:4747/?x='salut|getflag'
+
+il va executer salut (donc echo salut) et on va creer l'erreur, on va lui dire d'executer la suite car on peut lui passer tout plein d'autres arguments, et donc de commande. 
+
+ainsi getflag sera execute 
+
+ne2searoevaevoem4ov4ar8ap
