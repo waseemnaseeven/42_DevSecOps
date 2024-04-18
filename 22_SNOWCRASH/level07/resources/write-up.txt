@@ -1,0 +1,17 @@
+fichier binaire level07, qui utilise la fonction system 
+
+Le programme recupere la variable qui se trouve dans LOGNAME= et execute ensuite la commande echo 
+
+On va alors modifier la valeur de LOGNAME afin que le programme execute getflag
+
+export LOGNAME="$;getflag;"
+
+puis ./level07
+
+- ';' est un separateur de commandes qui permet d'executer plusieurs commandes séquentiellement sur une même ligne de commande. Après l'exécution de la première commande, le shell passe à la suivante.
+
+Lorqu'on insere ';' dans la chaine de commandes, le shell interpretera la commande comme 2 commandes distintes, executant d'abord /bin/echo puis "getflag".
+
+en inserant ';' dans la var d'env LOGNAME on peut ajouter une commande supplementaire a la commande originale, on a pu executer getflag apres l'exec d'echo.
+
+fiumuikeil55xe9cu4dood66h

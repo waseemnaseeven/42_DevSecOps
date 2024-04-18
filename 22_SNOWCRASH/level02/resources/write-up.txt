@@ -18,6 +18,6 @@ ft_wandrNDRelL0L
 
 delete 3 fois donc :
 
-flag = ft_waNDReLOL
+flag = ft_waNDReL0L
 
 token = kooda2puivaav1idi4f57q8iq

