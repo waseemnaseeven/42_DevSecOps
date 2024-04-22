@@ -6,7 +6,6 @@ def reverse_string(input):
         reversed_char = chr(ord(input[i]) - i)
         ret += reversed_char
     return ret
-    # return input[::-1]
 
 def main():
     if len(sys.argv) != 2:
