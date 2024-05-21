@@ -1,0 +1,51 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+LOCAL_USER = ENV['USER']
+USER_SERVER = ENV['USER'] + "S"
+USER_SERVERW = ENV['USER'] + "SW"
+print "server is : #{USER_SERVER}\n"
+print "server worker is : #{USER_SERVERW}\n"
+
+Vagrant.configure("2") do | config |
+    config.vm.box = "ubuntu/jammy64"
+    # config.vm.box_url = "https://app.vagrantup.com/ubuntu/boxes/jammy64"
+    # config.vm.box_check_update = true
+    
+    config.vm.define "#{USER_SERVER}" do |server|
+        server.vm.hostname = "#{USER_SERVER}"
+        server.vm.network "private_network", ip: "192.168.56.110"
+        server.vm.provider "virtualbox" do |vb|
+            vb.name = "#{USER_SERVER}"
+            vb.gui = true
+            vb.memory = "512"
+            vb.cpus = "1"
+        end
+        server.vm.provision "shell", privileged: true, inline: <<-SHELL
+            apt-get update
+            apt-get install -y curl
+            curl -sfL https://get.k3s.io | sh -
+            systemctl enable k3s
+            systemctl start k3s
+        SHELL
+    end
+
+    config.vm.define "#{USER_SERVERW}" do |worker|
+        worker.vm.hostname = "#{USER_SERVERW}"
+        worker.vm.network "private_network", ip: "192.168.56.111"
+        worker.vm.provider "virtualbox" do |vb|
+            vb.name = "#{USER_SERVERW}"
+            vb.gui = true
+            vb.memory = "512"
+            vb.cpus = "1"
+        end
+        worker.vm.provision "shell", privileged: true, inline: <<-SHELL
+            apt-get update
+            apt-get install -y curl
+            TOKEN=$(cat /var/lib/rancher/k3s/server/node-token)
+            curl -sfL https://get.k3s.io | K3S_URL=https://192.168.56.110:6443 K3S_TOKEN=$TOKEN sh -
+            systemctl enable k3s-agent
+            systemctl start k3s-agent
+        SHELL
+    end
+end
