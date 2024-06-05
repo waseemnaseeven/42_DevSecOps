@@ -7,7 +7,7 @@ RESET="\033[0m"
 # Creating an environment variable for installing the master node
 # https://docs.k3s.io/installation/configuration#configuration-file
 
-if export INSTALL_K3S_EXEC="--write-kubeconfig-mode=644 --tls-san wnaseeveS --node-ip 192.168.56.110 --bind-address=192.168.56.110 --advertise-address=192.168.56.110 "; then
+if export INSTALL_K3S_EXEC="--write-kubeconfig-mode=0644 --tls-san wnaseeveS --node-ip 192.168.56.110 --bind-address=192.168.56.110 --advertise-address=192.168.56.110 "; then
     echo -e "${GREEN}export INSTALL_K3S_EXEC SUCCEEDED${RESET}"
 else
     echo -e "${RED}export INSTALL_K3S_EXEC FAILED${RESET}"
