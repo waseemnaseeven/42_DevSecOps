@@ -6,6 +6,7 @@ RESET="\033[0m"
 
 apt-get update 
 apt-get install -y net-tools
+sudo alias k='kubectl'
 
 if sudo ip link add eth1 type dummy && sudo ip addr add 192.168.56.110/24 dev eth1 && sudo ip link set eth1 up; then
         echo -e "${PURPLE}adding IP address on interface eth1 SUCCEEDED${RESET}"

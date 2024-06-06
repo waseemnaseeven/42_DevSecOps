@@ -36,9 +36,9 @@ Vagrant.configure("2") do |config|
     SHELL
 
     config.vm.provision "shell", privileged: true, inline: <<-SHELL
-        usermod -aG sudo "#{LOCAL_USER}"
-        usermod -aG docker "#{LOCAL_USER}"
-        usermod -aG vagrant "#{LOCAL_USER}"
+        usermod -aG sudo vagrant
+        usermod -aG docker vagrant
+        usermod -aG vagrant vagrant
         hostnamectl set-hostname $USERNAME
 
         echo "wnaseeve ALL=(ALL) ALL" | sudo tee -a /etc/sudoers
