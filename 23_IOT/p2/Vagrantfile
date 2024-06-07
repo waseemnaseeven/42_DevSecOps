@@ -7,7 +7,7 @@ USER_SERVERW = ENV['USER'] + "SW"
 print "server is : #{USER_SERVER}\n"
 print "server worker is : #{USER_SERVERW}\n"
 
-Vagrant.configure("2") do | config |
+Vagrant.configure("2") do |config|
     config.vm.box = "ubuntu/jammy64"
     
     config.vm.define "#{USER_SERVER}" do |server|
@@ -20,8 +20,13 @@ Vagrant.configure("2") do | config |
             vb.memory = "1024"
             vb.cpus = "1"
         end
+
         server.vm.provision "shell", privileged: true, path: "scripts/server.sh"
-        server.vm.provision "shell", privileged: true, <<-SHELL
-            kubectl apply -f app1.yaml -f app2.yaml -f app3.yaml -f ingress.yaml
+        server.vm.provision "shell", privileged: true, inline: <<-SHELL
+            kubectl apply -f /vagrant/deployment/app1.yaml
+            kubectl apply -f /vagrant/deployment/app2.yaml
+            kubectl apply -f /vagrant/deployment/app3.yaml
+            kubectl apply -f /vagrant/deployment/ingress.yaml
         SHELL
     end
+end
