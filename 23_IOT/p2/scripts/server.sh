@@ -6,7 +6,7 @@ RESET="\033[0m"
 
 apt-get update 
 apt-get install -y net-tools
-
+sudo ufw disable
 
 if export INSTALL_K3S_EXEC="--write-kubeconfig-mode=0644 --tls-san wnaseeveS --node-ip 192.168.56.110 --bind-address=192.168.56.110 --advertise-address=192.168.56.110 "; then
     echo -e "${PURPLE}export INSTALL_K3S_EXEC SUCCEEDED${RESET}"
