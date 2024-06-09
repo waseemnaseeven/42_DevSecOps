@@ -13,7 +13,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: app1
+            name: svc-app1
             port:
               number: 80
   - host: app2.com
@@ -23,7 +23,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: app2
+            name: svc-app2
             port:
               number: 80
   - host: app3.com
@@ -33,11 +33,11 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: app3
+            name: svc-app3
             port:
               number: 80
   defaultBackend:
     service:
-      name: app3
+      name: svc-app3
       port:
         number: 80
