@@ -5,7 +5,6 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
-  ingressClassName: traefik
   rules:
   - host: app1.com
     http:
@@ -14,9 +13,9 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: svc-app1
+            name: app1
             port:
-              number: 8080
+              number: 80
   - host: app2.com
     http:
       paths:
@@ -24,9 +23,9 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: svc-app2
+            name: app2
             port:
-              number: 8080
+              number: 80
   - host: app3.com
     http:
       paths:
@@ -34,11 +33,11 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: svc-app3
+            name: app3
             port:
-              number: 8080
+              number: 80
   defaultBackend:
     service:
-      name: svc-app3
+      name: app3
       port:
-        number: 8080
+        number: 80
