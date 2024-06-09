@@ -12,7 +12,7 @@ Vagrant.configure("2") do |config|
       vb.name = "#{LOCAL_USER}"
       vb.gui = true
       vb.customize ["modifyvm", :id, "--name", "#{LOCAL_USER}"]
-      vb.customize ["setproperty", "machinefolder", "/media/wnaseeve/Extreme SSD/42VM"] # a changer pour plus tard
+      vb.customize ["setproperty", "machinefolder", "/mnt/nfs/homes/#{LOCAL_USER}/sgoinfre/#{LOCAL_USER}"] # a changer pour plus tard
       vb.memory = "12096"
       vb.cpus = "18"
     end
