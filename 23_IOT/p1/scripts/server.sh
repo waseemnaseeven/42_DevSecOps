@@ -6,13 +6,8 @@ RESET="\033[0m"
 
 apt-get update 
 apt-get install -y net-tools
-sudo alias k='kubectl'
+alias k='kubectl'
 
-if sudo ip link add eth1 type dummy && sudo ip addr add 192.168.56.110/24 dev eth1 && sudo ip link set eth1 up; then
-        echo -e "${PURPLE}adding IP address on interface eth1 SUCCEEDED${RESET}"
-else
-        echo -e "${RED}adding IP address on interface eth1 FAILED${RESET}"
-fi
 
 if export INSTALL_K3S_EXEC="--write-kubeconfig-mode=0644 --tls-san wnaseeveS --node-ip 192.168.56.110 --bind-address=192.168.56.110 --advertise-address=192.168.56.110 --cluster-init "; then
     echo -e "${PURPLE}export INSTALL_K3S_EXEC SUCCEEDED${RESET}"
@@ -30,4 +25,10 @@ if sudo cat /var/lib/rancher/k3s/server/token >> /vagrant/token.env; then
     echo -e "${PURPLE}TOKEN SUCCESSFULLY SAVED${RESET}"
 else
     echo -e "${RED}TOKEN SAVING FAILED${RESET}"
+fi
+
+if sudo ip link add eth1 type dummy && sudo ip addr add 192.168.56.110/24 dev eth1 && sudo ip link set eth1 up; then
+        echo -e "${PURPLE}adding IP address on interface eth1 SUCCEEDED${RESET}"
+else
+        echo -e "${RED}adding IP address on interface eth1 FAILED${RESET}"
 fi
