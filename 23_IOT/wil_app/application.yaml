@@ -1,21 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: wil
+  name: wil-playground
   namespace: dev
   labels:
-    app: wil
+    app: wil-playground
 spec:
+  replicas: 1
   selector:
     matchLabels:
-      app: wil
+      app: wil-playground
   template:
     metadata:
       labels:
-        app: wil
+        app: wil-playground
     spec:
       containers:
-      - name: wil
+      - name: wil-playground
         image: wil42/playground:v1
         ports:
         - containerPort: 8888
@@ -26,10 +27,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: svc-wil
+  namespace: dev
 spec:
   selector:
-    app: wil
+    app: wil-playground
   ports:
     - protocol: TCP
-      port: 8080
+      port: 8888
       targetPort: 8888
+  type: Cluster IP
