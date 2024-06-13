@@ -7,11 +7,11 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/waseemnaseeven/wnaseeve-configk8s.git
+    repoURL: 'https://github.com/waseemnaseeven/wnaseeve-configk8s.git'
     targetRevision: HEAD
-    path: wil-app
+    path: wil_app/
   destination:
-    server: https:/kubernetes.default.svc
+    server: 'https:/kubernetes.default.svc'
     namespace: dev
 
   syncPolicy:
@@ -20,3 +20,5 @@ spec:
     automated:
       selfHeal: true
       prune: true
+
+# Au final, on a gerer avec argocd CLI

@@ -18,13 +18,18 @@ sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 # Install k3d
 curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
 
-# Cluster creation and context 
-k3d cluster create newCluster
+# Install argocd
+curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
+rm argocd-linux-amd64
 
-k3d kubeconfig get newCluster
+# Cluster creation and context (ECHO THEM) 
+k3d cluster create wnaseeve --port "8081:80@loadbalancer"
 
-sudo chmod 666 /etc/rancher/k3s/k3s.yaml
+sudo chmod 744 /etc/rancher/k3s/k3s.yaml
 
-k3d kubeconfig get newCluster > /etc/rancher/k3s/k3s.yaml
+k3d kubeconfig get wnaseeve > /etc/rancher/k3s/k3s.yaml
 
-k3d cluster start newCluster
+k3d cluster start wnaseeve
+
+
