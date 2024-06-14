@@ -1,35 +1,44 @@
 #!/bin/bash
 
-sudo apt-get update -y
+PURPLE="\033[35m"
+GREEN="\033[32m"
+RED="\033[31m"
+RESET="\033[0m"
 
-# Install Docker
+echo -e "${GREEN} ~~  INSTALLING EVERY TOOLS ~~ ${RESET}"
+sudo apt-get update -y
+sudo apt-get install vim git curl -y 
+
+echo -e "${GREEN} ~~  INSTALLING DOCKER ~~ ${RESET}"
 curl -fsSL https://get.docker.com -o get-docker.sh
 sh get-docker.sh
 
-# Install kubectl
+echo -e "${GREEN} ~~  INSTALLING KUBECTL ~~ ${RESET}"
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
 
-echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+echo -e "${PURPLE} ~~  1) echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check ~~ ${RESET}"
+echo -e "${PURPLE} ~~  2) sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl ~~ ${RESET}"
 
-sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+sleep 20
 
-# Install k3d
+echo -e "${GREEN} ~~  INSTALLING K3D ~~ ${RESET}"
 curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
 
-# Install argocd
-curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
-rm argocd-linux-amd64
+echo -e "${GREEN} ~~  INSTALLING ARGOCD ~~ ${RESET}"
 
-# Cluster creation and context (ECHO THEM) 
-k3d cluster create wnaseeve --port "8081:80@loadbalancer"
+echo -e "${PURPLE} ~~  1) curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64 ~~ ${RESET}"
+echo -e "${PURPLE} ~~  2) sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd ~~ ${RESET}"
+echo -e "${PURPLE} ~~  3) rm argocd-linux-amd64 ~~ ${RESET}"
 
-sudo chmod 744 /etc/rancher/k3s/k3s.yaml
+sleep 20
 
-k3d kubeconfig get wnaseeve > /etc/rancher/k3s/k3s.yaml
+echo -e "${GREEN} ~~  K3S CONTAINER CLUSTER CREATION WITH K3D ~~ ${RESET}"
 
-k3d cluster start wnaseeve
+echo -e "${PURPLE} ~~  1) k3d cluster create wnaseeve --port "8081:80@loadbalancer" ~~ ${RESET}"
+echo -e "${PURPLE} ~~  2) k3d cluster start wnaseeve ~~ ${RESET}"
 
+# sudo chmod 744 /etc/rancher/k3s/k3s.yaml
+
+# k3d kubeconfig get wnaseeve > /etc/rancher/k3s/k3s.yaml
 
