@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PURPLE="\033[35m"
-GREEN="\33[32m"
+GREEN="\033[32m"
 RED="\033[31m"
 RESET="\033[0m"
 
@@ -16,9 +16,6 @@ kubectl config use-context wnaseeve
 
 echo -e "${GREEN} ~~ LETS ACCESS THE ARGOCD SERVER ~~ ${RESET}"
 
-echo -e "${PURPLE} ~~ 1) kubectl get secret argocd-initial-admin-secret -n argocd -o yaml | grep "password" | awk '{ print $2 }' | base64 --decode ~~ ${RESET}"
-echo -e "${PURPLE} ~~ 2) (Username is 'admin') argocd login localhost:7447 ~~ ${RESET}"
-
-sleep 15
-
-echo -e "${PURPLE} ~~ 3) kubectl port-forward svc/argocd-server -n argocd 7447:443 ~~ ${RESET}"
+echo -e "${PURPLE} ~~ 1) kubectl port-forward svc/argocd-server -n argocd 7447:443 ~~ ${RESET}"
+echo -e "${PURPLE} ~~ 2) kubectl get secret argocd-initial-admin-secret -n argocd -o yaml | grep "password" | awk '{ print $2 }' | base64 --decode ~~ ${RESET}"
+echo -e "${PURPLE} ~~ 3) (Username is 'admin') argocd login localhost:7447 ~~ ${RESET}"

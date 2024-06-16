@@ -7,11 +7,11 @@ RESET="\033[0m"
 
 echo -e "${GREEN} ~~  INSTALLING EVERY TOOLS ~~ ${RESET}"
 sudo apt-get update -y
-sudo apt-get install vim git curl -y 
+# sudo apt-get install vim git curl -y 
 
-echo -e "${GREEN} ~~  INSTALLING DOCKER ~~ ${RESET}"
-curl -fsSL https://get.docker.com -o get-docker.sh
-sh get-docker.sh
+# echo -e "${GREEN} ~~  INSTALLING DOCKER ~~ ${RESET}"
+# curl -fsSL https://get.docker.com -o get-docker.sh
+# sh get-docker.sh
 
 echo -e "${GREEN} ~~  INSTALLING KUBECTL ~~ ${RESET}"
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -20,7 +20,7 @@ curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stabl
 echo -e "${PURPLE} ~~  1) echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check ~~ ${RESET}"
 echo -e "${PURPLE} ~~  2) sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl ~~ ${RESET}"
 
-sleep 20
+sleep 60
 
 echo -e "${GREEN} ~~  INSTALLING K3D ~~ ${RESET}"
 curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash

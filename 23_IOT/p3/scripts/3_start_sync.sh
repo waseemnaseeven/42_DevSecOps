@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PURPLE="\033[35m"
-GREEN="\33[32m"
+GREEN="\033[32m"
 RED="\033[31m"
 RESET="\033[0m"
 
@@ -23,5 +23,4 @@ argocd app get wil-playground
 
 echo -e "${GREEN} ~~ set current context changing current context ~~ ${RESET}"
 kubectl config set-context --current --namespace=dev
-
-kubectl port-forward wil-playground-d44c7f4fc-zsrx5 8888:81
+echo -e "${PURPLE} ~~ 2) do "kubectl get pods" before and THEN kubectl port-forward wil-playground-.... 8888:81 ~~ ${RESET}"
