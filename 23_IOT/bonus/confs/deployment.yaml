@@ -1,0 +1,24 @@
+# Deploy wil/playground application from the new repository thanks the argoAPI
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: wil-playground
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/waseemnaseeven/wnaseeve-configk8s.git'
+    targetRevision: HEAD
+    path: wil_app/
+  destination:
+    server: 'https:/kubernetes.default.svc'
+    namespace: dev
+
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+    automated:
+      selfHeal: true
+      prune: true
+
+# Au final, on a gerer avec argocd CLI
