@@ -23,4 +23,4 @@ argocd app get wil-playground
 
 echo -e "${GREEN} ~~ set current context changing current context ~~ ${RESET}"
 kubectl config set-context --current --namespace=dev
-echo -e "${PURPLE} ~~ 2) do "kubectl get pods" before and THEN kubectl port-forward wil-playground-.... 8888:81 ~~ ${RESET}"
+echo -e "${PURPLE} ~~ DO "kubectl get pods" before and THEN kubectl port-forward wil-playground-.... 8888:81 ~~ ${RESET}"

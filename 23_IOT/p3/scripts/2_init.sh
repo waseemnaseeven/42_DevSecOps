@@ -12,7 +12,7 @@ echo -e "${GREEN} ~~ CREATING ARGOCD ~~ ${RESET}"
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
 echo -e "${GREEN} ~~ USE THE CLUSTER wnaseeve ~~ ${RESET}"
-kubectl config use-context wnaseeve
+kubectl config use-context k3d-wnaseeve
 
 echo -e "${GREEN} ~~ LETS ACCESS THE ARGOCD SERVER ~~ ${RESET}"
 
