@@ -32,10 +32,3 @@ echo -e "${GREEN} ~~  INSTALLING ARGOCD ~~ ${RESET}"
 echo -e "${PURPLE} ~~  1) curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64 ~~ ${RESET}"
 echo -e "${PURPLE} ~~  2) sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd ~~ ${RESET}"
 echo -e "${PURPLE} ~~  3) rm argocd-linux-amd64 ~~ ${RESET}"
-
-sleep 20
-
-echo -e "${GREEN} ~~  K3S CONTAINER CLUSTER CREATION WITH K3D ~~ ${RESET}"
-
-echo -e "${PURPLE} ~~  1) k3d cluster create wnaseeve --port "8081:80@loadbalancer" ~~ ${RESET}"
-echo -e "${PURPLE} ~~  2) k3d cluster start wnaseeve ~~ ${RESET}"

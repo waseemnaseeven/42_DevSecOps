@@ -1,8 +1,0 @@
-helm repo add gitlab https://charts.gitlab.io/
-helm repo update
-helm search repo -l gitlab/gitlab-runner | head -n10
-helm pull gitlab/gitlab-runner --version <last_version>
-tar -xvf gitlab-runner-0.65.0.tgz 
-cd gitlab-runner
-
-sudo helm upgrade --install gitlab gitlab/https://charts.gitlab.io/   -n gitlab   -f https://gitlab.com/gitlab-org/charts/gitlab/raw/master/examples/values-minikube-minimum.yaml   --set global.hosts.domain=k3d.gitlab.com   --set global.hosts.externalIP=0.0.0.0:40241   --set global.hosts.https=false   --timeout 600s   --kubeconfig ~/.kube/config

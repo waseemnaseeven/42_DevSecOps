@@ -18,5 +18,7 @@ argocd app set wil-playground --sync-policy automated
 argocd app set wil-playground --auto-prune
 argocd app set wil-playground --self-heal
 
+sleep 60
+
 echo -e "${GREEN} ~~ display application infos ~~ ${RESET}"
 argocd app get wil-playground

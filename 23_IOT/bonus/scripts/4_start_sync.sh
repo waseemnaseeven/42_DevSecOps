@@ -11,7 +11,7 @@ kubectl config set-context --current --namespace=argocd
 
 echo -e "${GREEN} ~~ apply yaml file ~~ ${RESET}"
 
-echo -e "${PURPLE} go to /bonus and /confs and kubectl apply -f deployments.yaml ${RESET}"
+echo -e "${PURPLE} go to /bonus and /confs and kubectl apply -f deployment.yaml ${RESET}"
 
 sleep 30
 

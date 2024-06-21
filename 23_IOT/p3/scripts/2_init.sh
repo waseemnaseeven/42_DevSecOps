@@ -5,6 +5,14 @@ GREEN="\033[32m"
 RED="\033[31m"
 RESET="\033[0m"
 
+echo -e "${GREEN} ~~  K3S CONTAINER CLUSTER CREATION WITH K3D ~~ ${RESET}"
+
+echo -e "${PURPLE} ~~  1) k3d cluster create wnaseeve --port "8081:80@loadbalancer" ~~ ${RESET}"
+echo -e "${PURPLE} ~~  2) k3d cluster start wnaseeve ~~ ${RESET}"
+
+k3d cluster create wnaseeve --port "8081:80@loadbalancer"
+k3d cluster start wnaseeve
+
 echo -e "${GREEN} ~~  CREATING NAMESPACES ~~ ${RESET}"
 kubectl create namespace argocd && kubectl create namespace dev
 

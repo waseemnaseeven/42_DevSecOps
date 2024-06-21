@@ -35,14 +35,10 @@ helm upgrade --install gitlab gitlab/gitlab \
 	--set global.hosts.externalIP=0.0.0.0 \
 	--set global.hosts.https=false
 
-wait_for_pods_to_exist "gitlab" "gitlab" 120
-
-kubectl wait -n gitlab --for=condition=available deployment --all --timeout=-1s && echo ok
-
 kubectl get secret --namespace=gitlab gitlab-gitlab-initial-root-password -ojsonpath='{.data.password}' | base64 --decode ; echo
 
 # or classic passwd
 
 echo -e "${RED} ~~ LETS CONNECT TO MY LOCAL GITLAB ~~ ${RESET}"
 
-echo "${PURPLE} kubectl port-forward svc/gitlab-webservice-default -n gitlab 8081:8181 ${RESET}"
+echo -e "${PURPLE} kubectl port-forward svc/gitlab-webservice-default -n gitlab 8081:8181 ${RESET}"
