@@ -20,7 +20,3 @@ argocd app set wil-playground --self-heal
 
 echo -e "${GREEN} ~~ display application infos ~~ ${RESET}"
 argocd app get wil-playground
-
-echo -e "${GREEN} ~~ set current context changing current context ~~ ${RESET}"
-kubectl config set-context --current --namespace=dev
-echo -e "${PURPLE} ~~ DO "kubectl get pods" before and THEN kubectl port-forward wil-playground-.... 8888:81 ~~ ${RESET}"
