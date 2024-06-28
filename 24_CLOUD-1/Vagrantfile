@@ -6,7 +6,7 @@
 
 LOCAL_USER = ENV['USER']
 print "Local user: #{LOCAL_USER}\n"
-VAGRANT_HOME = "/tmp/vagrant_home"
+VAGRANT_HOME = "/media/wnaseeve/Extreme\ SSD/cloud-1-VM "
 
 Vagrant.configure("2") do |config|
     config.vm.box = "ubuntu/jammy64"
