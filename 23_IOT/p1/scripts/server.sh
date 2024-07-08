@@ -15,7 +15,7 @@ else
     echo -e "${RED}export INSTALL_K3S_EXEC FAILED${RESET}"
 fi
 
-if curl -sfL https://get.k3s.io | sh -; then
+if curl -sfL https://get.k3s.io | sh -s -; then
     echo -e "${PURPLE}K3s MASTER installation SUCCEEDED${RESET}"
 else
     echo -e "${RED}K3s MASTER installation FAILED${RESET}"
@@ -32,3 +32,5 @@ if sudo ip link add eth1 type dummy && sudo ip addr add 192.168.56.110/24 dev et
 else
         echo -e "${RED}adding IP address on interface eth1 FAILED${RESET}"
 fi
+
+sudo reboot

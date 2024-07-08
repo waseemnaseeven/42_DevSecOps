@@ -31,3 +31,4 @@ fi
 # We delete the token for security, and also so that when restarting, a new token is used and not the previously created one
 
 sudo rm /vagrant/token.env
+sudo reboot
