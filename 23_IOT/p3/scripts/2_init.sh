@@ -5,7 +5,7 @@ GREEN="\033[32m"
 RED="\033[31m"
 RESET="\033[0m"
 
-NODE_IP=127.0.0.1
+NODE_IP=$(kubectl get nodes -o wide | awk '/master/ {print $6}')
 PORT_ARGOCD=30443
 
 NAMESPACES_ARGOCD="argocd"
