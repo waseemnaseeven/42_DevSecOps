@@ -35,7 +35,6 @@ Vagrant.configure("2") do |config|
             echo -e "APP3 DONE"
             kubectl apply -f /vagrant/deployment/ingress.yaml
             echo -e "INGRESS DONE"
-            sudo reboot
         SHELL
     end
 end

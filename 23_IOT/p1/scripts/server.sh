@@ -32,5 +32,3 @@ if sudo ip link add eth1 type dummy && sudo ip addr add 192.168.56.110/24 dev et
 else
         echo -e "${RED}adding IP address on interface eth1 FAILED${RESET}"
 fi
-
-sudo reboot
