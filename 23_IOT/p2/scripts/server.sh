@@ -28,4 +28,4 @@ fi
 
 echo -e "${PURPLE} dont forget to add host with the script${RESET}"
 
-echo -e "${PURPLE} Go to a browser, and then, 192.168.56.110:80 ${RESET}"
+echo -e "${PURPLE} Go to a browser, and then, 192.168.56.110:80, wait at least 4mins ${RESET}"

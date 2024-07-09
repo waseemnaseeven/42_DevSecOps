@@ -9,7 +9,6 @@ apt-get update
 apt-get install -y net-tools
 alias k='kubectl'
 
-
 if export INSTALL_K3S_EXEC="agent -s https://192.168.56.110:6443 -t $(cat /vagrant/token.env) --node-ip=192.168.56.111"; then
         echo -e "${PURPLE}export INSTALL_K3S_EXEC SUCCEEDED${RESET}"
 else

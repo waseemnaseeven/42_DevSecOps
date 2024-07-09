@@ -54,7 +54,7 @@ echo -e "${PURPLE} ~~  CREATING NAMESPACES ~~ ${RESET}"
 kubectl create namespace $NAMESPACES_ARGOCD 
 kubectl create namespace $NAMESPACES_DEV
 
----- LAUNCH ARGOCD ---- #
+#---- LAUNCH ARGOCD ---- #
 
 echo -e "${PURPLE} ~~ CREATING ARGOCD ~~ ${RESET}"
 kubectl apply -n $NAMESPACES_ARGOCD -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
