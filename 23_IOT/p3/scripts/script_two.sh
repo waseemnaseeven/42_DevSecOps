@@ -11,35 +11,35 @@ PORT_ARGOCD=30443
 NAMESPACES_ARGOCD="argocd"
 NAMESPACES_DEV="dev"
 
-# ---- CONFIG ---- #
+# # ---- CONFIG ---- #
 
-echo -e "${GREEN} ~~  INSTALLING EVERY TOOLS ~~ ${RESET}"
-sudo apt-get update -y
-sudo apt-get install vim git curl ncdu -y 
-
-
-echo -e "${GREEN} ~~  INSTALLING DOCKER ~~ ${RESET}"
-curl -fsSL https://get.docker.com -o get-docker.sh
-sh get-docker.sh
-sudo chmod 666 /var/run/docker.sock
-rm get-docker.sh
-
-echo -e "${GREEN} ~~  INSTALLING KUBECTL ~~ ${RESET}"
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-chmod +x kubectl
-sudo mv kubectl /usr/local/bin
+# echo -e "${GREEN} ~~  INSTALLING EVERY TOOLS ~~ ${RESET}"
+# sudo apt-get update -y
+# sudo apt-get install vim git curl ncdu -y 
 
 
-echo -e "${GREEN} ~~  INSTALLING K3D ~~ ${RESET}"
-curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
-mkdir -p ~/.kube
-touch ~/.kube/config
+# echo -e "${GREEN} ~~  INSTALLING DOCKER ~~ ${RESET}"
+# curl -fsSL https://get.docker.com -o get-docker.sh
+# sh get-docker.sh
+# sudo chmod 666 /var/run/docker.sock
+# rm get-docker.sh
 
-echo -e "${GREEN} ~~  INSTALLING ARGOCD ~~ ${RESET}"
+# echo -e "${GREEN} ~~  INSTALLING KUBECTL ~~ ${RESET}"
+# curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+# chmod +x kubectl
+# sudo mv kubectl /usr/local/bin
 
-curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64 
-sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
-rm argocd-linux-amd64
+
+# echo -e "${GREEN} ~~  INSTALLING K3D ~~ ${RESET}"
+# curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+# mkdir -p ~/.kube
+# touch ~/.kube/config
+
+# echo -e "${GREEN} ~~  INSTALLING ARGOCD ~~ ${RESET}"
+
+# curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64 
+# sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
+# rm argocd-linux-amd64
 
 
 echo -e "${PURPLE} ~~  K3S CONTAINER CLUSTER CREATION WITH K3D ~~ ${RESET}"
