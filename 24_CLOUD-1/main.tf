@@ -1,6 +1,6 @@
 # 1- local resource + provider aws 
 # 2- security groups
-# 3- egrtgeebwrbnv
+# 3- remote-exec
 
 locals {
     vpc_id              = "vpc-06955dff58950eef3"
@@ -55,19 +55,43 @@ resource "aws_instance" "wordpress" {
     ami             = "ami-09d83d8d719da9808"
     instance_type   = "t2.micro"
     key_name        = local.key_name
-    security_groups = [aws_security_group.wordpress.name] # bizarre....
+    security_groups = [aws_security_group.wordpress.name]
 
-    # provisioner "file" {
-    #     source      = "/Users/waseemnaseeven/Desktop/42_DevSecOps/24_CLOUD-1/playbooks/deploy.yaml" # Update path if needed
-    #     destination = "/home/${local.ssh_user}/deploy.yml"
-    # }
 
     provisioner "remote-exec" {
         inline = [
-            "echo = 'Wait until SSH is ready' ",
-            "sudo apt-get install -y python3-pip",
-            "sudo pip3 install ansible",
-            "ansible-playbook /home/${local.ssh_user}/deploy.yml"
+            "mkdir /home/ubuntu/app",
+        ]
+
+    connection {
+            type        = "ssh"
+            user        = local.ssh_user
+            private_key = file(local.private_key_path)
+            host        = self.public_ip
+        }
+    }
+
+    # Deplacement du projet a deployer
+    provisioner "file" {
+        source      = "/Users/waseemnaseeven/Desktop/42_DevSecOps/24_CLOUD-1/inception/" # Update path if needed
+        destination = "/home/${local.ssh_user}/app"
+
+    connection {
+            type        = "ssh"
+            user        = local.ssh_user
+            private_key = file(local.private_key_path)
+            host        = self.public_ip
+        }   
+    }
+
+    # Install docker, docker-compose
+    provisioner "remote-exec" {
+        inline = [
+                "sudo apt-get update",
+                "sudo apt-get install -y ca-certificates curl gnupg",
+                "curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh",
+                "sudo apt install -y make",
+                "sudo usermod -aG docker ${local.ssh_user}",
         ]
 
         connection {
@@ -75,7 +99,22 @@ resource "aws_instance" "wordpress" {
             user        = local.ssh_user
             private_key = file(local.private_key_path)
             host        = self.public_ip
-        }     
+        }
+    }
+
+    # Lancement du wordpress
+    provisioner "remote-exec" {
+        inline = [ 
+            "cd /home/ubuntu/app",
+            "sudo make"
+        ]
+    
+        connection {
+            type        = "ssh"
+            user        = local.ssh_user
+            private_key = file(local.private_key_path)
+            host        = self.public_ip
+        }
     }
 
     tags = {
@@ -83,4 +122,3 @@ resource "aws_instance" "wordpress" {
     }
 
 }
-
