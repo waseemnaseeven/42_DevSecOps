@@ -14,7 +14,7 @@ provider "aws" {
 }
 
 resource "aws_security_group" "wordpress" {
-    name    = "wordpress_access"
+    name    = "wordpress_security_access"
     vpc_id  = local.vpc_id
 
     ingress {
