@@ -5,5 +5,9 @@
 | [malloc](https://github.com/waseemnaseeven/42_DevSecOps/20_MALLOC) | C | April 2024 | Implementing a dynamic memory allocation mechanism... | 70 | 3,5 |
 | [libasm](https://github.com/waseemnaseeven/42_DevSecOps/21_LIBASM) | asm | April 2024 | Introduction to assembly language | 70 | 2,5 |
 | [snowcrash](https://github.com/waseemnaseeven/42_DevSecOps/22_SNOWCRASH) | python, c, docker, bash | May 2024 | Introduction to cyber security, with a developper-oriented approach (programming errors) | 147 | 3,5 |
-| [kubernetes](https://github.com/waseemnaseeven/42_DevSecOps/tree/main/23_IOT) | k3s, vagrant, k3d, argocd, gitlab | June 2024 | Introduction to kubernetes cluster from a developer perspective. Setting up a small infrastructure and discover the mechanics of continuous integration. | 225 | 2 |
+| [kubernetes](https://github.com/waseemnaseeven/42_DevSecOps/tree/main/23_IOT) | k3s, vagrant, k3d, argocd, gitlab | June 2024 | Introduction to kubernetes cluster from a developer perspective. Setting up a small infrastructure and discover the mechanics of continuous integration. | 225 | 4 |
 | [cloud-1](https://github.com/waseemnaseeven/42_DevSecOps/24_CLOUD-1) | aws, terraform, ansible | July 2024 | Introduction to cloud servers, such as AWS and automation with terraform or ansible | 100 | 2,5 |
+| [kfs-1](https://github.com/waseemnaseeven/42_DevSecOps/25_KFS-1) | Rust, asm, QEMU | September 2024 | Kernel programming from scratch | 100 | 3 |
+| [computorv1](https://github.com/waseemnaseeven/42_DevSecOps/26_COMPUTORV1) | Rust | October 2024 | Mathematical reminder from high school haha. A program that solve equation in Rust, Polynomial degree 1 and 2. I did it to get apply what i've learned in Rust, cuz there is a lot of parsing on this project | 50 | 3 |
+| [rainfall](https://github.com/waseemnaseeven/42_DevSecOps/27_RAINFALL) | python, c, bash, gdb | November 2024 | Reverse engineering | 250 | 3,5 |
+| [override](https://github.com/waseemnaseeven/42_DevSecOps/28_OVERRIDE) | python, c, bash, gdb | December 2024 | Reverse engineering | 250 | 3,5 |
