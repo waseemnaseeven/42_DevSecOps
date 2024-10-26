@@ -1,0 +1,60 @@
+version: '3.9'
+
+services:
+  db:
+    image: mysql:8.0
+    volumes:
+      - db_data_volume:/var/lib/mysql
+      # - ./database:/var/lib/mysql 
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    networks:
+      - dockerwp
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  phpmyadmin:
+    depends_on:
+      - db
+    image: phpmyadmin
+    restart: always
+    ports:
+      - "8082:80"
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: password
+    networks:
+      - dockerwp
+
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:latest
+    volumes:
+      - wordpress_data_volume:/var/www/html
+      - ./src:/var/www/html
+    ports:
+      - "8081:80"
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    networks:
+      - dockerwp
+
+networks:
+  dockerwp:
+
+volumes:
+  db_data_volume: {}
+  wordpress_data_volume: {}
