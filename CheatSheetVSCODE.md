@@ -1,0 +1,132 @@
+# Visual Studio Code (VS Code)
+
+### Gestion de fichiers
+| Action                          | Mac                          | Linux                  |
+|---------------------------------|------------------------------|------------------------|
+| Ouvrir un fichier               | `Cmd + O`                    | `Ctrl + O`             |
+| Sauvegarder un fichier          | `Cmd + S`                    | `Ctrl + S`             |
+| Fermer l'éditeur                | `Cmd + W`                    | `Ctrl + W`             |
+| Fermer la fenêtre               | `Cmd + Shift + W`            | `Ctrl + Shift + W`     |
+| Explorer fichier ouvert         | `Cmd + K` puis `R`           | `Ctrl + K` puis `R`    |
+| Nouveau fichier                 | `Cmd + N`                    | `Ctrl + N`             |
+| Nouvelle fenêtre                | `Cmd + Shift + N`            | `Ctrl + Shift + N`     |
+
+### Navigation et édition de code
+| Action                          | Mac                          | Linux                  |
+|---------------------------------|------------------------------|------------------------|
+| Aller à la ligne                | `Cmd + G`                    | `Ctrl + G`             |
+| Aller au fichier                | `Cmd + P`                    | `Ctrl + P`             |
+| Aller à la définition           | `F12`                        | `F12`                  |
+| Retour à la définition          | `Cmd + Alt + ←`              | `Ctrl + Alt + ←`       |
+| Trouver dans le fichier         | `Cmd + F`                    | `Ctrl + F`             |
+| Remplacer dans le fichier       | `Cmd + Option + F`           | `Ctrl + H`             |
+| Sélectionner tout               | `Cmd + A`                    | `Ctrl + A`             |
+| Sélection multiple              | `Cmd + D`                    | `Ctrl + D`             |
+| Copier la ligne                 | `Option + Shift + ↓ / ↑`     | `Alt + Shift + ↓ / ↑`  |
+| Dupliquer une ligne             | `Shift + Option + ↓ / ↑`     | `Shift + Alt + ↓ / ↑`  |
+| Supprimer la ligne              | `Cmd + Shift + K`            | `Ctrl + Shift + K`     |
+
+### Fenêtres et panneaux
+| Action                          | Mac                          | Linux                  |
+|---------------------------------|------------------------------|------------------------|
+| Ouvrir le terminal intégré      | `Cmd + \``                   | `Ctrl + \``            |
+| Basculer l'explorateur latéral  | `Cmd + B`                    | `Ctrl + B`             |
+| Basculer entre les éditeurs     | `Cmd + 1`, `Cmd + 2`...      | `Ctrl + 1`, `Ctrl + 2` |
+| Ouvrir l’interface de commande  | `Cmd + Shift + P`            | `Ctrl + Shift + P`     |
+| Diviser l'éditeur               | `Cmd + \`                    | `Ctrl + \`             |
+| Passer de panneau en panneau    | `Cmd + K`, puis `Cmd + ← / →`| `Ctrl + K` puis `← / →`|
+
+### Débogage
+| Action                          | Mac                          | Linux                  |
+|---------------------------------|------------------------------|------------------------|
+| Démarrer le débogage            | `F5`                         | `F5`                   |
+| Pause / Reprise du débogage     | `F6`                         | `F6`                   |
+| Arrêter le débogage             | `Shift + F5`                 | `Shift + F5`           |
+| Ajouter un point d'arrêt        | `F9`                         | `F9`                   |
+| Étape suivante                  | `F10`                        | `F10`                  |
+| Entrer dans la fonction         | `F11`                        | `F11`                  |
+| Sortir de la fonction           | `Shift + F11`                | `Shift + F11`          |
+
+---
+
+# Cheat Sheet : Terminal (Mac & Linux)
+
+## Navigation dans le terminal
+| Action                          | Raccourci                    |
+|---------------------------------|------------------------------|
+| Accéder au début de la ligne    | `Ctrl + A`                   |
+| Accéder à la fin de la ligne    | `Ctrl + E`                   |
+| Effacer la ligne entière        | `Ctrl + U`                   |
+| Effacer de la position au début | `Ctrl + W`                   |
+| Effacer du curseur à la fin     | `Ctrl + K`                   |
+| Passer au mot précédent         | `Option + B` ou `Alt + B`    |
+| Passer au mot suivant           | `Option + F` ou `Alt + F`    |
+| Ouvrir un nouveau terminal      | `Cmd + N` (Mac) / `Ctrl + Shift + N` (Linux) |
+
+### Commandes associées
+| Action                          | Commande                     |
+|---------------------------------|------------------------------|
+| Aller à un autre répertoire     | `cd <directory>`             |
+| Aller au répertoire parent      | `cd ..`                      |
+| Aller à la racine               | `cd /`                       |
+| Aller au répertoire utilisateur | `cd ~`                       |
+| Lister les fichiers et dossiers | `ls`                         |
+| Lister tous les fichiers        | `ls -a`                      |
+| Afficher le chemin complet      | `pwd`                        |
+
+## Gestion de commandes
+| Action                          | Raccourci                    |
+|---------------------------------|------------------------------|
+| Annuler la commande             | `Ctrl + C`                   |
+| Suspendre le processus          | `Ctrl + Z`                   |
+| Reprendre un processus          | `fg`                         |
+| Répéter la dernière commande    | `!!`                         |
+| Parcourir l'historique          | `history` ou `↑ / ↓`         |
+
+### Commandes associées
+| Action                          | Commande                     |
+|---------------------------------|------------------------------|
+| Afficher l'historique complet   | `history`                    |
+| Exécuter une commande de l'historique | `!<numéro>`             |
+| Tuer un processus par son ID    | `kill <PID>`                 |
+| Lancer un processus en arrière-plan | `command &`             |
+
+## Édition de commandes
+| Action                          | Raccourci                    |
+|---------------------------------|------------------------------|
+| Supprimer le caractère précédent| `Ctrl + H` ou `Backspace`    |
+| Supprimer le mot précédent      | `Ctrl + W`                   |
+| Supprimer le caractère suivant  | `Ctrl + D`                   |
+| Supprimer le mot suivant        | `Alt + D`                    |
+| Transposer deux caractères      | `Ctrl + T`                   |
+| Changer en majuscules           | `Alt + U`                    |
+| Changer en minuscules           | `Alt + L`                    |
+
+### Commandes associées
+| Action                          | Commande                     |
+|---------------------------------|------------------------------|
+| Effacer le terminal (affichage) | `clear`                      |
+| Créer un fichier                | `touch <filename>`           |
+| Créer un dossier                | `mkdir <directory>`          |
+| Copier un fichier               | `cp <source> <destination>`  |
+| Déplacer un fichier/dossier     | `mv <source> <destination>`  |
+| Supprimer un fichier            | `rm <filename>`              |
+| Supprimer un dossier            | `rm -r <directory>`          |
+
+## Manipulation des fenêtres du terminal
+| Action                          | Raccourci                    |
+|---------------------------------|------------------------------|
+| Ouvrir un nouvel onglet terminal | `Cmd + T` (Mac) / `Ctrl + Shift + T` (Linux) |
+| Diviser la fenêtre (Tilix)      | `Ctrl + Shift + O` (horizontal) / `Ctrl + Shift + E` (vertical) |
+| Passer d'un onglet à l'autre    | `Cmd + Shift + ]` ou `Cmd + Shift + [` (Mac) / `Ctrl + PageUp/PageDown` (Linux) |
+| Fermer un onglet                | `Cmd + W` (Mac) / `Ctrl + Shift + W` (Linux) |
+
+## Commandes pour consulter le système
+| Action                          | Commande                     |
+|---------------------------------|------------------------------|
+| Afficher les processus actifs   | `ps aux`                     |
+| Afficher l'utilisation des ressources | `top` ou `htop`         |
+| Afficher l'espace disque        | `df -h`                      |
+| Afficher la mémoire disponible  | `free -h`                    |
+| Afficher l'adresse IP           | `ifconfig` ou `ip a`         |
+
