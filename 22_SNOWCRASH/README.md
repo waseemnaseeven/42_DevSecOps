@@ -15,3 +15,5 @@ password: level00
 ```bash
 
 ```
+
+# Everytime we want to create a file, create first a folder in /tmp/
