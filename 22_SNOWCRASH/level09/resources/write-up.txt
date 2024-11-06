@@ -1,7 +1,0 @@
-On capte qu'a chaque caractere, il additionne 
-
-python3 /tmp/toto/reverse.py "$(cat token)"
-
-flag = f3iji1ju5yuevaus41q1afiuq
-
-token = s5cAJpM8ev6XHw998pRWG728z
