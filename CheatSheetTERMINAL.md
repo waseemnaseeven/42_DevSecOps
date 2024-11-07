@@ -12,17 +12,6 @@
 | Passer au mot suivant           | `Option + F` ou `Alt + F`    |
 | Ouvrir un nouveau terminal      | `Cmd + N` (Mac) / `Ctrl + Shift + N` (Linux) |
 
-### Commandes associées
-| Action                          | Commande                     |
-|---------------------------------|------------------------------|
-| Aller à un autre répertoire     | `cd <directory>`             |
-| Aller au répertoire parent      | `cd ..`                      |
-| Aller à la racine               | `cd /`                       |
-| Aller au répertoire utilisateur | `cd ~`                       |
-| Lister les fichiers et dossiers | `ls`                         |
-| Lister tous les fichiers        | `ls -a`                      |
-| Afficher le chemin complet      | `pwd`                        |
-
 ## Gestion de commandes
 | Action                          | Raccourci                    |
 |---------------------------------|------------------------------|
@@ -50,17 +39,6 @@
 | Transposer deux caractères      | `Ctrl + T`                   |
 | Changer en majuscules           | `Alt + U`                    |
 | Changer en minuscules           | `Alt + L`                    |
-
-### Commandes associées
-| Action                          | Commande                     |
-|---------------------------------|------------------------------|
-| Effacer le terminal (affichage) | `clear`                      |
-| Créer un fichier                | `touch <filename>`           |
-| Créer un dossier                | `mkdir <directory>`          |
-| Copier un fichier               | `cp <source> <destination>`  |
-| Déplacer un fichier/dossier     | `mv <source> <destination>`  |
-| Supprimer un fichier            | `rm <filename>`              |
-| Supprimer un dossier            | `rm -r <directory>`          |
 
 ## Manipulation des fenêtres du terminal
 | Action                          | Raccourci                    |
