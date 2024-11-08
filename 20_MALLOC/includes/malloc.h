@@ -20,20 +20,14 @@
 #define LARGE_HEAP_ALLOCATION_SIZE (16 * getpagesize())
 
 // Size of blocks
-#define TINY_BLOCK_SIZE (TINY_HEAP_ALLOCATION_SiZE / 100)
+#define TINY_BLOCK_SIZE (TINY_HEAP_ALLOCATION_SIZE / 100)
 #define SMALL_BLOCK_SIZE (SMALL_HEAP_ALLOCATION_SIZE / 100)
-
-typedef enum	e_bool {
-	FALSE,
-	TRUE
-}				t_bool;
 
 typedef enum	e_heap_group {
 	TINY,
 	SMALL,
 	LARGE
 }				t_heap_group;
-
 
 // Metadata structure for a block 
 typedef struct      s_block {
@@ -53,8 +47,8 @@ typedef struct      s_heap {
     size_t          block_count;
     struct s_heap	*prev;
 	struct s_heap	*next;
-	t_heap_group	group;
-    t_block         *blocks;
+	t_heap_group	group; // Type of heap (TINY, SMALL, LARGE)
+    t_block         *blocks; // Pointer to the first block in the heap
 
 }                   t_heap;
 
@@ -62,7 +56,7 @@ extern t_heap           *g_heap;
 extern pthread_mutex_t  g_malloc_mutex;
 
 // Malloc functions
-void    *ft_malloc(size_t size);
+void    *malloc(size_t size);
 void    free(void *ptr);
 void    *realloc(void *ptr, size_t size);
 

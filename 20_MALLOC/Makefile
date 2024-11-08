@@ -55,6 +55,7 @@ $(OBJS_PATH)%.o: $(SRCS_PATH)%.c $(INCLUDE_PATH)
 
 valgrind:
 	make && clear && valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all ./libft_malloc.so
+
 clean:
 	@echo " - Cleaning objs"
 	@rm -rf objs
