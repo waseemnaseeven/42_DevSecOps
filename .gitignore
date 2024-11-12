@@ -1,3 +1,12 @@
 **/.terraform 
 **/target
 **/.DS_Store
+
+*/*target
+*/*.DS_Store
+
+*/*.terraform
+*/*.env
+
+*/.terraform
+*/.env
