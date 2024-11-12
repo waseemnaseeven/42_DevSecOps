@@ -1,0 +1,42 @@
+version: '3.9'
+
+services:
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: "${WORDPRESS_DB_HOST}"
+      MYSQL_ROOT_PASSWORD: "${RDS_ROOT_PASSWORD}"
+      PMA_SSL: "true"
+      PMA_SSL_CA: "/etc/ssl/certs/rds-combined-ca-bundle.pem"
+      PMA_SSL_MODE: "VERIFY_IDENTITY"
+    networks:
+      - dockerwp
+    ports:
+      - "8181:80"
+
+  wordpress:
+    image: wordpress:latest
+    volumes:
+      - wordpress_data:/var/www/html
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      WORDPRESS_DB_HOST: "${WORDPRESS_DB_HOST}"
+      WORDPRESS_DB_USER: "${WORDPRESS_DB_USER}"
+      WORDPRESS_DB_PASSWORD: "${WORDPRESS_DB_PASSWORD}"
+      WORDPRESS_DB_NAME: "${WORDPRESS_DB_NAME}"
+    networks:
+      - dockerwp
+
+networks:
+  dockerwp:
+
+volumes:
+  wordpress_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /mnt/efs
+      o: bind
