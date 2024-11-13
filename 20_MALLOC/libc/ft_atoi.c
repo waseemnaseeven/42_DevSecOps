@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_atoi.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wnaseeve <wnaseeve@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lagrandephrase <lagrandephrase@student.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/07 14:41:47 by wnaseeve          #+#    #+#             */
-/*   Updated: 2023/12/26 12:14:03 by wnaseeve         ###   ########.fr       */
+/*   Updated: 2024/11/12 21:58:42 by lagrandephr      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,11 +36,4 @@ int	ft_atoi(const char *nptr)
 	}
 	return (res * sign);
 }
-/*
-int main (void)
-{
-	char res[894] = "-2147483648";
 
-	printf("%d", ft_atoi(res));
-}
-*/

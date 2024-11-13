@@ -1,3 +1,5 @@
+#include "../includes/malloc.h"
+
 void show_alloc_mem_ex(void)
 {
     pthread_mutex_lock(&g_malloc_mutex);
@@ -8,7 +10,7 @@ void show_alloc_mem_ex(void)
         printf("%s : %p\n", (current_heap->group == TINY) ? "TINY" :
                                (current_heap->group == SMALL) ? "SMALL" : "LARGE", current_heap);
         printf("  Total size: %zu, Free size: %zu, Block count: %zu\n",
-               current_heap->total_size, current_heap->free_size, current_heap->block_count);
+               current_heap->total_size, current_heap->unused_space_size, current_heap->block_count);
         t_block *current_block = current_heap->blocks;
         while (current_block)
         {

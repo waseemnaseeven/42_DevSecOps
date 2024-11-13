@@ -12,7 +12,10 @@ LOG_PATH  = log/
 INC_PATH  = includes/
 
 SRCS_NAME = main.c \
-			malloc.c 
+			malloc.c \
+			free.c \
+			realloc.c \
+			test.c  
 
 LIB_NAME =  ft_atoi.c \
 			ft_bzero.c \
@@ -26,24 +29,33 @@ LIB_NAME =  ft_atoi.c \
 			ft_putendl_fd.c \
 			ft_putstr_fd.c 
 
-LOG_NAME =  show_alloc_mem.c 
+LOG_NAME =  show_alloc_mem.c \
+			show_alloc_mem_exe.c
 
 INCLUDES =  malloc.h 
 
 SRCS = $(addprefix $(SRCS_PATH), $(SRCS_NAME))
-OBJS_PATH = objs/
 OBJS_NAME = $(SRCS_NAME:.c=.o)
-OBJS = $(addprefix $(OBJS_PATH), $(OBJS_NAME))
 
 LIBRARY = $(addprefix $(LIB_PATH), $(LIB_NAME))
+LIB_OBJS_NAME = $(LIB_NAME:.c=.o)
+LIB_OBJS = $(addprefix $(OBJS_PATH), $(LIB_OBJS_NAME))
+
 LOGS = $(addprefix $(LOG_PATH), $(LOG_NAME))
+LOG_OBJS_NAME = $(LOG_NAME:.c=.o)
+LOG_OBJS = $(addprefix $(OBJS_PATH), $(LOG_OBJS_NAME))
+
+OBJS_PATH = objs/
+OBJS = $(addprefix $(OBJS_PATH), $(OBJS_NAME)) $(LIB_OBJS) $(LOG_OBJS)
+
 INCLUDE_PATH = $(addprefix $(INC_PATH), $(INCLUDES))
+
 
 all: odir $(NAME)
 
 $(NAME): $(OBJS)
 	@echo " - Making $(NAME)"
-	@$(CC) $(CFLAGS) -o $(NAME) $^ $(LIBRARY) $(LOGS) -I $(INC_PATH)
+	@$(CC) $(CFLAGS) -o $(NAME) $^ -shared -fPIC -I $(INC_PATH)
 	@ln -sf $(NAME) libft_malloc.so
 
 odir:
@@ -53,8 +65,20 @@ $(OBJS_PATH)%.o: $(SRCS_PATH)%.c $(INCLUDE_PATH)
 	@echo " - Compiling $<"
 	@$(CC) $(CFLAGS) -fPIC -o $@ -c $< -I $(INC_PATH)
 
+$(OBJS_PATH)%.o: $(LIB_PATH)%.c $(INCLUDE_PATH)
+	@echo " - Compiling $<"
+	@$(CC) $(CFLAGS) -fPIC -o $@ -c $< -I $(INC_PATH)
+
+$(OBJS_PATH)%.o: $(LOG_PATH)%.c $(INCLUDE_PATH)
+	@echo " - Compiling $<"
+	@$(CC) $(CFLAGS) -fPIC -o $@ -c $< -I $(INC_PATH)
+
+
 valgrind:
 	make && clear && valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all ./libft_malloc.so
+
+gdb:
+	make && clear && gdb -tui a.out
 
 clean:
 	@echo " - Cleaning objs"
