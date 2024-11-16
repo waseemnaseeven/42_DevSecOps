@@ -1,0 +1,11 @@
+plugin: aws_ec2
+aws_profile: default
+regions:
+  - eu-west-3
+filters:
+  "tag:Name":
+    - wp-web-1
+    - wp-web-2
+hostname_variable: tags.Name
+compose:
+  ansible_host: public_ip_address

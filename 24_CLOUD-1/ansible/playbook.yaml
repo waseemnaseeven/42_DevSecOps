@@ -1,0 +1,23 @@
+- name: Dealing with docker-compose on ec2 instances
+  hosts:
+    - wp-web-1
+    - wp-web-2
+  become: true
+  vars:
+    ansible_user: ubuntu
+    ansible_ssh_private_key_file: /home/wnaseeve/Desktop/wordpress_key.pem
+    docker_compose_file: /home/ubuntu/app/dockerwp/docker-compose.yaml
+  
+  tasks:
+    - name: Stop containers
+      command: docker compose -f {{ docker_compose_file }} down
+      args:
+        chdir: /home/ubuntu/app/dockerwp
+      tags: ['stop']
+    
+    - name: Start containers
+      command: docker compose -f {{ docker_compose_file }} up -d
+      args:
+        chdir: /home/ubuntu/app/dockerwp
+      tags: ['start']
+
