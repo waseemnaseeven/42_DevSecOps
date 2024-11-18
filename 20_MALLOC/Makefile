@@ -6,17 +6,18 @@ CC = gcc
 
 CFLAGS = -Wall -Wextra -Werror
 
+LDFLAGS = -shared -fPIC -pthread 
+
 SRCS_PATH = srcs/
 LIB_PATH  = libc/
 LOG_PATH  = log/
+TEST_PATH = tests/srcs/
 INC_PATH  = includes/
 
-SRCS_NAME = main.c \
-			malloc.c \
+SRCS_NAME = malloc.c \
 			free.c \
 			realloc.c \
-			test.c  
-
+			  
 LIB_NAME =  ft_atoi.c \
 			ft_bzero.c \
 			ft_itoa.c \
@@ -30,12 +31,18 @@ LIB_NAME =  ft_atoi.c \
 			ft_putstr_fd.c 
 
 LOG_NAME =  show_alloc_mem.c \
-			show_alloc_mem_exe.c
+			show_alloc_mem_exe.c \
+			show_heap_group.c 
+
+TEST_NAME = test.c
 
 INCLUDES =  malloc.h 
 
+OBJS_PATH = objs/
+
 SRCS = $(addprefix $(SRCS_PATH), $(SRCS_NAME))
 OBJS_NAME = $(SRCS_NAME:.c=.o)
+SRCS_OBJS = $(addprefix $(OBJS_PATH), $(OBJS_NAME))
 
 LIBRARY = $(addprefix $(LIB_PATH), $(LIB_NAME))
 LIB_OBJS_NAME = $(LIB_NAME:.c=.o)
@@ -45,17 +52,15 @@ LOGS = $(addprefix $(LOG_PATH), $(LOG_NAME))
 LOG_OBJS_NAME = $(LOG_NAME:.c=.o)
 LOG_OBJS = $(addprefix $(OBJS_PATH), $(LOG_OBJS_NAME))
 
-OBJS_PATH = objs/
-OBJS = $(addprefix $(OBJS_PATH), $(OBJS_NAME)) $(LIB_OBJS) $(LOG_OBJS)
+OBJS = $(SRCS_OBJS) $(LIB_OBJS) $(LOG_OBJS)
 
 INCLUDE_PATH = $(addprefix $(INC_PATH), $(INCLUDES))
-
 
 all: odir $(NAME)
 
 $(NAME): $(OBJS)
 	@echo " - Making $(NAME)"
-	@$(CC) $(CFLAGS) -o $(NAME) $^ -shared -fPIC -I $(INC_PATH)
+	@$(CC) $(CFLAGS) $(LDFLAGS) -o $(NAME) $^ -I $(INC_PATH)
 	@ln -sf $(NAME) libft_malloc.so
 
 odir:

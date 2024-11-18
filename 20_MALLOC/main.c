@@ -1,10 +1,6 @@
+// srcs/main.c
+
 #include "../includes/malloc.h"
-
-/*
-    // In case im using threads
-    @$(CC) $(CFLAGS) -o $(NAME) -lpthread $^ $(LIBRARY) $(LOGS) -I $(INC_PATH)
-
-*/
 
 #define N 10
 

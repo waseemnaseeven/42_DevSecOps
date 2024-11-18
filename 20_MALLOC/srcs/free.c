@@ -1,7 +1,8 @@
+// srcs/free.c
+
 #include "../includes/malloc.h"
 
-void    coalesce_free_blocks(t_heap *my_heap) {
-    
+void coalesce_free_blocks(t_heap *my_heap) {
     t_block *current = my_heap->blocks;
     while (current && current->next) {
         if (current->freed && current->next->freed) {
@@ -12,21 +13,19 @@ void    coalesce_free_blocks(t_heap *my_heap) {
         } else {
             current = current->next;
         }
-    } 
+    }
 }
 
-void    free(void *ptr) {
-    
+void free(void *ptr) {
     if (!ptr)
         return;
-    
+
     pthread_mutex_lock(&g_malloc_mutex);
 
-    //use of mmunmap ? 
     t_block *block = (t_block *)((void *)ptr - sizeof(t_block));
     block->freed = true;
     block->unused_space = 0;
-    
+
     t_heap *my_heap = g_heap;
     while (my_heap) {
         if (my_heap->blocks == block) {
@@ -37,7 +36,9 @@ void    free(void *ptr) {
     }
 
     if (getenv("MALLOC_DEBUG")) {
-        printf("[FREE] Freed memory at %p\n", ptr);
+        char buf[64];
+        int len = sprintf(buf, "[FREE] Freed memory at %p\n", ptr);
+        write(1, buf, len);
     }
 
     pthread_mutex_unlock(&g_malloc_mutex);
