@@ -28,7 +28,7 @@ void show_alloc_mem_ex(void) {
 
             current_block = current_block->next;
         }
-        current_heap = current_heap->next;
+        break;
     }
 
     pthread_mutex_unlock(&g_malloc_mutex);

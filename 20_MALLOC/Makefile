@@ -6,7 +6,7 @@ CC = gcc
 
 CFLAGS = -Wall -Wextra -Werror
 
-LDFLAGS = -shared -fPIC -pthread 
+LDFLAGS = -shared -fPIC -pthread
 
 SRCS_PATH = srcs/
 LIB_PATH  = libc/
@@ -17,6 +17,8 @@ INC_PATH  = includes/
 SRCS_NAME = malloc.c \
 			free.c \
 			realloc.c \
+			heap/heap_creation.c \
+			block/block_creation.c \
 			  
 LIB_NAME =  ft_atoi.c \
 			ft_bzero.c \
@@ -64,7 +66,8 @@ $(NAME): $(OBJS)
 	@ln -sf $(NAME) libft_malloc.so
 
 odir:
-	@mkdir -p $(OBJS_PATH)
+	@mkdir -p $(OBJS_PATH)heap
+	@mkdir -p $(OBJS_PATH)block
 
 $(OBJS_PATH)%.o: $(SRCS_PATH)%.c $(INCLUDE_PATH)
 	@echo " - Compiling $<"
@@ -77,7 +80,6 @@ $(OBJS_PATH)%.o: $(LIB_PATH)%.c $(INCLUDE_PATH)
 $(OBJS_PATH)%.o: $(LOG_PATH)%.c $(INCLUDE_PATH)
 	@echo " - Compiling $<"
 	@$(CC) $(CFLAGS) -fPIC -o $@ -c $< -I $(INC_PATH)
-
 
 valgrind:
 	make && clear && valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all ./libft_malloc.so
