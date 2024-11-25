@@ -36,7 +36,7 @@ t_block *create_block(t_heap *my_heap, size_t size) {
         return NULL;
 
     // Calculate the address for the new block
-    t_block *block = (t_block *)((char *)my_heap + my_heap->total_size - my_heap->unused_space_size);
+    t_block *block = (t_block *)((char *)my_heap + my_heap->current_offset);
 
     // Initialize the block
     block->size = size;
@@ -48,6 +48,7 @@ t_block *create_block(t_heap *my_heap, size_t size) {
         my_heap->blocks->prev = block;
     my_heap->blocks = block;
 
+    my_heap->current_offset += sizeof(t_block) + size;
     my_heap->unused_space_size -= (size + sizeof(t_block));
     my_heap->block_count++;
 

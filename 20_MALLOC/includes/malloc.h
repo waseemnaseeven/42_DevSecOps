@@ -49,6 +49,7 @@ typedef struct      s_heap {
     struct s_heap   *next;
     size_t          total_size;
     size_t          unused_space_size; // free_size
+    size_t          current_offset; // follow actual position
     size_t          block_count;
 	t_heap_group	group; // Type of heap (TINY, SMALL, LARGE)
     t_block         *blocks; // Pointer to the first block in the heap

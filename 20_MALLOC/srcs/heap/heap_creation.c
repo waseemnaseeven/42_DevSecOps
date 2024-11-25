@@ -42,11 +42,12 @@ t_heap *create_heap(size_t heap_size, t_heap_group group, t_heap *gl_heap) {
     my_heap->block_count = 0;
     my_heap->group = group;
     my_heap->blocks = NULL;
+    my_heap->current_offset = sizeof(t_heap);
 
     my_heap->prev = NULL;
     my_heap->next = gl_heap;
-    if (my_heap->next)
-        my_heap->next->prev = my_heap;
+    // if (my_heap->next)
+    //     my_heap->next->prev = my_heap;
     if (g_heap)
         g_heap->prev = my_heap;
     g_heap = my_heap;

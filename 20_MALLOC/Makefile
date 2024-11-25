@@ -93,6 +93,7 @@ gdb:
 compile_test:
 	cd tests/srcs && \
 	$(CC) $(CFLAGS) test.c 
+
 clean:
 	@echo " - Cleaning objs"
 	@rm -rf objs

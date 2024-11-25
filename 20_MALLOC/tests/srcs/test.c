@@ -37,11 +37,11 @@ void run_tests() {
     free(str);
 
     // Large Allocation
-    // write(1, "\nRunning: Large allocation test\n", 33);
-    // size_t large_size = 1024 * 1024 * 1024; // 1GB
-    // void *large = malloc(large_size);
-    // assert(large != NULL);
-    // free(large);
+    write(1, "\nRunning: Large allocation test\n", 33);
+    size_t large_size = 1024 * 1024 * 1024; // 1GB
+    void *large = malloc(large_size);
+    assert(large != NULL);
+    free(large);
 
     // // Test with a range of digits
     write(1, "\nRunning: Range of digits test\n", 31);
