@@ -1,9 +1,12 @@
 // srcs/malloc.c
 
 /*
-    - relire last page of GPT
-    - recalculer block
-    - faire marcher show_alloc_mem dans mon 
+    - recalculer block 
+    - refaire pour large addr
+    - realloc test 
+    - thread test
+    - corrections test 
+    - show_alloc_mem_ex avec free et realloc ? 
 */
 
 #include "../includes/malloc.h"
@@ -46,9 +49,11 @@ void    *malloc(size_t size)
             block = find_free_block(my_heap, total_block_size);
             if (block) {
                 block->freed = false;
-                break;
             }
         }
+        // } else if (my_heap->group == LARGE && total_block_size > SMALL_BLOCK_SIZE) {
+        //     block = 
+        // }
         my_heap = my_heap->next;
     }
 
@@ -67,9 +72,6 @@ void    *malloc(size_t size)
         block = create_block(my_heap, total_block_size);
     }
 
-    if (block)
-        block->freed = false;
-    block->unused_space = (block->size > size) ? (block->size - size) : 0;
     
     if (getenv("MALLOC_DEBUG")) {
         char buf[64];

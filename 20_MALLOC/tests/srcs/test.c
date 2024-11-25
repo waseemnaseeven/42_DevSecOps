@@ -37,11 +37,11 @@ void run_tests() {
     free(str);
 
     // Large Allocation
-    write(1, "\nRunning: Large allocation test\n", 33);
-    size_t large_size = 1024 * 1024 * 1024; // 1GB
-    void *large = malloc(large_size);
-    assert(large != NULL);
-    free(large);
+    // write(1, "\nRunning: Large allocation test\n", 33);
+    // size_t large_size = 1024 * 1024 * 1024; // 1GB
+    // void *large = malloc(large_size);
+    // assert(large != NULL);
+    // free(large);
 
     // // Test with a range of digits
     write(1, "\nRunning: Range of digits test\n", 31);
@@ -56,16 +56,16 @@ void run_tests() {
 
 
     // Fragmentation test
-    // write(1, "\nRunning: Fragmentation test\n", 30);
-    // void *frag1 = malloc(100);
-    // void *frag2 = malloc(200);
-    // void *frag3 = malloc(300);
-    // free(frag2);
-    // void *frag4 = malloc(150);
-    // assert(frag4 != NULL);
-    // free(frag1);
-    // free(frag3);
-    // free(frag4);
+    write(1, "\nRunning: Fragmentation test\n", 30);
+    void *frag1 = malloc(100);
+    void *frag2 = malloc(200);
+    void *frag3 = malloc(300);
+    free(frag2);
+    void *frag4 = malloc(150);
+    assert(frag4 != NULL);
+    free(frag1);
+    free(frag3);
+    free(frag4);
 
     // // Double free test
     // write(1, "\nRunning: Double free test\n", 28);

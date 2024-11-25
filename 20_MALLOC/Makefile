@@ -81,12 +81,18 @@ $(OBJS_PATH)%.o: $(LOG_PATH)%.c $(INCLUDE_PATH)
 	@echo " - Compiling $<"
 	@$(CC) $(CFLAGS) -fPIC -o $@ -c $< -I $(INC_PATH)
 
+run:
+	LD_PRELOAD=./libft_malloc.so tests/srcs/a.out
+
 valgrind:
-	make && clear && valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all ./libft_malloc.so
+	make && clear && LD_PRELOAD=./libft_malloc.so valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all tests/srcs/a.out
 
 gdb:
 	make && clear && gdb -tui a.out
 
+compile_test:
+	cd tests/srcs && \
+	$(CC) $(CFLAGS) test.c 
 clean:
 	@echo " - Cleaning objs"
 	@rm -rf objs
