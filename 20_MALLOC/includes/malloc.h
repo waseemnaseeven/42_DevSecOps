@@ -39,6 +39,7 @@ typedef struct      s_block {
     size_t          unused_space;
     struct s_block  *prev;
     struct s_block  *next;
+    struct s_block  *next_alloc;
 
 }                   t_block;
 
@@ -53,6 +54,7 @@ typedef struct      s_heap {
     size_t          block_count;
 	t_heap_group	group; // Type of heap (TINY, SMALL, LARGE)
     t_block         *blocks; // Pointer to the first block in the heap
+    t_block         *last_allocated_block;
 
 }                   t_heap;
 
@@ -75,7 +77,7 @@ t_block *find_free_block(t_heap *my_heap, size_t size);
 // Log functions
 void    show_heap_group(t_heap *my_heap);
 void    show_alloc_mem(void);
-// void    show_alloc_mem_ex(void);
+void    show_alloc_mem_ex(void);
 
 // Utils Methods
 void	ft_bzero(void *s, size_t n);

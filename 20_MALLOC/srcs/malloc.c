@@ -76,22 +76,6 @@ void    *malloc(size_t size)
             my_heap = my_heap->next;
         }
     }
-    // // Compare size and find free_block
-    // while (my_heap != NULL) {
-    //     if ((my_heap->group == TINY && total_block_size <= TINY_BLOCK_SIZE) ||
-    //         (my_heap->group == SMALL && total_block_size <= SMALL_BLOCK_SIZE) ||
-    //         (my_heap->group == LARGE && total_block_size > SMALL_BLOCK_SIZE)) {
-    //         block = find_free_block(my_heap, total_block_size);
-    //         if (block) {
-    //             block->freed = false;
-    //         }
-    //     }
-    //     // } else if (my_heap->group == LARGE && total_block_size > SMALL_BLOCK_SIZE) {
-    //     //     block = 
-    //     // }
-    //     my_heap = my_heap->next;
-    // }
-
     // Compare_size and create_heap and create_block
     if (!block) {
 
@@ -118,7 +102,6 @@ void    *malloc(size_t size)
         write(1, buf, len);
     }
     pthread_mutex_unlock(&g_malloc_mutex);
-    show_alloc_mem();
     return block ? BLOCK_SHIFT(block) : NULL;
 }
 
