@@ -12,18 +12,23 @@
 #include <fcntl.h>
 #include <pthread.h>
 
+#define ALIGN_SIZE 
+
 #define HEAP_SHIFT(start) ((void *)((char *) (start) + sizeof(t_heap)))
 #define BLOCK_SHIFT(start) ((void *)((char *)(start) + sizeof(t_block)))
 
 
 // Size of heap
-#define TINY_HEAP_ALLOCATION_SIZE ((size_t)4 * sysconf(_SC_PAGESIZE))
-#define SMALL_HEAP_ALLOCATION_SIZE ((size_t)8 * sysconf(_SC_PAGESIZE))
-#define LARGE_HEAP_ALLOCATION_SIZE ((size_t)16 * sysconf(_SC_PAGESIZE))
+// #define TINY_HEAP_ALLOCATION_SIZE ((size_t)4 * sysconf(_SC_PAGESIZE))
+// #define SMALL_HEAP_ALLOCATION_SIZE ((size_t)8 * sysconf(_SC_PAGESIZE))
+
+#define TINY_HEAP_ALLOCATION_SIZE ((size_t)16 * sysconf(_SC_PAGESIZE))
+#define SMALL_HEAP_ALLOCATION_SIZE ((size_t)64 * sysconf(_SC_PAGESIZE))
 
 // Size of blocks
-#define TINY_BLOCK_SIZE (TINY_HEAP_ALLOCATION_SIZE / 128)
-#define SMALL_BLOCK_SIZE (SMALL_HEAP_ALLOCATION_SIZE / 128)
+#define TINY_BLOCK_SIZE (TINY_HEAP_ALLOCATION_SIZE / 100)
+#define SMALL_BLOCK_SIZE (SMALL_HEAP_ALLOCATION_SIZE / 100)
+
 
 typedef enum	e_heap_group {
 	TINY,
@@ -34,9 +39,10 @@ typedef enum	e_heap_group {
 // Metadata structure for a block 
 typedef struct      s_block {
 
-    size_t          size;
-    bool            freed;
-    size_t          unused_space;
+    size_t          requested_size; // The actual size requested with malloc
+    size_t          size; // Aligned size of the allocated block
+    bool            freed; // If the block is free or not
+    size_t          unused_space; 
     struct s_block  *prev;
     struct s_block  *next;
     struct s_block  *next_alloc;
@@ -61,7 +67,7 @@ typedef struct      s_heap {
 extern t_heap           *g_heap;
 extern pthread_mutex_t  g_malloc_mutex;
 
-// Malloc functions
+// Malloc / Free / Realloc functions
 void    *malloc(size_t size);
 void    free(void *ptr);
 void    *realloc(void *ptr, size_t size);
@@ -75,8 +81,8 @@ t_block *create_block(t_heap *my_heap, size_t size);
 t_block *find_free_block(t_heap *my_heap, size_t size);
 
 // Log functions
-void    show_heap_group(t_heap *my_heap);
 void    show_alloc_mem(void);
+void    show_alloc_mem_basic(void);
 void    show_alloc_mem_ex(void);
 
 // Utils Methods

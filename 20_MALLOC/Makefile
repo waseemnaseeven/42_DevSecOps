@@ -4,14 +4,14 @@ NAME = libft_malloc_$(HOSTTYPE).so
 
 CC = gcc
 
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror 
 
-LDFLAGS = -shared -fPIC -pthread
+LDFLAGS = -shared -fPIC -pthread -g3
 
 SRCS_PATH = srcs/
 LIB_PATH  = libc/
 LOG_PATH  = log/
-TEST_PATH = tests/srcs/
+TEST_PATH = tests/
 INC_PATH  = includes/
 
 SRCS_NAME = malloc.c \
@@ -28,13 +28,11 @@ LIB_NAME =  ft_atoi.c \
 			ft_memcpy.c \
 			ft_memmove.c \
 			ft_memset.c \
-			ft_putchar_fd.c \
 			ft_putendl_fd.c \
-			ft_putstr_fd.c 
+			ft_putstr_fd.c \
 
-LOG_NAME =  show_alloc_mem.c \
+LOG_NAME =  show_alloc_mem_basic.c \
 			show_alloc_mem_exe.c \
-			show_heap_group.c 
 
 TEST_NAME = test.c
 
@@ -60,7 +58,7 @@ INCLUDE_PATH = $(addprefix $(INC_PATH), $(INCLUDES))
 
 all: odir $(NAME)
 
-$(NAME): $(OBJS)
+$(NAME): $(OBJS) 
 	@echo " - Making $(NAME)"
 	@$(CC) $(CFLAGS) $(LDFLAGS) -o $(NAME) $^ -I $(INC_PATH)
 	@ln -sf $(NAME) libft_malloc.so
@@ -82,17 +80,29 @@ $(OBJS_PATH)%.o: $(LOG_PATH)%.c $(INCLUDE_PATH)
 	@$(CC) $(CFLAGS) -fPIC -o $@ -c $< -I $(INC_PATH)
 
 run:
-	LD_PRELOAD=./libft_malloc.so tests/srcs/a.out
+	cd tests/ && LD_PRELOAD=../libft_malloc.so ../tests/a.out \
+	# LD_PRELOAD=./libft_malloc.so tests/a.out
+
+vim:
+	LD_PRELOAD=./libft_malloc.so vim test_vim.c
 
 valgrind:
-	make && clear && LD_PRELOAD=./libft_malloc.so valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all tests/srcs/a.out
+	make && clear && cd tests/ && LD_PRELOAD=../libft_malloc.so valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all ../tests/a.out
+
+valgrind_ls:
+	make && clear && cd tests/ && LD_PRELOAD=../libft_malloc.so valgrind --leak-check=full --track-origins=yes  --show-leak-kinds=all /bin/ls
+
+valgrind_cal:
+	make && clear && cd tests/ && LD_PRELOAD=../libft_malloc.so valgrind --leak-check=full --track-origins=yes  --show-leak-kinds=all cal
+
+valgrind_echo:
+	make && clear && cd tests/ && LD_PRELOAD=../libft_malloc.so valgrind --leak-check=full --track-origins=yes  --show-leak-kinds=all echo "bonjour"
 
 gdb:
 	make && clear && gdb -tui a.out
 
-compile_test:
-	cd tests/srcs && \
-	$(CC) $(CFLAGS) test.c 
+compile_test: all
+	gcc -Wall -Wextra -Werror -I includes/ tests/test.c -L. -Wl,-rpath=.. -lft_malloc -o tests/a.out
 
 clean:
 	@echo " - Cleaning objs"
