@@ -2,28 +2,7 @@
 
 #include "../includes/malloc.h"
 
-static bool is_heap_all_free(t_heap *my_heap) {
-    t_block *block = my_heap->blocks;
-    while (block) {
-        if (!block->freed) {
-            return false;
-        }
-        block = block->next;
-    }
-    return true;
-}
-
-static void remove_heap_from_list(t_heap *my_heap) {
-    if (my_heap->prev)
-        my_heap->prev->next = my_heap->next;
-    else
-        g_heap = my_heap->next;
-
-    if (my_heap->next)
-        my_heap->next->prev = my_heap->prev;
-}
-
-static void coalesce_free_blocks(t_heap *my_heap) {
+void coalesce_free_blocks(t_heap *my_heap) {
     t_block *current = my_heap->blocks;
     while (current && current->next) {
         if (current->freed && current->next->freed) {
@@ -49,25 +28,8 @@ void free(void *ptr) {
 
     t_heap *my_heap = g_heap;
     while (my_heap) {
-        t_block *b = my_heap->blocks;
-        bool found = false;
-        while (b) {
-            if (b == block) {
-                found = true;
-                break;
-            }
-            b = b->next;
-        }
-
-        if (found) {
+        if (my_heap->blocks == block) {
             coalesce_free_blocks(my_heap);
-
-            // Si la heap est entièrement libre, on rend la mémoire au système
-            if (is_heap_all_free(my_heap)) {
-                remove_heap_from_list(my_heap);
-                munmap(my_heap, my_heap->total_size);
-            }
-
             break;
         }
         my_heap = my_heap->next;

@@ -1,41 +1,6 @@
 #include "../includes/malloc.h"
-#include <unistd.h>
-#include <string.h>
-#include <stdio.h>
-#include <pthread.h>
 
-
-
-void ft_putchar_fd(char c, int fd) {
-    write(fd, &c, 1);
-}
-
-void ft_putnbr_fd(int n, int fd)
-{
-    char buf[32];
-    int len = 0;
-    if (n == -2147483648) {
-        write(fd, "-2147483648", 11);
-        return;
-    }
-    if (n < 0) {
-        write(fd, "-", 1);
-        n = -n;
-    }
-    if (n == 0) {
-        write(fd, "0", 1);
-        return;
-    }
-    while (n > 0 && len < 31) {
-        buf[len++] = (n % 10) + '0';
-        n /= 10;
-    }
-    for (int i = len - 1; i >= 0; i--) {
-        write(fd, &buf[i], 1);
-    }
-}
-
-/// Print an address in hexadecimal format (ex: 0x7ffee3c0a9b0)
+// Print an address in hexadecimal format (ex: 0x7ffee3c0a9b0)
 static void print_address_hex(size_t value) {
     char hex[16] = "0123456789abcdef";
     char buffer[32]; 
@@ -56,7 +21,7 @@ static void print_address_hex(size_t value) {
     }
 }
 
-/// Print a memory block in hexadecimal format, 16 bytes per line
+// Print a memory block in hexadecimal format, 16 bytes per line
 static void print_block_hex(void *block_start, size_t size) {
     unsigned char *ptr = (unsigned char *)block_start;
     size_t i = 0;
@@ -67,7 +32,6 @@ static void print_block_hex(void *block_start, size_t size) {
             if (i > 0) {
                 write(1, "\n", 1);
             }
-            // Print address
             print_address_hex((size_t)(ptr + i));
             write(1, ": ", 2);
         }
@@ -79,18 +43,8 @@ static void print_block_hex(void *block_start, size_t size) {
     write(1, "\n", 1);
 }
 
-/// Retourne le nom du groupe en fonction de t_heap_group
-static const char *get_group_name(t_heap_group group) {
-    if (group == TINY)
-        return "TINY";
-    else if (group == SMALL)
-        return "SMALL";
-    else
-        return "LARGE";
-}
-
-/// Affiche toutes les heaps et blocs d'un type donné (TINY, SMALL ou LARGE)
-/// Le paramètre 'dump' indique s'il faut afficher l'hexdump des blocs alloués.
+// Affiche toutes les heaps et blocs d'un type donné (TINY, SMALL ou LARGE)
+// Le paramètre 'dump' indique s'il faut afficher l'hexdump des blocs alloués.
 static void print_zone(const char *zone_name, size_t *total, char dump)
 {
     t_heap *heap = g_heap;
@@ -100,7 +54,7 @@ static void print_zone(const char *zone_name, size_t *total, char dump)
     while (heap) {
         const char *heap_name = get_group_name(heap->group);
         if (strlen(heap_name) == strlen(zone_name) && strncmp(heap_name, zone_name, strlen(zone_name)) == 0) {
-            // Afficher la heap
+
             int len = snprintf(buf, sizeof(buf), "%s : ", zone_name);
             write(1, buf, len);
             print_address_hex((size_t)heap);
@@ -109,6 +63,9 @@ static void print_zone(const char *zone_name, size_t *total, char dump)
             t_block *block = heap->blocks;
             int i = 0;
             while (block) {
+                len = snprintf(buf, sizeof(buf), "%zu\n", block->requested_size);
+                write(1, buf, len);
+                
                 void *block_start = (void *)BLOCK_SHIFT(block);
                 void *block_end = (void *)((char *)block_start + block->size);
 
@@ -152,7 +109,7 @@ static void print_zone(const char *zone_name, size_t *total, char dump)
     }
 }
 
-/// Affiche l'intro et appelle print_zone pour chaque zone (TINY, SMALL, LARGE)
+// Affiche l'intro et appelle print_zone pour chaque zone (TINY, SMALL, LARGE)
 static void intro_print_zone(char dump)
 {
     char buf[256];
@@ -173,14 +130,6 @@ static void intro_print_zone(char dump)
     write(1, buf, strlen(buf));
 
     write(1, "--------------------------------\n", 33);
-}
-
-// Fonction pour afficher les allocations mémoire (sans hexdump)
-void show_alloc_mem()
-{
-    pthread_mutex_lock(&g_malloc_mutex);
-    intro_print_zone(0);
-    pthread_mutex_unlock(&g_malloc_mutex);
 }
 
 // Fonction pour afficher les allocations mémoire avec hexdump

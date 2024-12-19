@@ -1,4 +1,4 @@
-#include "../../includes/malloc.h"
+#include "../includes/malloc.h"
 
 t_block *find_free_block(t_heap *my_heap, size_t size) {
     
@@ -29,11 +29,6 @@ t_block *create_block(t_heap *my_heap, size_t size) {
         my_heap->blocks->prev = block;
     my_heap->blocks = block;
 
-    block->next_alloc = NULL;
-    if (my_heap->last_allocated_block)
-        my_heap->last_allocated_block->next_alloc = block;
-    my_heap->last_allocated_block = block;
-    
     my_heap->current_offset += sizeof(t_block) + size;
     my_heap->unused_space_size -= (size + sizeof(t_block));
     my_heap->block_count++;

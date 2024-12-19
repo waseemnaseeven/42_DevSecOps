@@ -2,7 +2,6 @@
 
 int main() {
     int i;
-    char *addr;
 
     i = 0;
     while (i < 1024) {

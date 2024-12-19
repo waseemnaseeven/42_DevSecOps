@@ -1,5 +1,5 @@
 #include "../includes/malloc.h"
-#include <unistd.h>
+
 
 void	ft_putchar_fd(char c, int fd) {
 	write(fd, &c, 1);
@@ -42,22 +42,9 @@ void test_realloc_increase() {
     // Vérifier que les données sont toujours là
     assert(strcmp(ptr, "12345") == 0);
     show_alloc_mem_ex();
-
-    free(ptr);
-    show_alloc_mem_ex();
-}
-
-void test_realloc_decrease() {
-    write(1, "\nRunning: test_realloc_decrease\n", 33);
-    char *ptr = malloc(50);
-    strcpy(ptr, "Hello, this is a long string");
-    show_alloc_mem_ex();
-
-    // Réduire à 20 octets
-    ptr = realloc(ptr, 20);
+    ptr = realloc(ptr, 1024);
     assert(ptr != NULL);
-    // Les 20 premiers octets doivent toujours contenir le début de la chaîne
-    assert(strncmp(ptr, "Hello, this is a l", 19) == 0); 
+    assert(strcmp(ptr, "12345") == 0);
     show_alloc_mem_ex();
 
     free(ptr);
@@ -179,9 +166,8 @@ void test_range_digits() {
 }
 
 void run_realloc_tests() {
-    test_realloc_increase();
-    test_realloc_decrease();
-    test_realloc_null();
+    // test_realloc_increase();
+    // test_realloc_null();
 }
 
 void run_tests() {

@@ -1,20 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_putstr_fd.c                                     :+:      :+:    :+:   */
+/*   ft_putchar_fd.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: wnaseeve <wnaseeve@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/11/09 14:44:18 by wnaseeve          #+#    #+#             */
-/*   Updated: 2023/12/26 12:17:49 by wnaseeve         ###   ########.fr       */
+/*   Created: 2022/11/09 16:09:23 by wnaseeve          #+#    #+#             */
+/*   Updated: 2023/12/26 12:15:40 by wnaseeve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <unistd.h>
 
-void	ft_putchar_fd(char c, int fd);
-
-void	ft_putstr_fd(char *s, int fd)
+void	ft_putchar_fd(char c, int fd)
 {
-	while (s && *s)
-		ft_putchar_fd(*s++, fd);
+	write(fd, &c, 1);
 }
