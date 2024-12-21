@@ -1,13 +1,8 @@
-# ===========================
-# Variables de Compilation
-# ===========================
+
 CC = gcc
 CFLAGS = -g3 -I ../includes/
 LIBFT_MALLOC = -L.. -lft_malloc
 
-# ===========================
-# Répertoires
-# ===========================
 TESTS_DIR = .
 SRC_DIR = ../srcs
 

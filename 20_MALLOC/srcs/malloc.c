@@ -1,97 +1,92 @@
 // srcs/malloc.c
 
-/*
-    - recalculer block 
-    - refaire pour large addr
-    - realloc test 
-    - thread test
-    - corrections test 
-    - show_alloc_mem_ex avec free et realloc ? 
-*/
-
 #include "../includes/malloc.h"
 
 pthread_mutex_t g_malloc_mutex = PTHREAD_MUTEX_INITIALIZER;
-t_heap *g_heap = NULL;
 
+heap_group g_heap = {
+    .TINY_HEAP = NULL,
+    .SMALL_HEAP = NULL,
+    .LARGE_HEAP = NULL,
+};
 
-// Aligne sur 16 octets (taille typique pour 64 bits)
+// Aligne sur 16 octets (taille typique pour arch 64 bits)
 static size_t align_size(size_t size) {
     size_t alignment = 16;
     return (size + alignment - 1) & ~(alignment - 1);
 }
 
-void    *malloc(size_t size)
+// Fonction pour allouer dans une zone spécifique (TINY, SMALL, LARGE)
+static void* allocate_in_zone(t_heap **zone_head, size_t size, size_t heap_size, t_heap_group group) {
+    t_heap *zone = *zone_head;
+    t_block *block = NULL;
+
+    // 1- Parcourir les heaps existantes pour trouver un bloc libre
+    while (zone) {
+
+        if (zone->group == group) {
+            coalesce_free_blocks(zone);
+            block = find_free_block(zone, size);
+            if (block) {
+                block->freed = false;
+                // Here, we should split the block (shrink)
+                // block->size > size + sizeof(t_block)
+                return BLOCK_SHIFT(block);
+            }
+        }
+        zone = zone->next;
+    }
+
+    // 2- Si aucun bloc libre n'est trouvé, créer une nouvelle heap
+    if (!block) {
+        t_heap *new_heap = create_heap_from_aligned_size(heap_size, group);
+        if (!new_heap) {
+            return NULL;
+        }
+
+        block = create_block(new_heap, size);
+        if (!block) {
+            return NULL;
+        }
+    }
+
+    return BLOCK_SHIFT(block);
+}
+
+
+void *malloc(size_t size)
 {
-    if (size <= 0)
+    if (size == 0)
         return (NULL);
 
     pthread_mutex_lock(&g_malloc_mutex);
 
-    size_t total_block_size = 0;
-    total_block_size = align_size(size);
-    t_heap_group group = (total_block_size <= TINY_BLOCK_SIZE) ? TINY : (total_block_size <= SMALL_BLOCK_SIZE) ? SMALL : LARGE;
+    size_t aligned_size = align_size(size);
 
-    t_heap  *my_heap = g_heap;
-    t_block *block = NULL;
-    
-    if (group == LARGE) {
-        // Pour les allocations LARGE, créer une nouvelle heap dédiée
-        size_t heap_size = total_block_size + sizeof(t_heap) + sizeof(t_block);
+    t_heap_group group = get_group_size(aligned_size);
 
-        my_heap = create_heap(heap_size, group, NULL);
-        if (!my_heap) {
-            pthread_mutex_unlock(&g_malloc_mutex);
-            return NULL;
-        }
-
-        block = create_block(my_heap, total_block_size);
-        if (!block) {
-            munmap(my_heap, heap_size);
-            pthread_mutex_unlock(&g_malloc_mutex);
-            return NULL;
-        }
-
-
-    } else {
-        // Pour TINY et SMALL, chercher un bloc libre ou créer une nouvelle heap
-        my_heap = g_heap;
-        while (my_heap != NULL) {
-            if (my_heap->group == group) {
-                block = find_free_block(my_heap, total_block_size);
-                if (block) {
-                    block->freed = false;
-                    break;
-                }
-            }
-            my_heap = my_heap->next;
-        }
+    void *allocated_block = NULL;
+    if (group == TINY) {
+        allocated_block = allocate_in_zone(&g_heap.TINY_HEAP, aligned_size, TINY_HEAP_ALLOCATION_SIZE, TINY);
     }
-    // Compare_size and create_heap and create_block
-    if (!block) {
-
-        size_t heap_size = heap_size_function(group, total_block_size);
-
-        my_heap = create_heap_from_aligned_size(heap_size, group);
-        if (!my_heap) {
-            pthread_mutex_unlock(&g_malloc_mutex);
-            return (NULL);
-        }
-        block = create_block(my_heap, total_block_size);
-        if (!block) {
-            pthread_mutex_unlock(&g_malloc_mutex);
-            return NULL;
-        }
+    else if (group == SMALL) {
+        allocated_block = allocate_in_zone(&g_heap.SMALL_HEAP, aligned_size, SMALL_HEAP_ALLOCATION_SIZE, SMALL);
     }
-    
-    if (getenv("MALLOC_DEBUG")) {
-        char buf[64];
-        int len = sprintf(buf, "[MALLOC] Allocated %zu bytes at %p\n", size, BLOCK_SHIFT(block));
-        write(1, buf, len);
+    else if (group == LARGE) {
+        // For LARGE, create a new heap
+        size_t heap_size = align_size(size + sizeof(t_heap) + sizeof(t_block));
+        allocated_block = allocate_in_zone(&g_heap.LARGE_HEAP, aligned_size, heap_size, LARGE);
+    }
+
+    if (allocated_block && getenv("MALLOC_DEBUG")) {
+        // Afficher le message de débogage
+        ft_putstr_fd("[MALLOC] Allocated ", 1);
+        ft_putnbr_fd(size, 1);
+        ft_putstr_fd(" bytes at ", 1);
+        print_address_hex((size_t)allocated_block);
+        ft_putstr_fd("\n", 1);
     }
 
     pthread_mutex_unlock(&g_malloc_mutex);
-    return block ? BLOCK_SHIFT(block) : NULL;
+    return allocated_block;
 }
-
-

@@ -1,32 +1,5 @@
 #include "../includes/malloc.h"
 
-
-void	ft_putchar_fd(char c, int fd) {
-	write(fd, &c, 1);
-}
-
-void	ft_putnbr_fd(int n, int fd) {
-	if (n == -2147483648)
-	{
-		ft_putchar_fd('-', fd);
-		ft_putnbr_fd(2, fd);
-		ft_putnbr_fd(147483648, fd);
-	}
-	else if (n < 0)
-	{
-		ft_putchar_fd('-', fd);
-		n = -n;
-		ft_putnbr_fd(n, fd);
-	}
-	else if (n > 9)
-	{
-		ft_putnbr_fd(n / 10, fd);
-		ft_putnbr_fd(n % 10, fd);
-	}
-	else
-		ft_putchar_fd(n + 48, fd);
-}
-
 void show_alloc_mem_ex(void);
 
 
@@ -165,6 +138,13 @@ void test_range_digits() {
     show_alloc_mem_ex();
 }
 
+void *test_thread() {
+    pthread_t *thread = malloc(sizeof(pthread_t) * 100);
+    void *ret = malloc(80);
+    pthread_exit(NULL);
+    return ret;
+}
+
 void run_realloc_tests() {
     // test_realloc_increase();
     // test_realloc_null();
@@ -172,10 +152,13 @@ void run_realloc_tests() {
 
 void run_tests() {
     // test_random_size(512, "TINY");
+    // test_random_size(2048, "SMALL");
+    // test_random_size(1024)
     // test_zero_allocation();
     test_string();
     // test_large_alloc();
-    // test_fragmentation();
+    test_fragmentation();
+    test_thread();
 }
 
 int main(void) {

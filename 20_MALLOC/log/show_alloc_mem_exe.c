@@ -1,141 +1,86 @@
+// log/show_alloc_mem_ex.c
+
 #include "../includes/malloc.h"
 
-// Print an address in hexadecimal format (ex: 0x7ffee3c0a9b0)
-static void print_address_hex(size_t value) {
-    char hex[16] = "0123456789abcdef";
-    char buffer[32]; 
-    int i = 0;
-
-    if (value == 0) {
-        write(1, "0x0", 3);
-        return;
-    }
-
-    while (value > 0 && i < 32) {
-        buffer[i++] = hex[value % 16];
-        value /= 16;
-    }
-    write(1, "0x", 2);
-    while (i > 0) {
-        write(1, &buffer[--i], 1);
-    }
-}
-
-// Print a memory block in hexadecimal format, 16 bytes per line
-static void print_block_hex(void *block_start, size_t size) {
+void print_block_hex(void *block_start, size_t size) {
     unsigned char *ptr = (unsigned char *)block_start;
     size_t i = 0;
-    char buf[256];
 
     while (i < size) {
         if (i % 16 == 0) {
             if (i > 0) {
-                write(1, "\n", 1);
+                ft_putchar_fd('\n', 1);
             }
             print_address_hex((size_t)(ptr + i));
-            write(1, ": ", 2);
+            ft_putstr_fd(": ", 1);
         }
 
-        snprintf(buf, sizeof(buf), " %02x", ptr[i]);
-        write(1, buf, strlen(buf));
+        unsigned char byte = ptr[i];
+        char high_nibble = "0123456789abcdef"[byte >> 4];
+        char low_nibble = "0123456789abcdef"[byte & 0x0F];
+        ft_putchar_fd(high_nibble, 1);
+        ft_putchar_fd(low_nibble, 1);
+        ft_putchar_fd(' ', 1);
         i++;
     }
-    write(1, "\n", 1);
+    ft_putchar_fd('\n', 1);
 }
 
-// Affiche toutes les heaps et blocs d'un type donné (TINY, SMALL ou LARGE)
-// Le paramètre 'dump' indique s'il faut afficher l'hexdump des blocs alloués.
-static void print_zone(const char *zone_name, size_t *total, char dump)
-{
-    t_heap *heap = g_heap;
-    int zone_printed = 0;
-    char buf[256];
+static void display_group_ex(t_heap *heap, char *group_name) {
+    t_heap *current_heap = heap;
+    while (current_heap) {
+        ft_putstr_fd(group_name, 1);
+        ft_putstr_fd(" : ", 1);
+        print_address_hex((size_t)current_heap);
+        ft_putstr_fd("\n", 1);
 
-    while (heap) {
-        const char *heap_name = get_group_name(heap->group);
-        if (strlen(heap_name) == strlen(zone_name) && strncmp(heap_name, zone_name, strlen(zone_name)) == 0) {
+        t_block *current_block = current_heap->blocks;
+        int block_num = 0;
+        while (current_block) {
+            block_num++;
+            ft_putstr_fd("    Block ", 1);
+            ft_putnbr_fd(block_num, 1);
+            ft_putstr_fd(" : ", 1);
 
-            int len = snprintf(buf, sizeof(buf), "%s : ", zone_name);
-            write(1, buf, len);
-            print_address_hex((size_t)heap);
-            write(1, "\n", 1);
-
-            t_block *block = heap->blocks;
-            int i = 0;
-            while (block) {
-                len = snprintf(buf, sizeof(buf), "%zu\n", block->requested_size);
-                write(1, buf, len);
-                
-                void *block_start = (void *)BLOCK_SHIFT(block);
-                void *block_end = (void *)((char *)block_start + block->size);
-
-                // i - numéro de bloc
-                // Si freed -> vert, sinon rouge
-                i++;
-                snprintf(buf, sizeof(buf), "%d - ", i);
-                write(1, buf, strlen(buf));
-                if (block->freed) {
-                    write(1, "\033[0;32m", 7);
-                } else {
-                    *total += block->size;
-                    write(1, "\033[0;31m", 7);
-                }
-
-                // Adresse début - fin + taille
-                write(1, "", 0);
-                print_address_hex((size_t)block_start);
-                write(1, " - ", 3);
-                print_address_hex((size_t)block_end);
-                snprintf(buf, sizeof(buf), " : %zu bytes\n", block->size);
-                write(1, buf, strlen(buf));
-
-                write(1, "\033[0m", 4); // Reset color
-
-                if (dump && !block->freed) {
-                    print_block_hex(block_start, block->size);
-                }
-                block = block->next;
+            if (current_block->freed) {
+                ft_putstr_fd("\033[0;32mFREE ", 1);
+            } else {
+                ft_putstr_fd("\033[0;31mALLOCATED ", 1);
             }
-            zone_printed = 1;
+
+            ft_putnbr_fd(current_block->size, 1);
+            ft_putstr_fd(" bytes\033[0m\n", 1);
+
+            void *start_address = BLOCK_SHIFT(current_block);
+            void *end_address = (void *)((char *)start_address + current_block->size);
+
+            ft_putstr_fd("        ", 1);
+            print_address_hex((size_t)start_address);
+            ft_putstr_fd(" - ", 1);
+            print_address_hex((size_t)end_address);
+            ft_putstr_fd(" : ", 1);
+            ft_putnbr_fd(current_block->size, 1);
+            ft_putstr_fd(" bytes\n", 1);
+
+            if (!current_block->freed) {
+                ft_putstr_fd("        Hexdump:\n", 1);
+                print_block_hex(start_address, current_block->size);
+            }
+
+            current_block = current_block->next;
         }
-        heap = heap->next;
-    }
-
-    // Même si aucune heap de ce type n'a été trouvée, on affiche le titre
-    // avec une ligne vide.
-    if (!zone_printed) {
-        snprintf(buf, sizeof(buf), "%s : \n", zone_name);
-        write(1, buf, strlen(buf));
+        current_heap = current_heap->next;
     }
 }
 
-// Affiche l'intro et appelle print_zone pour chaque zone (TINY, SMALL, LARGE)
-static void intro_print_zone(char dump)
-{
-    char buf[256];
-    write(1, "--------------------------------\n", 33);
-    if (dump) {
-        write(1, "🔋 Memory hexdump \n", 22);
-    } else {
-        write(1, "🔋 Memory allocations \n", 26);
-    }
-
-    size_t total_memory = 0;
-
-    print_zone("TINY", &total_memory, dump);
-    print_zone("SMALL", &total_memory, dump);
-    print_zone("LARGE", &total_memory, dump);
-
-    snprintf(buf, sizeof(buf), "Total : %zu bytes\n", total_memory);
-    write(1, buf, strlen(buf));
-
-    write(1, "--------------------------------\n", 33);
-}
-
-// Fonction pour afficher les allocations mémoire avec hexdump
-void show_alloc_mem_ex(void)
-{
+void show_alloc_mem_ex(void) {
     pthread_mutex_lock(&g_malloc_mutex);
-    intro_print_zone(1);
+
+    display_group_ex(g_heap.TINY_HEAP, "TINY");
+    display_group_ex(g_heap.SMALL_HEAP, "SMALL");
+    display_group_ex(g_heap.LARGE_HEAP, "LARGE");
+
     pthread_mutex_unlock(&g_malloc_mutex);
 }
+
+

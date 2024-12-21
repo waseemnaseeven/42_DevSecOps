@@ -6,7 +6,7 @@
 /*   By: wnaseeve <wnaseeve@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/08 11:50:47 by wnaseeve          #+#    #+#             */
-/*   Updated: 2023/12/26 12:17:01 by wnaseeve         ###   ########.fr       */
+/*   Updated: 2024/12/20 15:40:48 by wnaseeve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ void	*ft_memcpy(void *dest, const void *src, size_t n)
 	}
 	return (d);
 }
+
 /*
 int main (void)
 {
