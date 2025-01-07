@@ -16,6 +16,8 @@ We'll have to a simulate a network using GNS3 and docker, focusing on advanced n
 
 - `IS-IS (Intermediate System to Intermediate System)`: Another interior gateway protocol for routing within an autonomous system.
 
+## Tools
+
 - `Wireshark` : Open-Source Analysor of network packets. We can capture and inspect data on a network in real time. it use for: 
     - Identify communications problems
     - Security analysis
@@ -43,7 +45,7 @@ We'll have to a simulate a network using GNS3 and docker, focusing on advanced n
     - Include BusyBox to have essential UNIX utilities.
 
 2. Image with Routing Capabilities
-    - Use a Linux distribution of your choice (e.g., Ubuntu, Debian).
+    - Use a Linux distribution of your choice (e.g., Ubuntu, Debian) or directly frr/routing directly.
     - `FRRouting (FRR)`: An open-source routing software suite that supports BGP, OSPF, and IS-IS.
     - Installation:
         - Add the FRR repository and install using package manager.
