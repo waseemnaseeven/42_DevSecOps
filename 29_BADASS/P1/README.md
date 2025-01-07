@@ -42,14 +42,14 @@ We'll have to a simulate a network using GNS3 and docker, focusing on advanced n
 
 1. Image with busybox
     - Use `Alpine Linux` as it's lightweight and suitable for network tasks.
-    - Include BusyBox to have essential UNIX utilities.
+    - Include bash
 
 2. Image with Routing Capabilities
     - Use a Linux distribution of your choice (e.g., Ubuntu, Debian) or directly frr/routing directly.
     - `FRRouting (FRR)`: An open-source routing software suite that supports BGP, OSPF, and IS-IS.
     - Installation:
         - Add the FRR repository and install using package manager.
-        - Configure `FRR daemons` (bgpd, ospfd, isisd).
+        - Configure `FRR daemons` (bgpd, ospfd, isisd) with the `daemons.conf` in the router folder.
         - Include BusyBox or equivalent for basic utilities.
 
 3. Test images locally
@@ -59,7 +59,8 @@ We'll have to a simulate a network using GNS3 and docker, focusing on advanced n
 - Add Docker Images to GNS3:
     - Open GNS3 and go to `Preferences > Docker Containers.`
     - Add new templates using your Docker images.
-    - Configure `network interfaces` as required.
+        - Start command : `/bin/sh`
+        - `telnet`
 
 ## Simple Network Setup
 
@@ -67,15 +68,6 @@ Objective: Create a simple network with two machines using your Docker images.
 
 - Drag and drop your Docker containers into the GNS3 workspace.
 - Connect the containers using GNS3's network links.
-- Ensure that both machines are operational and you can access their consoles.
-- Naming Convention: Include your login in the device names (e.g., yourlogin_host).
+- Ensure that both machines are operationnal with `Right Click` + `Auxiliary Console` : `ps` and `hostname` cmds.
 
-Configuration Files:
 
-- Save all configuration files (e.g., network interface configs, daemon configs).
-- Add comments explaining each configuration directive.
-
-Submission:
-
-- Place all configurations and the exported GNS3 project in the P1 folder of your Git repository.
-- Export the GNS3 project as a portable project (includes base images) in ZIP format.
