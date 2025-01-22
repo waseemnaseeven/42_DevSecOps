@@ -31,7 +31,7 @@ void enable_timeout_cons(void) {
 }
 
 int main(void) {
-    char buffer[128] = {0}; // Local buffer (potential vulnerability)
+    char buffer[155] = {0}; // Local buffer (potential vulnerability)
     pid_t child_pid = fork();
     int status;
     long syscall;

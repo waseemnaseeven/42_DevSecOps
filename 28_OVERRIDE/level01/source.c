@@ -3,15 +3,13 @@
 
 // Expected username and password
 const char *expected_username = "dat_wil";
-const char *expected_password = "admin"; // ?????
 
-// Verify the username
 int verify_user_name(const char *username) {
     puts("Verifying username...\n");
     return strncmp(username, expected_username, strlen(expected_username));
 }
 
-// Verify the password
+
 int verify_user_pass(const char *password) {
     return strncmp(password, expected_password, strlen(expected_password));
 }

@@ -2,20 +2,28 @@
 #include <stdlib.h>
 #include <time.h>
 
+// Password doit etre dans l'intervalle [322424824, 322424845]
+// BRUTEFORCE La bonne valeur est 322424827, qui donne diff = 18.
+// Parce que 18 est la clé qui transforme "Q}|usfg~sf{}|a"en"Congratulations"`.
+/*
+EXAMPLE bitwise
+char c = 'A' ^ 42;  // Chiffrement avec 42
+char m = c ^ 42;    // Déchiffrement avec 42 (retrouve 'A')
+*/
 void decrypt(nb) {
     int i = 0;
-    char* hash = "Q}|u`sfg~sf{}|a";
+    char* hash = "Q}|u`sfg~sf{}|a"; // version chiffre de congratuliations
     int hashLength = 15;
     char* buff1 = NULL;
 
     hashLength = strlen(hash);
 
     do {
-        hash[i] = hash[i] ^ nb;
+        hash[i] = hash[i] ^ nb; // chaque caractere est modifie en fonction de la valeur de nb
         i++
     } while (i < hashLength)
 
-    if (strncmp(hash, "Congratulations!", 17) != 0) {
+    if (strncmp(hash, "Congratulations", 17) != 0) {
         puts("\nInvalid Password");
     } else {
         system("/bin/sh");
@@ -25,6 +33,10 @@ void decrypt(nb) {
     return;
 }
 
+
+// Calcule la difference entre password et 322424845
+// Si cette diff est > a 21 decrypt est appele avec un nb aleatoire et on ne veut pas ca
+// Si diff est entre 0 et 21, decrypt est appele avec diff en argument
 void test(int param_1, int param_2) {
     int diff = param_2 - param_1;
 

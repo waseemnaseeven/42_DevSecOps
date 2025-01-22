@@ -50,6 +50,22 @@ or after the for loop :
 25 - 0x354a35686e475873 does not have access!
 26 - 0x48336750664b394d does not have access!
 [...]
+```
+
+- This is a simplified version ; Here is the explanation : 
+    - We have a lot of `0x7fffffffe` it means that we are in the stack of the program
+    - `0x400730`, `0x400814` et `0x400ac0`are on the typical field of the binary program, probably .text
+    - `0x2a2a2a2a2a2a2a2a` valeur de remplissages, magical numbers
+    - and there is `0x756e505234376848` which are non-values ASCII in memories
+
+- Values are written upside-down because of endianness : l'architecture utilise le little-endian, ce qui signifie que les octets les moins significatifs sont stockés en premier en mémoire. 
+
+- So now : 
+    - `Découper la valeur en blocs de 2 caractères (un octet = 2 caractères hexadécimaux).`
+    - `Inverser ces blocs.`
+    - `Convertir le tout en ASCII.`
+
+```bash
 level02@OverRide:~$ python -c 'print "756e505234376848".decode("hex")[::-1]'
 Hh74RPnu
 level02@OverRide:~$ python -c 'print "45414a3561733951".decode("hex")[::-1]'

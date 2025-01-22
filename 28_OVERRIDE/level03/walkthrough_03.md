@@ -1,6 +1,6 @@
 # Level03 Walkthrough
 
-- Vulnerability here is a about the test function and the success if calls to decrypt function.
+- Vulnerability here is a about the `test` function and the success if calls to decrypt function.
 
 - main():
     - seeds the random number generator used by the function rand
@@ -180,7 +180,6 @@ $ whoami
 level04
 $ cat /home/users/level04/.pass
 kgv3tkEb9h2mLkRsPkXRfc2mHbjMxQzvb2FrgKkf
-
 ```
 
 ## Moving to level04

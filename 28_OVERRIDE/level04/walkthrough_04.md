@@ -13,7 +13,6 @@
 
 - Its a fork() challenge, here we read user string input thanks to `gets()` function but there is no control on the size. So we can overflow the buffer, so overwrite the pointer (eip register) with a particular libc function address directly.
 
-
 - We will need to set on gdb  `set follow-fork-mode child`. 
 ```bash
 (gdb) set follow-fork-mode child
@@ -55,9 +54,7 @@ level05
 cat /home/users/level05/.pass
 3v8QLcN5SAhPaZZfEasfmXdwyR59ktDEMAwHF3aN
 ```
-
 ---
-
 
 ## Moving to level05
 

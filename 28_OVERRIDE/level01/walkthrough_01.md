@@ -37,7 +37,7 @@ nope, incorrect password...
 
 Program received signal SIGSEGV, Segmentation fault.
 0x37634136 in ?? ()
-(gdb) info register eip
+(gdb) info register eip <---- cuz its char*
 eip            0x37634136       0x37634136 <------> offset 80
 ```
 
