@@ -4,17 +4,25 @@
 
 1. Logs systeme 
 
-- *Description*: Logs sys d'exploitation enregistrant les evenements du systeme (demarrage, arrets, errors...) et healthcheck des services, permet de verifier le fonctionnement correct des processus et du materiel. 
+- *Description*: Logs sys d'exploitation enregistrant les evenements du systeme (demarrage, arrets, errors...) et healthcheck des services, permet de verifier le fonctionnement correct des processus et du materiel mais egalement la securite, regroupant les evenements d'authentification, d'acces, et les alertes d'intrusion ou de violation de politique... tentative d'acces non autorise, comportements suspects.
 
 - *Exemples concrets*: 
     - syslog indiquant l'execution d'une tache planifie
-    - message kernel 
-    - message sur temperature CPU
+    - log kernel 
+    - log sur temperature CPU
+    - log d'authentification sur un serveur linux signant un echec de connexion SSH
+    - log parefeu
+    - log anti virus
 
 - *Outils/Services generant ce type de logs*: 
     - syslog
     - journald
     - daemon
+    - SSH
+    - Active Directory
+    - iptables
+    - UFW ou autre pare-feu
+    - IDS/IPS
 
 2. Logs de Web Server
 
@@ -57,22 +65,6 @@
 - *Outils/Services generant ce type de logs*:
     - Postgres
     - SQL : log errur, log request, log slow request
-
-5. Log de securite (a regrouper dans systeme ??)
-
-- *Description*: log relatif a la securite, regroupant les evenements d'authentification, d'acces, et les alertes d'intrusion ou de violation de politique... tentative d'acces non autorise, comportements suspects
-
-- *Exemples concrets*: 
-    - log d'authentification sur un serveur linux signant un echec de connexion SSH
-    - log parefeu
-    - log anti virus
-
-- *Outils/Services generant ce type de logs*:
-    - SSH
-    - Active Directory
-    - iptables
-    - UFW ou autre pare-feu
-    - IDS/IPS
 
 6. Log de reseau
 

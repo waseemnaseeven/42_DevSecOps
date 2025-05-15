@@ -1,0 +1,152 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for vm_config
+---
+# tasks/main.yml
+
+- name: Mettre à jour la liste des paquets APT
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Mettre à niveau tous les paquets installés
+  apt:
+    upgrade: dist
+
+- name: Installer les paquets de base
+  apt:
+    name:
+      - git
+      - gnupg
+      - vim
+      - make
+      - wget
+      - curl
+      - openssh-server
+      - ufw
+      - net-tools
+      - ansible
+    state: present
+
+- name: Ajouter le dépôt Ansible PPA
+  apt_repository:
+    repo: ppa:ansible/ansible
+    update_cache: yes
+
+- name: Installer Ansible depuis le PPA
+  apt:
+    name: ansible
+    state: present
+
+- name: Télécharger le script d'installation de Docker
+  get_url:
+    url: https://get.docker.com
+    dest: /tmp/get-docker.sh
+    mode: '0755'
+
+- name: Installer Docker via le script officiel
+  command: sh /tmp/get-docker.sh
+  args:
+    creates: /usr/bin/docker
+
+- name: Donner les droits 666 sur le socket Docker
+  file:
+    path: /var/run/docker.sock
+    mode: '0666'
+
+- name: Supprimer le script d'installation Docker
+  file:
+    path: /tmp/get-docker.sh
+    state: absent
+
+- name: Récupérer la version stable de kubectl
+  shell: curl -L -s https://dl.k8s.io/release/stable.txt
+  register: kubectl_version
+
+- name: Télécharger kubectl
+  get_url:
+    url: "https://dl.k8s.io/release/{{ kubectl_version.stdout }}/bin/linux/amd64/kubectl"
+    dest: /usr/local/bin/kubectl
+    mode: '0755'
+
+- name: Télécharger la somme de contrôle SHA256 de kubectl
+  get_url:
+    url: "https://dl.k8s.io/release/{{ kubectl_version.stdout }}/bin/linux/amd64/kubectl.sha256"
+    dest: /tmp/kubectl.sha256
+
+- name: Vérifier l’intégrité de kubectl
+  shell: |
+    echo "$(cat /tmp/kubectl.sha256)  /usr/local/bin/kubectl" | sha256sum --check
+  args:
+    warn: false
+  register: kubectl_check
+  failed_when: "'OK' not in kubectl_check.stdout"
+
+- name: Nettoyer le fichier de somme de contrôle kubectl
+  file:
+    path: /tmp/kubectl.sha256
+    state: absent
+
+- name: Ajouter le dépôt HashiCorp pour Terraform et OpenTofu
+  apt_key:
+    url: https://apt.releases.hashicorp.com/gpg
+    state: present
+
+- name: Configurer le dépôt HashiCorp
+  apt_repository:
+    repo: "deb [signed-by=/etc/apt/trusted.gpg.d/hashicorp.asc] https://apt.releases.hashicorp.com {{ ansible_distribution_release | lower }} main"
+    state: present
+    filename: hashicorp
+    update_cache: yes
+
+- name: Installer Terraform
+  apt:
+    name: terraform
+    state: present
+
+- name: (Optionnel) Installer OpenTofu
+  apt:
+    name: opentofu
+    state: present
+
+- name: Télécharger Kind
+  get_url:
+    url: https://github.com/kubernetes-sigs/kind/releases/latest/download/kind-linux-amd64
+    dest: /usr/local/bin/kind
+    mode: '0755'
+
+- name: Ajouter la clé GPG pour Kubernetes
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: Ajouter le dépôt Kubernetes
+  apt_repository:
+    repo: "deb https://apt.kubernetes.io/ kubernetes-xenial main"
+    filename: kubernetes
+    update_cache: yes
+
+- name: Installer kubeadm, kubelet et kubectl via APT
+  apt:
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: present
+    update_cache: yes
+
+- name: Télécharger le script d’installation de Helm
+  get_url:
+    url: https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+    dest: /tmp/get_helm.sh
+    mode: '0755'
+
+- name: Installer Helm
+  command: /tmp/get_helm.sh
+  args:
+    creates: /usr/local/bin/helm
+
+- name: Supprimer le script d’installation de Helm
+  file:
+    path: /tmp/get_helm.sh
+    state: absent
