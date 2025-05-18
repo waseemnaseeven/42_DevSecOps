@@ -95,3 +95,35 @@
 - *Outils/Services generant ce type de logs*: 
     - Docker/containerd logs docker daemon, output conteneur
     - Kubernetes avec cluster events, log composants maitre comme api-server, scheduler, kubelet. Par defaut Kubernetes stocke les logs de conteneurs sur chaque noeud (/var/log/containers/*) et events cluster via `kubectl get events` des outils comme `FileBeat`/`Fluentd` peuvent collecter et centraliser ces logs vers ELK.
+
+## ELK
+
+### Elastic Search 
+
+- Base de donnees nosql: facilite systeme distribue a tres large echelle
+- forte volumetries
+- specialiste recherche plain text
+- index/sharding/replicas de tous les mots des documents
+- moteur Lucene
+- API REST json
+- haute dispo
+- communication via port 9300
+- noeud est un serveur ayant un service elastic, differents type: masterr, data, client
+- index est une instance de database
+- shards est un decoupage logique d'un index 
+- replicas sont les replicas de shards d'un index : redondance, mais aussi performance
+
+### Logstash
+
+- ETL (Extract Transform Load)
+- Input/Filter/Output
+- nbr plugin d'entree (nginx, postgres...)
+- filtres et grok
+- injection dans elasticsearch
+
+### Kibana
+
+- Visualisation et requetes
+- Specialiste des donnees ElasticSearch
+- dashboard
+- concurrence grafana

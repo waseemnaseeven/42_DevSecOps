@@ -1,0 +1,14 @@
+clusterName: elasticsearch
+replicas: 1
+image:
+  tag: 8.6.3
+persistence:
+  enabled: true
+  size: 10Gi
+resources:
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 1Gi

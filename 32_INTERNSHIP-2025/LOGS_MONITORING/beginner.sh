@@ -79,3 +79,4 @@ https://betterstack.com/community/guides/scaling-docker/kind/
 https://www.blueshoe.io/blog/minikube-vs-k3d-vs-kind-vs-getdeck-beiboot/
 https://www.linuxactionshow.com/kind-vs-minikube/
 https://shashanksrivastava.medium.com/install-configure-argo-cd-on-kind-kubernetes-cluster-f0fee69e5ac4
+https://github.com/deviantony/docker-elk
