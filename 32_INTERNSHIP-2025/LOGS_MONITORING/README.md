@@ -16,7 +16,7 @@
 
 - *Outils/Services generant ce type de logs*: 
     - syslog
-    - journald
+    - journald (centralise log kernel, sshd, sudo, avec leur metadata)
     - daemon
     - SSH
     - Active Directory
@@ -96,9 +96,48 @@
     - Docker/containerd logs docker daemon, output conteneur
     - Kubernetes avec cluster events, log composants maitre comme api-server, scheduler, kubelet. Par defaut Kubernetes stocke les logs de conteneurs sur chaque noeud (/var/log/containers/*) et events cluster via `kubectl get events` des outils comme `FileBeat`/`Fluentd` peuvent collecter et centraliser ces logs vers ELK.
 
-## ELK
+## Stack monitoring de logs 
 
-### Elastic Search 
+### Choix de collecteur de logs 
+
+- Logstash
+    - Avantages:
+        - ETL (Extract Transform Load)
+        - Input/Filter/Output
+        - nbr plugin d'entree (nginx, postgres...)
+        - filtres et grok
+        - injection dans elasticsearch
+    - Inconvenients:
+        - grosse consommation en ressources
+        - temps de demarrage et arrets + long
+
+- Fluentbit:
+    - Avantages: 
+        - leger en memoire, quelques mega octets
+        - ecrite en C
+        - integration native k8s
+        - supporte traitement en flux (SQL) et la plupart des filtres (grok basique, regex, multiline)
+        - projet open-source tres actif et communaute DevOps large, adopte par de grands cloud providers (AWS pour son agent CloudWatch Logs dans EKS, GCP...)
+    - Inconvenients:
+        - legerement moins extensible que fluentd/logstash
+        - moins de plugins disponible (moins de 100 vs plus de 100 pour fluentd)
+        - pas de filtrage grok aussi puissant que logstash
+        - en sortie, il ne tire pas parti des pipelines ingest d'elastic, oblige de faire des call HTTP
+
+- Filebeat:
+    - Avantages:
+        - leger, specialement optimise pour fonctionner en agent sur tous types de serveurs
+        - ecrite en Go
+        - module system de filebeat va lire journald ou /var/log/auth.log et /var/log/syslog 
+        - fourni pipeline Elasticsearch pour parser les msgs SSH, sudo, kern.log 
+        - Integration native avec elastic search 
+    - Inconvenients:
+        - moins puissant en transformation locale que fluentd/logstash 
+        - possibilites de parsing limitees
+        - concu pour elastic search only a priori (?)
+
+
+### Data base : Elastic Search
 
 - Base de donnees nosql: facilite systeme distribue a tres large echelle
 - forte volumetries
@@ -112,14 +151,7 @@
 - index est une instance de database
 - shards est un decoupage logique d'un index 
 - replicas sont les replicas de shards d'un index : redondance, mais aussi performance
-
-### Logstash
-
-- ETL (Extract Transform Load)
-- Input/Filter/Output
-- nbr plugin d'entree (nginx, postgres...)
-- filtres et grok
-- injection dans elasticsearch
+- capacite a ecrire des TAGS pour differencier
 
 ### Kibana
 
