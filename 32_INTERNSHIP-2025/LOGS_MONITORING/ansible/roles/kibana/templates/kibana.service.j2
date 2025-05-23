@@ -1,0 +1,17 @@
+[Unit]
+Description=Kibana
+Documentation=https://www.elastic.co
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User={{ kib_user }}
+Group={{ kib_group }}
+ExecStart={{ kib_install_dir }}/current/bin/kibana
+Type=simple
+Restart=on-failure
+LimitNOFILE=65536
+LimitNPROC=4096
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,9 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for kibana
+kib_version: "9.0.0"
+kib_archive_url: "https://artifacts.elastic.co/downloads/kibana/kibana-{{ kib_version }}-linux-x86_64.tar.gz"
+kib_archive_checksum_url: "https://artifacts.elastic.co/downloads/kibana/kibana-{{ kib_version }}-linux-x86_64.tar.gz.sha512"
+kib_install_dir: "/etc/kibana"
+kib_user: kibana
+kib_group: kibana

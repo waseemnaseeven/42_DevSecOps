@@ -1,0 +1,17 @@
+[Unit]
+Description=Elasticsearch
+Documentation=https://www.elastic.co
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User={{ es_user }}
+Group={{ es_group }}
+Type=simple
+ExecStart={{ es_install_dir }}/current/bin/elasticsearch
+Restart=on-failure
+LimitNOFILE=65536
+LimitNPROC=4096
+
+[Install]
+WantedBy=multi-user.target

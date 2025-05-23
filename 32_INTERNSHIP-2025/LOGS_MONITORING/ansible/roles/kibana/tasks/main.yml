@@ -1,0 +1,88 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for kibana
+- name: Check if Kibana is already installed
+  ansible.builtin.stat:
+    path: "{{ kib_install_dir }}/current/bin/kibana"
+  register: kib_installed
+
+- name: Create Kibana group
+  ansible.builtin.group:
+    name: "{{ kib_group }}"
+    state: present
+
+- name: Create Kibana user
+  ansible.builtin.user:
+    name: "{{ kib_user }}"
+    group: "{{ kib_group }}"
+    system: yes
+    create_home: no
+
+- block:
+    - name: Create Kibana installation directory
+      ansible.builtin.file:
+        path: "{{ kib_install_dir }}"
+        state: directory
+        owner: "{{ kib_user }}"
+        group: "{{ kib_group }}"
+        mode: '0755'
+
+    - name: Download Kibana archive
+      ansible.builtin.get_url:
+        url: "{{ kib_archive_url }}"
+        dest: "/tmp/kibana-{{ kib_version }}.tar.gz"
+        # checksum: "sha512:{{ lookup('url', kib_archive_checksum_url) }}"
+        mode: '0644'
+
+    - name: Extract Kibana archive
+      ansible.builtin.unarchive:
+        src: "/tmp/kibana-{{ kib_version }}.tar.gz"
+        dest: "{{ kib_install_dir }}"
+        remote_src: yes
+        owner: "{{ kib_user }}"
+        group: "{{ kib_group }}"
+
+    - name: Symlink current Kibana
+      ansible.builtin.file:
+        src: "{{ kib_install_dir }}/kibana-{{ kib_version }}"
+        dest: "{{ kib_install_dir }}/current"
+        state: link
+
+    - name: Create data and logs directories for Kibana
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ kib_user }}"
+        group: "{{ kib_group }}"
+        mode: '0755'
+      loop:
+        - "/var/lib/kibana"
+        - "/var/log/kibana"
+
+  when: not kib_installed.stat.exists
+
+- name: Copy kibana.yml template
+  ansible.builtin.template:
+    src: "kibana.yml.j2"
+    dest: "{{ kib_install_dir }}/current/config/kibana.yml"
+    owner: "{{ kib_user }}"
+    group: "{{ kib_group }}"
+    mode: '0644'
+  notify: restart kibana
+
+- name: Deploy systemd service for Kibana
+  ansible.builtin.template:
+    src: "kibana.service.j2"
+    dest: /etc/systemd/system/kibana.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - restart kibana
+
+- name: Activer et démarrer Kibana
+  ansible.builtin.systemd_service:
+    name: kibana
+    enabled: yes
+    daemon_reload: yes
+    state: started

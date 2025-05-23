@@ -1,0 +1,108 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for elasticsearch
+- name: Check if Elasticsearch is already installed
+  ansible.builtin.stat:
+    path: "{{ es_install_dir }}/current/bin/elasticsearch"
+  register: es_installed
+
+- name: Install pre apt
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - gnupg
+    state: present
+    update_cache: yes
+    
+- name: Create Elasticsearch group
+  ansible.builtin.group:
+    name: "{{ es_group }}"
+    state: present
+
+- name: Create Elasticsearch user
+  ansible.builtin.user:
+    name: "{{ es_user }}"
+    group: "{{ es_group }}"
+    system: yes
+    create_home: no
+
+- block:
+    - name: Create installation directory
+      ansible.builtin.file:
+        path: "{{ es_install_dir }}"
+        state: directory
+        owner: "{{ es_user }}"
+        group: "{{ es_group }}"
+        mode: '0755'
+
+    - name: Download Elasticsearch archive
+      ansible.builtin.get_url:
+        url: "{{ es_archive_url }}"
+        dest: "/tmp/elasticsearch-{{ es_version }}.tar.gz"
+        # checksum: "sha512:{{ lookup('url', es_archive_checksum_url) }}"
+        mode: '0644'
+
+    - name: Extract Elasticsearch archive
+      ansible.builtin.unarchive:
+        src: "/tmp/elasticsearch-{{ es_version }}.tar.gz"
+        dest: "{{ es_install_dir }}"
+        remote_src: yes
+        owner: "{{ es_user }}"
+        group: "{{ es_group }}"
+
+    - name: Symlink current Elasticsearch
+      ansible.builtin.file:
+        src: "{{ es_install_dir }}/elasticsearch-{{ es_version }}"
+        dest: "{{ es_install_dir }}/current"
+        state: link
+
+    - name: Create data and logs directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ es_user }}"
+        group: "{{ es_group }}"
+        mode: '0755'
+      loop:
+        - "/var/lib/elasticsearch"
+        - "/var/log/elasticsearch"
+
+  when: not es_installed.stat.exists
+
+- name: Copy elasticsearch.yml template
+  ansible.builtin.template:
+    src: "elasticsearch.yml.j2"
+    dest: "{{ es_install_dir }}/current/config/elasticsearch.yml"
+    owner: "{{ es_user }}"
+    group: "{{ es_group }}"
+    mode: '0644'
+  notify: restart elasticsearch
+
+- name: Copy jvm.options template
+  ansible.builtin.template:
+    src: "jvm.options.j2"
+    dest: "{{ es_install_dir }}/current/config/jvm.options"
+    owner: "{{ es_user }}"
+    group: "{{ es_group }}"
+    mode: '0644'
+  notify: restart elasticsearch
+
+- name: Deploy systemd service for Elasticsearch
+  ansible.builtin.template:
+    src: "elasticsearch.service.j2"
+    dest: /etc/systemd/system/elasticsearch.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - restart elasticsearch
+  
+- name: Activer et démarrer Elasticsearch
+  ansible.builtin.systemd_service:
+    name: elasticsearch
+    enabled: yes
+    daemon_reload: yes
+    state: started
+  notify:
+    - restart elasticsearch
