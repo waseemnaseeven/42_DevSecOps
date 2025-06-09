@@ -1,0 +1,4 @@
+collections:
+  - name: "vgn.base"
+    source: git+git@git.adm.vgn:devops/ansible-collection-vgn.base.git
+    type: git

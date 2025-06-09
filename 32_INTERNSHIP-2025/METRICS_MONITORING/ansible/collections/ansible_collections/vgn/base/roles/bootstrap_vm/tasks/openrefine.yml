@@ -1,0 +1,76 @@
+---
+- name: Register openrefine version
+  ansible.builtin.lineinfile:
+    path: /var/versions
+    regexp: "^openrefine="
+    create: true
+    line: "openrefine={{ openrefine_version }}"
+  register: binary_version
+
+- name: Managing openrefine
+  when: binary_version.changed or (openrefine_force_install | default(false))
+  block:
+    - name: Remove OpenRefine
+      ansible.builtin.file:
+        path: /opt/openrefine
+        state: absent
+
+    - name: Download openrefine
+      ansible.builtin.unarchive:
+        remote_src: true
+        src: "{{ openrefine_url }}"
+        dest: "/opt"
+
+    - name: Copy openrefine
+      ansible.builtin.copy:
+        remote_src: true
+        src: /opt/openrefine-{{ openrefine_version }}/
+        dest: /opt/openrefine/
+
+    - name: Copy openrefine icon
+      ansible.builtin.copy:
+        src: openrefine.svg
+        dest: /opt/openrefine/openrefine.svg
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Remove old openrefine
+      ansible.builtin.file:
+        path: /opt/openrefine-{{ openrefine_version }}
+        state: absent
+  rescue:
+    - name: "Registering openrefine failure"
+      ansible.builtin.lineinfile:
+        path: /var/versions
+        regexp: "^openrefine="
+        line: "openrefine=failure"
+
+# - name: Make openrefine executable
+#   ansible.builtin.file:
+#     path: /opt/openrefine
+#     mode: "0755"
+#     owner: root
+#     group: root
+#     recurse: true
+
+- name: Add Desktop shortcut
+  ansible.builtin.copy:
+    content: |
+      [Desktop Entry]
+      Name=OpenRefine
+      Version={{ openrefine_version }}
+      Comment=OpenRefine is a powerful free, open source tool for working with messy data.
+      GenericName=OpenRefine
+      Exec=/opt/openrefine/refine
+      Icon=/opt/openrefine/openrefine.svg
+      Encoding=UTF-8
+      Terminal=true
+      Type=Application
+      StartupNotify=false
+      Categories=Development;Office;
+      Keywords=openrefine;
+    dest: /usr/share/applications/openrefine.desktop
+    mode: "0644"
+    owner: root
+    group: root

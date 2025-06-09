@@ -1,0 +1,24 @@
+#!/bin/bash
+function stoprdp {
+    echo "Arret de la connexion..."
+    gsettings set org.gnome.desktop.remote-desktop.rdp view-only true
+    gsettings set org.gnome.desktop.remote-desktop.rdp enable false
+    secret-tool clear xdg:schema org.gnome.RemoteDesktop.RdpCredentials
+    echo "Arret effectue."
+}
+trap stoprdp EXIT
+
+secret-tool clear xdg:schema org.gnome.RemoteDesktop.RdpCredentials
+password=$(python3 -c 'import random; print("".join(random.choices(r"abc-./#@!_defghijkmnpqrstuxyzABCDEFGHJKLMNPQRSTUY23456789", k=10)))')
+usersuffix=$(python3 -c 'import random; print("".join(random.choices(r"23456789", k=3)))')
+echo -n "{\"password\": \"${password}\", \"username\": \"${USER}-${usersuffix}\"}" | secret-tool store --label='GNOME Remote Desktop RDP credentials' xdg:schema org.gnome.RemoteDesktop.RdpCredentials
+gsettings set org.gnome.desktop.remote-desktop.rdp view-only {{ pc_remote_screen_view_only }}
+gsettings set org.gnome.desktop.remote-desktop.rdp enable true
+{% if ansible_distribution_release == "noble" %}
+gsettings set org.gnome.desktop.remote-desktop.rdp port 3389
+{% endif %}
+
+echo "User a communiquer : ${USER}-${usersuffix}"
+echo "Mdp a communiquer : ${password}"
+read -p "Appuyer sur entree pour terminer la connexion."
+stoprdp

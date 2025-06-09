@@ -1,0 +1,118 @@
+---
+- name: Install work packages
+  ansible.builtin.apt:
+    name: "{{ vm_packages }}"
+    state: present
+
+- name: Install work snaps
+  community.general.snap:
+    name: "{{ vm_snaps }}"
+
+- name: Copy HackNerd fonts
+  ansible.builtin.copy:
+    src: "HackNerd"
+    dest: /usr/share/fonts/truetype/
+    mode: 0755
+
+- name: Copy DejaVuSansMono Nerd Font
+  ansible.builtin.copy:
+    src: "DejaVuSansMono Nerd Font"
+    dest: /usr/share/fonts/truetype/
+    mode: 0755
+
+- name: Deploy disk_password scripts
+  ansible.builtin.template:
+    src: disks/disk_{{ item.0 }}.j2
+    dest: /usr/local/sbin/disk_{{ item.0 }}_{{ item.1.name }}
+    owner: root
+    group: root
+    mode: "0700"
+    validate: /usr/bin/shellcheck %s
+  vars:
+    disk_name: "{{ item.1.name }}"
+    disk_uuid: "{{ item.1.uuid }}"
+  loop: "{{ (['password_change', 'password_test', 'mount', 'unmount'] | product(bootstrap_vm_disks)) }}"
+  loop_control:
+    label: "{{ item.0 }} - {{ item.1.name }}"
+  when: item.1.state | default("present") != "absent"
+
+- name: Remove absent disks scripts
+  ansible.builtin.file:
+    path: /usr/local/sbin/disk_{{ item.0 }}_{{ item.1.name }}
+    state: absent
+  when: item.1.state | default("present") == "absent"
+  loop: "{{ (['password_change', 'password_test', 'mount', 'unmount'] | product(bootstrap_vm_disks)) }}"
+  loop_control:
+    label: "{{ item.0 }} - {{ item.1.name }}"
+
+- name: Deploy dconf
+  ansible.builtin.include_tasks: "dconf.yml"
+- name: Install Brave
+  include_tasks: brave.yml
+- name: Install exiftool
+  include_tasks: exiftool.yml
+- name: Install openrefine
+  include_tasks: openrefine.yml
+- name: Install filebrowser
+  ansible.builtin.include_tasks: "filebrowser.yml"
+# - name: Disable resolved
+#   ansible.builtin.systemd:
+#     name: systemd-resolved
+#     state: stopped
+#     enabled: false
+# - name: Set DNS
+#   ansible.builtin.copy:
+#     content: |
+#       nameserver {{ dns_server }}
+#       options edns0 trust-ad
+#       search .
+#     dest: /etc/resolv.conf
+#     owner: root
+#     group: root
+#     mode: "0644"
+
+- name: Ensure initial setup is disabled
+  ansible.builtin.lineinfile:
+    path: /etc/gdm3/custom.conf
+    insertafter: '\[daemon\]'
+    line: "InitialSetupEnable=False"
+
+- name: Manage Wayland
+  ansible.builtin.lineinfile:
+    path: /etc/gdm3/custom.conf
+    regexp: ^#?WaylandEnable=
+    insertafter: '\[daemon\]'
+    line: "{% if bootstrap_enable_wayland %}#{% endif %}WaylandEnable=false"
+
+- name: Remove legacy split tunneling
+  ansible.builtin.cron:
+    name: "ip route add {{ item.to }} via {{ item.via }}"
+    special_time: reboot
+    user: root
+    cron_file: ansible_route_{{ item.to | replace('.','-') | replace('/','--') }}
+    state: absent
+    job: "while ! nmcli -t; do sleep 1; done; ip route add {{ item.to }} via {{ item.via }}"
+  loop: "{{ vpn_splittunnels }}"
+
+- name: Split tunneling using netplan
+  ansible.builtin.template:
+    src: 50-cloud-init.yaml.j2
+    dest: /etc/netplan/50-cloud-init.yaml
+    mode: "0600"
+    owner: root
+    group: root
+  register: _bootstrap_vm_split_tunneling_netplan
+  when: vpn_splittunnels | length > 0
+
+# - name: Reload netplan
+#   ansible.builtin.shell:
+#     cmd: 'netplan apply'
+#   when: _bootstrap_vm_split_tunneling_netplan.changed
+
+- name: Install python via deadsnakes
+  ansible.builtin.include_tasks: "python.yml"
+
+- name: Install protonvpn
+  include_tasks: protonvpn.yml
+- name: Install mozilla
+  include_tasks: mozilla.yml

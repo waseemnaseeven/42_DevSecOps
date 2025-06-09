@@ -1,0 +1,65 @@
+---
+pc_packages: []
+pc_snaps: []
+pc_flatpak_remotes: {}
+pc_flatpak_packages: {}
+node_modules: []
+wallpaper_src_file: wallpaper.jpg
+wallpaper_path_file: /usr/local/share/backgrounds/wallpaper.jpg
+wallpaper_path_directory: /usr/local/share/backgrounds
+banner_msg: "Restricted"
+screensaver_idle_delay: 300
+screensaver_lock_enabled: true
+go_version: 1.21.4 # https://go.dev/dl/
+
+bootstrap_python_deadsnakes_packages: []
+
+virtualbox_version: "7.0.14-dfsg-4build5"
+
+firefox_disableinvalidcertificatebypass: "false"
+firefox_disablesafebrowsingbypass: "false"
+firefox_crts: ""
+firefox_homepage: "https://www.google.com"
+# Old way to manage bookmarks, creates a folder in the toolbar, supports bookmarklets
+firefox_bookmarks: []
+# New way to manage bookmarks, appear in the folder managed bookmarks. Does not support bookmarklets
+firefox_managed_bookmarks: ""
+firefox_extensions: ""
+
+bootstrap_pc_aws_enabled: false
+bootstrap_pc_server_to_desktop: false
+bootstrap_pc_go_enabled: false
+bootstrap_pc_terminator_enabled: false
+bootstrap_pc_virtualbox_enabled: false
+bootstrap_pc_qemu_enabled: false
+bootstrap_pc_qgis_enabled: false
+bootstrap_pc_zotero_enabled: false
+bootstrap_pc_yed_enabled: false
+bootstrap_pc_obs_enabled: false
+bootstrap_pc_flameshot_enabled: false
+
+pc_remote_screen_view_only: "false"
+bootstrap_enable_wayland: true
+
+keepassxc_distribution_release: "{{ ansible_distribution_release }}"
+obs_distribution_release: "{{ ansible_distribution_release }}"
+terminator_distribution_release: "{{ ansible_distribution_release }}"
+googleearth_version: "7.3.6" # https://support.google.com/earth/answer/40901?hl=en#zippy=%2Cearth-version
+google_earth_deb: "https://dl.google.com/dl/earth/client/current/google-earth-pro-stable_current_amd64.deb"
+bootstrap_pc_googleearth_enabled: false
+pc_nfs_mounts: []
+gephi_version: "0.10.1"
+gephi_url: "https://github.com/gephi/gephi/releases/download/v{{ gephi_version }}/gephi-{{ gephi_version }}-linux-x64.tar.gz"
+bootstrap_pc_gephi_enabled: false
+
+bootstrap_pc_lock_wallpaper: true
+
+zotero_version: 6.0.35
+zotero_url: https://download.zotero.org/client/release/{{ zotero_version }}/Zotero-{{ zotero_version }}_linux-x86_64.tar.bz2
+
+yed_version: 3.23.2
+yed_url: https://www.yworks.com/resources/yed/demo/yEd-{{ yed_version }}.zip
+
+# https://raw.githubusercontent.com/aws/aws-cli/v2/CHANGELOG.rst
+aws_version: "2.24.11"
+aws_url: "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-{{ aws_version }}.zip"

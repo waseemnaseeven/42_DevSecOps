@@ -1,0 +1,973 @@
+---
+# .. vim: foldmarker=[[[,]]]:foldmethod=marker
+#
+# ipr-cnrs.nftables default variables
+# ===================================
+
+nft_manage_sysctl_ip_forward: true
+
+# Packages and installation [[[
+# -----------------------------
+
+# .. envvar:: nft_enabled [[[
+#
+# Enable or disable support for Nftables on a given host. Disabling this
+# option does not remove existing installation and configuration.
+#
+nft_enabled:
+  true
+  # ]]]
+# .. envvar:: nft_pkg_state [[[
+#
+# What is the desired state for Nftables packages ? Possible options :
+#
+# ``present``
+#   Default. Nftables packages will be installed.
+#
+# ``absent``
+#   Ensure to remove Nftables related packages.
+nft_pkg_state:
+  "present"
+  # ]]]
+# .. envvar:: nft_update_repositories [[[
+#
+# Enable or disable updating of repositories on a given host. Disabling this
+# option enables using this role on hosts with limited outgoing connections.
+#
+nft_update_repositories:
+  true
+  # ]]]
+# .. envvar:: nft_old_pkg_list [[[
+#
+# List of old Iptables packages to remove to avoid duplicate firewall.
+#
+nft_old_pkg_list:
+  - "iptables"
+  - "libiptc0"
+    # ]]]
+# .. envvar:: nft_old_pkg_state [[[
+#
+# What is the desired state for Iptables packages ? Possible options :
+#
+# ``absent``
+#   Default. Ensure to remove Iptables related packages.
+#
+# ``present``
+#   Iptables packages will be kept.
+nft_old_pkg_state:
+  "absent"
+  # ]]]
+# .. envvar:: nft_old_pkg_manage [[[
+#
+# If the old Iptables packages should be managed ? Possible options :
+#
+# ``true``
+#   Default. Ensure to apply the required state for Iptables related packages.
+#
+# ``false``
+#   Iptables packages will not be touched.
+nft_old_pkg_manage:
+  true
+  # ]]]
+  # ]]]
+# Nftables global rules [[[
+# -------------------------
+
+# .. envvar:: nft_global_default_rules [[[
+#
+# List of global rules (applied on all tables) to configure for all hosts
+# inherited from this role.
+nft_global_default_rules:
+  005 established: "{{ nft_templates.allow_established }}"
+  006 invalid:
+    "{{ nft_templates.drop_invalid_log_no_rst }}"
+    # ]]]
+# .. envvar:: nft_global_rules [[[
+#
+# List of global rules (applied on all tables) to configure for all hosts
+# in the Ansible inventory.
+nft_global_rules:
+  {}
+  # ]]]
+# .. envvar:: nft_merged_groups [[[
+#
+# Enable or disable the ability to merge multiple firewall group variables
+nft_merged_groups:
+  false
+  # ]]]
+# .. envvar:: nft_merged_groups_dir [[[
+#
+# The directory to read the group firewall rules from.
+# Relative to the playbook directory.
+nft_merged_groups_dir:
+  vars/
+  # ]]]
+# .. envvar:: nft_global_group_rules [[[
+#
+# List of global rules (applied on all tables) to configure for hosts in
+# specific Ansible inventory group.
+nft_global_group_rules:
+  {}
+  # ]]]
+# .. envvar:: nft_global_host_rules [[[
+#
+# List of global rules (applied on all tables) to configure for specific hosts
+# in the Ansible inventory.
+nft_global_host_rules:
+  {}
+  # ]]]
+# .. envvar:: nft__custom_content [[[
+#
+# Custom content (tables, include,…) to add in Nftables configuration.
+nft__custom_content:
+  ""
+  # ]]]
+# .. envvar:: nft_custom_includes [[[
+#
+# Custom includes to add into the main Nftables filter configuration.
+nft_custom_includes:
+  ""
+  # ]]]
+# .. envvar:: nft_conf_dir_path [[[
+#
+# Path to the sub directory for Nftables configuration files.
+#
+# Should be an absolut path and this var will be used in all *_path vars.
+nft_conf_dir_path:
+  "/etc/nftables.d"
+  # ]]]
+# .. envvar:: nft_main_conf_path [[[
+#
+# Path to the main configuration file called by the Systemd Nftables service.
+#
+# Should be an absolut path.
+nft_main_conf_path:
+  "/etc/nftables.conf"
+  # ]]]
+# .. envvar:: nft_main_conf_content [[[
+#
+# Template used to provide the previous main configuration file.
+#
+# Must be a relative path from default/ directory of this role or from your
+# Ansible inventory directory.
+nft_main_conf_content:
+  "etc/nftables.conf.j2"
+  # ]]]
+  # ]]]
+# Nftables vars definition [[[
+# ----------------------------
+#
+# These lists allow to define some vars that can be used in nftables rules.
+# See the official Nftables wiki page for more informations and examples :
+# https://wiki.nftables.org/wiki-nftables/index.php/Scripting#Defining_variables
+
+# .. envvar:: nft_define_default [[[
+#
+# List of vars definition to configure for all hosts inherited from this role.
+nft_define_default:
+  broadcast and multicast:
+    desc: "broadcast and multicast"
+    name: badcast_addr
+    value: "{ 255.255.255.255, 224.0.0.1, 224.0.0.251 }"
+  ip6 broadcast and multicast:
+    desc: "broadcast and multicast"
+    name: ip6_badcast_addr
+    value: "{ ff02::16 }"
+  input tcp accepted:
+    name: in_tcp_accept
+    value: "{ ssh }"
+  output tcp accepted:
+    name: out_tcp_accept
+    value: "{ http, https, hkp }"
+  output udp accepted:
+    name: out_udp_accept
+    value:
+      "{ bootps, domain, ntp }"
+      # ]]]
+# .. envvar:: nft_define [[[
+#
+# List of vars definition to configure for all hosts in the Ansible inventory.
+nft_define:
+  {}
+  # ]]]
+# .. envvar:: nft_define_group [[[
+#
+# List of vars definition to configure for hosts in specific
+# Ansible inventory group.
+nft_define_group:
+  {}
+  # ]]]
+# .. envvar:: nft_define_host [[[
+#
+# List of vars definition to configure for specific hosts
+# in the Ansible inventory.
+nft_define_host:
+  {}
+  # ]]]
+# .. envvar:: nft_define_conf_path [[[
+#
+# Path to the defined vars file to include in the main configuration file
+# in order to use the previous defined lists.
+#
+# Should include the '{{ nft_conf_dir_path }}' var or be an absolut path.
+nft_define_conf_path:
+  "{{ nft_conf_dir_path }}/defines.nft"
+  # ]]]
+# .. envvar:: nft_define_conf_content [[[
+#
+# Template used to provide the previous defined vars file.
+#
+# Must be a relative path from default/ directory of this role or from your
+# Ansible inventory directory.
+nft_define_conf_content:
+  "etc/nftables.d/defines.nft.j2"
+  # ]]]
+  # ]]]
+# Nftables sets definition [[[
+# ----------------------------
+#
+# These "set" lists allow to define sets that can be used in Nftables rules.
+# See the official Nftables wiki page for more informations and examples :
+# https://wiki.nftables.org/wiki-nftables/index.php/Sets
+
+# .. envvar:: nft_define_default [[[
+#
+# List of sets to configure for all hosts inherited from this role.
+nft_set_default:
+  blackhole:
+    - type ipv4_addr;
+    - elements = $badcast_addr
+  ip6blackhole:
+    - type ipv6_addr;
+    - elements = $ip6_badcast_addr
+  in_tcp_accept:
+    - type inet_service; flags interval;
+    - elements = $in_tcp_accept
+  out_tcp_accept:
+    - type inet_service; flags interval;
+    - elements = $out_tcp_accept
+  out_udp_accept:
+    - type inet_service; flags interval;
+    - elements = $out_udp_accept
+      # ]]]
+# .. envvar:: nft_set [[[
+#
+# List of sets to configure for all hosts in the Ansible inventory.
+nft_set:
+  {}
+  # ]]]
+# .. envvar:: nft_set_group [[[
+#
+# List of sets to configure for hosts in specific Ansible inventory group.
+nft_set_group:
+  {}
+  # ]]]
+# .. envvar:: nft_set_host [[[
+#
+# List of sets to configure for specific hosts in the Ansible inventory.
+nft_set_host:
+  {}
+  # ]]]
+# .. envvar:: nft_set_conf_path [[[
+#
+# Path to the "sets" file to include in the main configuration file
+# in order to use the previous defined lists.
+#
+# Should include the '{{ nft_conf_dir_path }}' var or be an absolut path.
+nft_set_conf_path:
+  "{{ nft_conf_dir_path }}/sets.nft"
+  # ]]]
+# .. envvar:: nft_set_conf_content [[[
+#
+# Template used to provide the previous "sets" file.
+#
+# Must be a relative path from default/ directory of this role or from your
+# Ansible inventory directory.
+nft_set_conf_content:
+  "etc/nftables.d/sets.nft.j2"
+  # ]]]
+  # ]]]
+# inet filter table rules [[[
+# ---------------------------
+#
+# All these rules will be set up in an inet table in order to filter the
+# input and output traffic.
+
+# .. envvar:: nft_input_default_rules [[[
+#
+# List of input rules to configure for all hosts inherited from this role.
+nft_input_default_rules:
+  000 policy:
+    - type filter hook input priority 0; policy drop;
+  001 global:
+    - jump global
+  002 localhost: "{{ nft_templates.allow_in_localhost }}"
+  010 drop unwanted:
+    - ip daddr @blackhole counter drop
+  011 drop unwanted ipv6:
+    - ip6 daddr @ip6blackhole counter drop
+  015 ipv4 deprecated: "{{ nft_templates.ip_drop_deprecated }}"
+  016 ipv6 deprecated: "{{ nft_templates.ip6_drop_deprecated }}"
+  900 log:
+    - 'counter log prefix "{{ nft_log_prefix }}_IN-1-D " group 2'
+      # ]]]
+# .. envvar:: nft_input_rules [[[
+#
+# List of input rules to configure for all hosts in the Ansible inventory.
+nft_input_rules:
+  {}
+  # ]]]
+# .. envvar:: nft_input_group_rules [[[
+#
+# List of input rules to configure for hosts in specific Ansible inventory group.
+nft_input_group_rules:
+  {}
+  # ]]]
+# .. envvar:: nft_input_host_rules [[[
+#
+# List of input rules to configure for specific hosts in the Ansible inventory.
+nft_input_host_rules:
+  {}
+  # ]]]
+# .. envvar:: nft_input_conf_path [[[
+#
+# Path to the input rules file for the filter table to include in the main
+# configuration file in order to use the previous defined lists.
+#
+# Should include the '{{ nft_conf_dir_path }}' var or be an absolut path.
+nft_input_conf_path:
+  "{{ nft_conf_dir_path }}/filter-input.nft"
+  # ]]]
+# .. envvar:: nft_input_conf_content [[[
+#
+# Template used to provide the previous input rules file.
+#
+# Must be a relative path from default/ directory of this role or from your
+# Ansible inventory directory.
+nft_input_conf_content:
+  "etc/nftables.d/filter-input.nft.j2"
+  # ]]]
+
+# .. envvar:: nft_output_default_rules [[[
+#
+# List of output rules to configure for all hosts inherited from this role.
+nft_output_default_rules:
+  000 policy:
+    - type filter hook output priority 0; policy drop;
+  005 global:
+    - jump global
+  006 localhost: "{{ nft_templates.allow_out_localhost }}"
+  900 log:
+    - 'counter log prefix "{{ nft_log_prefix }}_OUT-1-D " group 2'
+
+      # ]]]
+# .. envvar:: nft_output_rules [[[
+#
+# List of output rules to configure for all hosts in the Ansible inventory.
+nft_output_rules:
+  {}
+  # ]]]
+# .. envvar:: nft_output_group_rules [[[
+#
+# List of output rules to configure for hosts in specific Ansible inventory group.
+nft_output_group_rules:
+  {}
+  # ]]]
+# .. envvar:: nft_output_host_rules [[[
+#
+# List of output rules to configure for specific hosts in the Ansible inventory.
+nft_output_host_rules:
+  {}
+  # ]]]
+# .. envvar:: nft_output_conf_path [[[
+#
+# Path to the output rules file for the filter table to include in the main
+# configuration file in order to use the previous defined lists.
+#
+# Should include the '{{ nft_conf_dir_path }}' var or be an absolut path.
+nft_output_conf_path:
+  "{{ nft_conf_dir_path }}/filter-output.nft"
+  # ]]]
+# .. envvar:: nft_output_conf_content [[[
+#
+# Template used to provide the previous output rules file.
+#
+# Must be a relative path from default/ directory of this role or from your
+# Ansible inventory directory.
+nft_output_conf_content:
+  "etc/nftables.d/filter-output.nft.j2"
+  # ]]]
+# .. envvar:: nft__forward_table_manage [[[
+#
+# If the forward table should be managed ? Possible options are :
+#
+# ``False``
+#   Default. The forward table is not managed and rules will not be added.
+#
+# ``True``
+#   Add the forwarding rules that follow.
+nft__forward_table_manage:
+  false
+  # ]]]
+# .. envvar:: nft_forward_default_rules [[[
+#
+# List of forward rules to configure for all hosts inherited from this role.
+nft_forward_default_rules:
+  000 policy:
+    - type filter hook forward priority 0; policy drop;
+  001 global:
+    - jump global
+  900 log:
+    - 'counter log prefix "{{ nft_log_prefix }}_FWD-1-D " group 2'
+      # ]]]
+# .. envvar:: nft_forward_rules [[[
+#
+# List of forward rules to configure for all hosts in the Ansible inventory.
+nft_forward_rules:
+  {}
+  # ]]]
+# .. envvar:: nft_forward_group_rules [[[
+#
+# List of forward rules to configure for hosts in specific Ansible inventory group.
+nft_forward_group_rules:
+  {}
+  # ]]]
+# .. envvar:: nft_forward_host_rules [[[
+#
+# List of forward rules to configure for specific hosts in the Ansible inventory.
+nft_forward_host_rules:
+  {}
+  # ]]]
+# .. envvar:: nft_forward_conf_path [[[
+#
+# Path to the forward rules file for the filter table to include in the main
+# configuration file in order to use the previous defined lists.
+#
+# Should include the '{{ nft_conf_dir_path }}' var or be an absolut path.
+nft_forward_conf_path:
+  "{{ nft_conf_dir_path }}/filter-forward.nft"
+  # ]]]
+# .. envvar:: nft_forward_conf_content [[[
+#
+# Template used to provide the previous forward rules file.
+#
+# Must be a relative path from default/ directory of this role or from your
+# Ansible inventory directory.
+nft_forward_conf_content:
+  "etc/nftables.d/filter-forward.nft.j2"
+  # ]]]
+  # ]]]
+# ip nat table rules [[[
+# ---------------------------
+#
+# All these rules will be set up in an ip table in order to perform some
+# Network Address Translation (NAT).
+
+# .. envvar:: nft__nat_table_manage [[[
+#
+# If the nat table should be managed ? Possible options are :
+#
+# ``False``
+#   Default. The nat table is not managed and rules will not be added.
+#
+# ``True``
+#   Add the pre and postrouting rules that follow.
+nft__nat_table_manage:
+  False
+  # ]]]
+# .. envvar:: nft__nat_default_prerouting_rules [[[
+#
+# List of prerouting rules to configure for all hosts inherited from this role.
+nft__nat_default_prerouting_rules:
+  000 policy:
+    - type nat hook prerouting priority 0;
+      # ]]]
+# .. envvar:: nft__nat_prerouting_rules [[[
+#
+# List of prerouting rules to configure for all hosts in the Ansible inventory.
+nft__nat_prerouting_rules:
+  {}
+  # ]]]
+# .. envvar:: nft__nat_group_prerouting_rules [[[
+#
+# List of prerouting rules to configure for hosts in specific
+# Ansible inventory group.
+nft__nat_group_prerouting_rules:
+  {}
+  # ]]]
+# .. envvar:: nft__nat_host_prerouting_rules [[[
+#
+# List of prerouting rules to configure for specific hosts
+# in the Ansible inventory.
+nft__nat_host_prerouting_rules:
+  {}
+  # ]]]
+# .. envvar:: nft__nat_prerouting_conf_path [[[
+#
+# Path to the prerouting rules file for the nat table to include in the main
+# configuration file in order to use the previous defined lists.
+#
+# Should include the '{{ nft_conf_dir_path }}' var or be an absolut path.
+nft__nat_prerouting_conf_path:
+  "{{ nft_conf_dir_path }}/nat-prerouting.nft"
+  # ]]]
+# .. envvar:: nft__nat_prerouting_conf_content [[[
+#
+# Template used to provide the previous prerouting rules file.
+#
+# Must be a relative path from default/ directory of this role or from your
+# Ansible inventory directory.
+nft__nat_prerouting_conf_content:
+  "etc/nftables.d/nat-prerouting.nft.j2"
+  # ]]]
+
+# .. envvar:: nft__nat_default_postrouting_rules [[[
+#
+# List of postrouting rules to configure for all hosts inherited from this role.
+nft__nat_default_postrouting_rules:
+  000 policy:
+    - type nat hook postrouting priority 100;
+      # ]]]
+# .. envvar:: nft__nat_postrouting_rules [[[
+#
+# List of postrouting rules to configure for all hosts in the Ansible inventory.
+nft__nat_postrouting_rules:
+  {}
+  # ]]]
+# .. envvar:: nft__nat_group_postrouting_rules [[[
+#
+# List of postrouting rules to configure for hosts in specific
+# Ansible inventory group.
+nft__nat_group_postrouting_rules:
+  {}
+  # ]]]
+# .. envvar:: nft__nat_host_postrouting_rules [[[
+#
+# List of postrouting rules to configure for specific hosts
+# in the Ansible inventory.
+nft__nat_host_postrouting_rules:
+  {}
+  # ]]]
+# .. envvar:: nft__nat_postrouting_conf_path [[[
+#
+# Path to the postrouting rules file for the nat table to include in the main
+# configuration file in order to use the previous defined lists.
+#
+# Should include the '{{ nft_conf_dir_path }}' var or be an absolut path.
+nft__nat_postrouting_conf_path:
+  "{{ nft_conf_dir_path }}/nat-postrouting.nft"
+  # ]]]
+# .. envvar:: nft__nat_postrouting_conf_content [[[
+#
+# Template used to provide the previous postrouting rules file.
+#
+# Must be a relative path from default/ directory of this role or from your
+# Ansible inventory directory.
+nft__nat_postrouting_conf_content:
+  "etc/nftables.d/nat-postrouting.nft.j2"
+  # ]]]
+  # ]]]
+# Service management [[[
+# ----------------------
+
+# .. envvar:: nft_service_manage [[[
+#
+# If the Nftables service should be managed ? Possible options are :
+#
+# ``True``
+#   Default. The service is started.
+#
+# ``False``
+#   The service will not be touched.
+nft_service_manage:
+  true
+  # ]]]
+# .. envvar:: nft_service_name [[[
+#
+# The service name to manage.
+nft_service_name:
+  "nftables"
+  # ]]]
+# .. envvar:: nft_service_enabled [[[
+#
+# If the Nftables service should be enabled at startup ? Possible options are :
+#
+# ``True``
+#   Default. The service is enabled.
+#
+# ``False``
+#   The service is disabled from startup.
+nft_service_enabled:
+  true
+  # ]]]
+# .. envvar:: nft_service_unit_from_role [[[
+#
+# Should the role supply a custom nftables.service unit file?
+# Or use the distribution provided one?
+#
+# ``true``
+#   Default. Install our service unit, written to 'nft_service_unit_path'.
+#
+# ``false``
+#   No service unit will be added. Use distribution provided nftables.service.
+nft_service_unit_from_role:
+  true
+  # ]]]
+# .. envvar:: nft_service_unit_path [[[
+#
+# Path to store Nftables service.
+nft_service_unit_path:
+  "/etc/systemd/system/nftables.service"
+  # ]]]
+# .. envvar:: nft_service_unit_content [[[
+#
+# Template used to provide systemd unit for Nftables service.
+nft_service_unit_content:
+  "etc/systemd/system/nftables.service.j2"
+  # ]]]
+# .. envvar:: nft__service_override_path [[[
+#
+# Path to store Nftables custom conf.
+nft__service_override_path:
+  "/etc/systemd/system/nftables.service.d/override.conf"
+  # ]]]
+# .. envvar:: nft__service_override_content [[[
+#
+# Template used to provide systemd custom conf for Nftables service.
+nft__service_override_content:
+  "etc/systemd/system/nftables.service.d/override.conf.j2"
+  # ]]]
+# .. envvar:: nft__service_protect [[[
+#
+# If the systemd unit should have the Protect directives ? Possible options :
+#
+# ``True``
+#   Default. Directives will be set (ProtectSystem, ProtectHome,…).
+#
+# ``False``
+#   The directives will be ignored.
+nft__service_protect:
+  true
+  # ]]]
+
+# .. envvar:: nft_fail2ban_service_override [[[
+#
+# Should the systemd unit override file for fail2ban.service be added?
+
+# Options:
+# ``True``:
+#   Default. The fail2ban override file should be present, at path 'nft__fail2ban_service_unit_path'.
+#
+# ``False``:
+#   Skip the tasks that put the fail2ban override file into place.
+nft_fail2ban_service_override:
+  true
+  # ]]]
+# .. envvar:: nft__fail2ban_service_unit_path [[[
+#
+# Path to store Fail2Ban custom conf.
+nft__fail2ban_service_unit_path:
+  "/etc/systemd/system/fail2ban.service.d/override.conf"
+  # ]]]
+# .. envvar:: nft__fail2ban_service_unit_content [[[
+#
+# Template used to provide systemd custom conf for Fail2Ban service.
+nft__fail2ban_service_unit_content:
+  "etc/systemd/system/fail2ban.service.d/override.conf.j2"
+  # ]]]
+  #
+# .. envvar:: nft_debug [[[
+#
+# Toggle on/off more verbose output. Possible options are:
+#
+# ''Flase''
+# Default. No additional output will be given.
+#
+# ''True''
+# More verbose output.
+nft_debug: False
+
+# .. envvar:: nft_backup_conf [[[
+#
+# If the nftables config files should be backuped when changed ?
+# Possible options are:
+#
+# ``True``
+#   Default. Backup all nftables config files inside the nftables directory.
+#
+# ``False``
+#   Configs will not be backuped.
+nft_backup_conf:
+  True
+  # ]]]
+  # ]]]
+  # ]]]
+# OS specific variables defaults [[[
+# ----------------------------------
+
+# .. envvar:: nft__bin_location [[[
+#
+# Specify Nftables executable location.
+#
+nft__bin_location:
+  "/usr/sbin/nft"
+  # ]]]
+  # ]]]
+
+# .. envvar:: nft_templates: [[[
+#
+# Frequently used nft rule collections.
+nft_templates:
+  drop_invalid_log_no_rst:
+    - ct state invalid tcp flags != rst log prefix "DROP INVALID "
+    - ct state invalid counter drop
+
+  allow_established:
+    - ct state established,related counter accept
+
+  allow_in_localhost:
+    - iif lo accept
+
+  allow_out_localhost:
+    - oif lo accept
+
+  allow_rst:
+    - tcp flags { rst, psh | ack } counter accept
+
+  allow_mdns:
+    - meta l4proto udp ip6 daddr ff02::fb    udp dport mdns counter accept comment "mDNS IPv6 service discovery"
+    - meta l4proto udp ip  daddr 224.0.0.251 udp dport mdns counter accept comment "mDNS IPv4 service discovery"
+
+  allow_in_dhcp4:
+    - meta l4proto udp udp sport bootps udp dport bootpc counter accept comment "DHCPv4"
+
+  allow_in_dhcp6:
+    - meta l4proto udp ip6 saddr fe80::/10 ip6 daddr fe80::/10 udp sport dhcpv6-server udp dport dhcpv6-client counter accept comment "DHCPv6"
+
+  allow_out_dhcp4:
+    - meta l4proto udp udp dport bootps udp sport bootpc counter accept comment "DHCPv4"
+
+  allow_out_dhcp6:
+    - meta l4proto udp ip6 saddr fe80::/10 ip6 daddr fe80::/10 udp dport dhcpv6-server udp sport dhcpv6-client counter accept comment "DHCPv6"
+
+  allow_upnp:
+    - meta l4proto udp ip daddr 239.255.255.250 udp dport 1900 counter accept comment "Multicast UPnP"
+
+  icmp_in_must_allow:
+    - meta l4proto icmp icmp type { destination-unreachable, time-exceeded, parameter-problem } counter accept
+
+  icmp_allow_ping:
+    - meta l4proto icmp icmp type { echo-request, echo-reply } counter accept
+
+  icmp_fwd_must_allow:
+    - meta l4proto icmp icmp type { destination-unreachable, time-exceeded, parameter-problem } counter accept
+
+  icmpv6_fwd_must_allow:
+    # RFC 4890, 4.3.1.  Traffic That Must Not Be Dropped
+
+    - meta l4proto ipv6-icmp icmpv6 type destination-unreachable counter accept
+    - meta l4proto ipv6-icmp icmpv6 type packet-too-big counter accept
+    - meta l4proto ipv6-icmp icmpv6 type time-exceeded icmpv6 code 0 counter accept
+    - meta l4proto ipv6-icmp icmpv6 type parameter-problem icmpv6 code { 1, 2 } counter accept
+
+  icmpv6_in_must_allow:
+    # RFC 4890, 4.4.1.  Traffic That Must Not Be Dropped
+
+    - meta l4proto ipv6-icmp icmpv6 type destination-unreachable counter accept
+    - meta l4proto ipv6-icmp icmpv6 type packet-too-big counter accept
+    - meta l4proto ipv6-icmp icmpv6 type time-exceeded icmpv6 code 0 counter accept
+    - meta l4proto ipv6-icmp icmpv6 type parameter-problem icmpv6 code { 1, 2 } counter accept
+    - meta l4proto ipv6-icmp icmpv6 type nd-router-solicit counter accept
+    - meta l4proto ipv6-icmp icmpv6 type nd-router-advert counter accept
+    - meta l4proto ipv6-icmp icmpv6 type nd-neighbor-solicit counter accept
+    - meta l4proto ipv6-icmp icmpv6 type nd-neighbor-advert counter accept
+    - meta l4proto ipv6-icmp icmpv6 type ind-neighbor-solicit counter accept
+    - meta l4proto ipv6-icmp icmpv6 type ind-neighbor-solicit counter accept
+
+    - meta l4proto ipv6-icmp ip6 saddr fe80::/10 icmpv6 type mld-listener-query counter accept
+    - meta l4proto ipv6-icmp ip6 saddr fe80::/10 icmpv6 type mld-listener-report counter accept
+    - meta l4proto ipv6-icmp ip6 saddr fe80::/10 icmpv6 type mld-listener-reduction counter accept
+    - meta l4proto ipv6-icmp ip6 saddr fe80::/10 icmpv6 type mld2-listener-report counter accept
+
+    - meta l4proto ipv6-icmp icmpv6 type 148 counter accept comment "Certification Path Solicitation (SEND)"
+    - meta l4proto ipv6-icmp icmpv6 type 149 counter accept comment "Certification Path Advertisement (SEND)"
+
+    - meta l4proto ipv6-icmp ip6 saddr fe80::/10 icmpv6 type 151 counter accept comment "Multicast Router Advertisement (MRD)"
+    - meta l4proto ipv6-icmp ip6 saddr fe80::/10 icmpv6 type 152 counter accept comment "Multicast Router Solicitation (MRD)"
+    - meta l4proto ipv6-icmp ip6 saddr fe80::/10 icmpv6 type 153 counter accept comment "Multicast Router Termination (MRD)"
+
+  icmpv6_in_should_allow:
+    # RFC 4890, 4.3.2.  Traffic That Normally Should Not Be Dropped
+
+    - meta l4proto ipv6-icmp icmpv6 type time-exceeded icmpv6 code 1 counter accept
+    - meta l4proto ipv6-icmp icmpv6 type parameter-problem icmpv6 code 0 counter accept
+
+  icmpv6_in_allow_mobip:
+    # RFC 4890, 4.3.2.  Traffic That Normally Should Not Be Dropped
+
+    - meta l4proto ipv6-icmp icmpv6 type 144 counter accept comment "Home Agent Address Discovery Request Message"
+    - meta l4proto ipv6-icmp icmpv6 type 145 counter accept comment "Home Agent Address Discovery Reply Message"
+    - meta l4proto ipv6-icmp icmpv6 type 146 counter accept comment "Mobile Prefix Solicitation"
+    - meta l4proto ipv6-icmp icmpv6 type 147 counter accept comment "Mobile Prefix Advertisement"
+
+  icmpv6_in_allow_dropped_anyway:
+    # RFC 4890, 4.4.3.  Traffic That Will Be Dropped Anyway -- No Special Attention Needed
+
+    - meta l4proto ipv6-icmp icmpv6 type router-renumbering counter accept
+    - meta l4proto ipv6-icmp icmpv6 type 150 counter drop comment "Seamoby Experimental"
+
+  icmpv6_in_allow_redirect:
+    # RFC 4890, 4.4.4.  Traffic for Which a Policy Should Be Defined
+
+    - meta l4proto ipv6-icmp icmpv6 type nd-redirect counter accept
+
+  icmpv6_in_drop_redirect:
+    # RFC 4890, 4.4.4.  Traffic for Which a Policy Should Be Defined
+
+    - meta l4proto ipv6-icmp icmpv6 type nd-redirect counter drop
+
+  icmpv6_in_allow_nodeinfo:
+    # RFC 4890, 4.4.4.  Traffic for Which a Policy Should Be Defined
+
+    - meta l4proto ipv6-icmp icmpv6 type 139 counter accept comment "Node Information Query"
+    - meta l4proto ipv6-icmp icmpv6 type 140 counter accept comment "Node Information Response"
+
+  icmpv6_in_drop_nodeinfo:
+    # RFC 4890, 4.4.4.  Traffic for Which a Policy Should Be Defined
+
+    - meta l4proto ipv6-icmp icmpv6 type 139 counter drop comment "Node Information Query"
+    - meta l4proto ipv6-icmp icmpv6 type 140 counter drop comment "Node Information Response"
+
+  icmpv6_in_allow_unallocated:
+    # RFC 4890, 4.4.4.  Traffic for Which a Policy Should Be Defined
+
+    - meta l4proto ipv6-icmp icmpv6 type 5-99    counter accept comment "Unallocated error ICMPv6"
+    - meta l4proto ipv6-icmp icmpv6 type 102-126 counter accept comment "Unallocated error ICMPv6"
+
+  icmpv6_in_drop_unallocated:
+    # RFC 4890, 4.4.4.  Traffic for Which a Policy Should Be Defined
+
+    - meta l4proto ipv6-icmp icmpv6 type 5-99    counter drop comment "Unallocated error ICMPv6"
+    - meta l4proto ipv6-icmp icmpv6 type 102-126 counter drop comment "Unallocated error ICMPv6"
+
+  icmpv6_in_drop_dangerous:
+    # RFC 4890, 4.4.5.  Traffic That Should Be Dropped Unless a Good Case Can Be Made
+
+    - meta l4proto ipv6-icmp icmpv6 type { 100, 101, 200, 201 } counter drop comment "Experimental ICMPv6 allocations"
+    - meta l4proto ipv6-icmp icmpv6 type { 127, 255 } counter drop comment "ICMPv6 extension numbers"
+    - meta l4proto ipv6-icmp icmpv6 type 154-199 counter drop comment "Unallocated informational ICMPv6"
+    - meta l4proto ipv6-icmp icmpv6 type 202-254 counter drop comment "Unallocated informational ICMPv6"
+
+  icmpv6_allow_ping:
+    - meta l4proto ipv6-icmp icmpv6 type { echo-request, echo-reply } counter accept
+
+  icmpv6_fwd_should_allow:
+    # RFC 4890, 4.3.2.  Traffic That Normally Should Not Be Dropped
+
+    - meta l4proto ipv6-icmp icmpv6 type time-exceeded icmpv6 code 1 counter accept
+    - meta l4proto ipv6-icmp icmpv6 type parameter-problem icmpv6 code 0 counter accept
+
+  icmpv6_fwd_allow_mobip:
+    # RFC 4890, 4.3.2.  Traffic That Normally Should Not Be Dropped
+
+    - meta l4proto ipv6-icmp icmpv6 type 144 counter accept comment "Home Agent Address Discovery Request Message"
+    - meta l4proto ipv6-icmp icmpv6 type 145 counter accept comment "Home Agent Address Discovery Reply Message"
+    - meta l4proto ipv6-icmp icmpv6 type 146 counter accept comment "Mobile Prefix Solicitation"
+    - meta l4proto ipv6-icmp icmpv6 type 147 counter accept comment "Mobile Prefix Advertisement"
+
+  icmpv6_fwd_allow_dropped_anyway:
+    # RFC 4890, 4.3.3.  Traffic That Will Be Dropped Anyway
+
+    - meta l4proto ipv6-icmp icmpv6 type nd-router-solicit ip6 hoplimit 255 counter accept
+    - meta l4proto ipv6-icmp icmpv6 type nd-router-advert ip6 hoplimit 255 counter accept
+    - meta l4proto ipv6-icmp icmpv6 type nd-neighbor-solicit ip6 hoplimit 255 counter accept
+    - meta l4proto ipv6-icmp icmpv6 type nd-neighbor-advert ip6 hoplimit 255 counter accept
+    - meta l4proto ipv6-icmp icmpv6 type nd-redirect ip6 hoplimit 255 counter accept
+    - meta l4proto ipv6-icmp icmpv6 type ind-neighbor-solicit ip6 hoplimit 255 counter accept
+    - meta l4proto ipv6-icmp icmpv6 type ind-neighbor-solicit ip6 hoplimit 255 counter accept
+
+    - meta l4proto ipv6-icmp ip6 saddr fe80::/10 icmpv6 type mld-listener-query counter accept
+    - meta l4proto ipv6-icmp ip6 saddr fe80::/10 icmpv6 type mld-listener-report counter accept
+    - meta l4proto ipv6-icmp ip6 saddr fe80::/10 icmpv6 type mld-listener-reduction counter accept
+    - meta l4proto ipv6-icmp ip6 saddr fe80::/10 icmpv6 type mld2-listener-report counter accept
+
+    - meta l4proto ipv6-icmp icmpv6 type 148 ip6 hoplimit 255 counter accept comment "Certification Path Solicitation (SEND)"
+    - meta l4proto ipv6-icmp icmpv6 type 149 ip6 hoplimit 255 counter accept comment "Certification Path Advertisement (SEND)"
+
+    - meta l4proto ipv6-icmp ip6 saddr fe80::/10 icmpv6 type 151 ip6 hoplimit 1 counter accept comment "Multicast Router Advertisement (MRD)"
+    - meta l4proto ipv6-icmp ip6 saddr fe80::/10 icmpv6 type 152 ip6 hoplimit 1 counter accept comment "Multicast Router Solicitation (MRD)"
+    - meta l4proto ipv6-icmp ip6 saddr fe80::/10 icmpv6 type 153 ip6 hoplimit 1 counter accept comment "Multicast Router Termination (MRD)"
+
+  icmpv6_fwd_allow_experimental:
+    # RFC 4890, 4.3.4.  Traffic for Which a Policy Should Be Defined
+
+    - meta l4proto ipv6-icmp icmpv6 type 150 counter drop comment "Seamoby Experimental"
+
+  icmpv6_fwd_drop_experimental:
+    # RFC 4890, 4.3.4.  Traffic for Which a Policy Should Be Defined
+
+    - meta l4proto ipv6-icmp icmpv6 type 150 counter drop comment "Seamoby Experimental"
+
+  icmpv6_fwd_allow_unallocated:
+    # RFC 4890, 4.3.4.  Traffic for Which a Policy Should Be Defined
+
+    - meta l4proto ipv6-icmp icmpv6 type 5-99    counter drop comment "Unallocated error ICMPv6"
+    - meta l4proto ipv6-icmp icmpv6 type 102-126 counter drop comment "Unallocated error ICMPv6"
+    - meta l4proto ipv6-icmp icmpv6 type 154-199 counter drop comment "Unallocated informational ICMPv6"
+    - meta l4proto ipv6-icmp icmpv6 type 202-254 counter drop comment "Unallocated informational ICMPv6"
+
+  icmpv6_fwd_drop_unallocated:
+    # RFC 4890, 4.3.4.  Traffic for Which a Policy Should Be Defined
+
+    - meta l4proto ipv6-icmp icmpv6 type 5-99    counter drop comment "Unallocated error ICMPv6"
+    - meta l4proto ipv6-icmp icmpv6 type 102-126 counter drop comment "Unallocated error ICMPv6"
+    - meta l4proto ipv6-icmp icmpv6 type 154-199 counter drop comment "Unallocated informational ICMPv6"
+    - meta l4proto ipv6-icmp icmpv6 type 202-254 counter drop comment "Unallocated informational ICMPv6"
+
+  icmpv6_fwd_drop_dangerous:
+    # RFC 4890, 4.3.5.  Traffic That Should Be Dropped Unless a Good Case Can Be Made
+
+    - meta l4proto ipv6-icmp icmpv6 type 138 counter drop comment "Router Renumbering"
+    - meta l4proto ipv6-icmp icmpv6 type 139 counter drop comment "Node Information Query"
+    - meta l4proto ipv6-icmp icmpv6 type 140 counter drop comment "Node Information Response"
+    - meta l4proto ipv6-icmp icmpv6 type { 100, 101, 200, 201 } counter drop comment "Experimental ICMPv6 allocations"
+    - meta l4proto ipv6-icmp icmpv6 type { 127, 255 } counter drop comment "ICMPv6 extension numbers"
+
+  ip6_drop_deprecated:
+    # RFC 9288, section 3.5.1.5
+    - exthdr hbh exists counter drop comment "Drop IPv6 Host-by-Host extensions"
+      # RFC 9288, section 3.5.2.5
+    - rt type { 0, 1, 3 } counter drop comment "Drop IPv6 deprecated Routing Header extension"
+      # RFC 9288, section 3.5.10.5
+    - meta l4proto { 253, 254 } counter drop comment "Drop IPv6 Experiment extension"
+
+  ip_drop_deprecated:
+    # RFC 7126, section 4.3.5
+    - ip option lsrr exists counter drop comment "Drop IPv4 Loose Source Routing option"
+      # RFC 7126, section 4.4.5
+    - ip option ssrr exists counter drop comment "Drop IPv4 Strict Source Routing option"
+      # RFC 7126, section 4.5.5
+    - ip option rr exists counter drop comment "Drop IPv4 Record Route option"
+      # RFC 7126, section 4.8.5
+    - ip option ra exists counter drop comment "Drop IPv4 Router Alert option"
+
+  set_dscp:
+    # set DSCP QoS classes for common types of outgoing and response traffic
+    # https://www.cisco.com/c/en/us/td/docs/switches/datacenter/nexus1000/sw/4_0/qos/configuration/guide/nexus1000v_qos/qos_6dscp_val.pdf
+    - tcp dport domain ip dscp set cs2 counter continue # CS2 (DSCP 16) Precedence (immediate)
+    - udp dport { domain, ntp } ip dscp set cs2 counter continue # CS2 (DSCP 16) Precedence (immediate)
+    - udp dport http ip dscp set af21 counter continue # AF21 (DSCP 18) Assured Forwarding (AF) Class 2 – low drop precedence
+    - udp sport http ip dscp set af21 counter continue # AF21 (DSCP 18) Assured Forwarding (AF) Class 2 – low drop precedence
+    - tcp dport { http, https } ip dscp set af22 counter continue # AF22 (DSCP 20) Assured Forwarding (AF) Class 2 – medium drop precedence
+    - tcp sport { http, https } ip dscp set af22 counter continue # AF22 (DSCP 20) Assured Forwarding (AF) Class 2 – medium drop precedence
+    - tcp dport { smtp, imaps } ip dscp set af21 counter continue # AF22 (DSCP 20) Assured Forwarding (AF) Class 2 – medium drop precedence
+    - tcp sport { smtp, imaps } ip dscp set af21 counter continue # AF22 (DSCP 20) Assured Forwarding (AF) Class 2 – medium drop precedence
+
+
+      # ]]]
+
+nft_customize_conntrack: false
+nft_nf_conntrack_max: 196608
+nft_nf_conntrack_tcp_timeout_established: 86400
+nft_log_file_path: "/var/log/iptables.log"
+nft_log_prefix: nft

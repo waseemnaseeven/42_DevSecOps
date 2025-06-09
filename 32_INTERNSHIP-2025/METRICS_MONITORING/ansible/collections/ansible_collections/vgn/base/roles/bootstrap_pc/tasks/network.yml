@@ -1,0 +1,10 @@
+---
+- name: Deploy network manager
+  ansible.builtin.template:
+    src: NetworkManager.conf.j2
+    dest: /etc/NetworkManager/NetworkManager.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - bootstrap_pc - Restart NetworkManager

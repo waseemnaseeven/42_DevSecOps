@@ -1,0 +1,22 @@
+# ANSIBLE MANAGED
+
+disable_ec2_metadata: true
+
+cloud_init_modules:
+  - [bootcmd, always]
+  - [write_files, always]
+  - [growpart, always]
+  - [resizefs, always]
+  - [disk_setup, always]
+  - [mounts, always]
+
+cloud_config_modules:
+  - [runcmd, always]
+  - [disable-ec2-metadata, always]
+
+cloud_final_modules:
+  - [write_files_deferred, always]
+  - [scripts_per_boot, always]
+  - [scripts_user, always]
+  - [keys_to_console, always]
+  - [final_message, always]

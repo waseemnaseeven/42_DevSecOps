@@ -1,0 +1,4 @@
+#!/bin/bash
+set -euo pipefail
+/usr/sbin/cryptsetup luksOpen /dev/disk/by-uuid/{{ disk_uuid }} {{ disk_name }}
+mount /dev/mapper/{{ disk_name }} /mnt/{{ disk_name }}

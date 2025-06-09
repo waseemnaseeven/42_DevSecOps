@@ -1,0 +1,30 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for thanos_query
+thanos_version: "0.38.0"
+thanos_install_dir: "/etc/thanos/"
+thanos_binary: "/usr/local/bin/thanos"
+thanos_bucket_file: "/etc/thanos/bucket.yml"
+thanos_query_service_file: "/etc/systemd/system/query.service"
+thanos_query_frontend_file: "/etc/systemd/system/query-frontend.service"
+thanos_data_dir: "/var/lib/prometheus-query"
+thanos_log_level: "info"
+thanos_user: "thanos"
+thanos_group: "thanos"
+thanos_query_enabled: true
+
+thanos_tls_server_enabled: false
+thanos_tls_client_enabled: false 
+thanos_crt_server_grpc: "/etc/thanos_ssl_grpc/thanos.crt"
+thanos_key_server_grpc: "/etc/thanos_ssl_grpc/thanos.key"
+thanos_crt_client_grpc: "/etc/thanos_ssl_client_grpc/thanos.crt"
+thanos_key_client_grpc: "/etc/thanos_ssl_client_grpc/thanos.key"
+
+thanos_crt_server_http: "/etc/thanos_ssl_http/thanos.crt"
+thanos_key_server_http: "/etc/thanos_ssl_http/thanos.key"
+thanos_crt_client_http: "/etc/thanos_ssl_client_http/thanos.crt"
+thanos_key_client_http: "/etc/thanos_ssl_client_http/thanos.key"
+thanos_ca_file: "/etc/thanos/ca.crt"
+
+
+

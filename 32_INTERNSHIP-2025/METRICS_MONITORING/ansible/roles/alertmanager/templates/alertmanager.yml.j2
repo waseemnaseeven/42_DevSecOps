@@ -1,0 +1,27 @@
+global:
+  resolve_timeout: 6m
+
+route:
+  group_by: ['alertname'] # Regroupe les alertes qui partagent ces labels 
+  group_wait: {{ delay }}s # Délai initial avant d'envoyer la premiere notification
+  group_interval: 5m # Délai entre 2 notifs pour un meme groupe
+  repeat_interval: 2h # Délai avant qu'une alerte qui est déja déclenché (firing) s'envoie de nouveau 
+  receiver: 'web.hook'
+  routes:
+    - matchers:
+      - alertname="PrometheusAlertmanagerE2eDeadManSwitch"
+      repeat_interval: 1m
+      receiver: web.hook
+
+receivers:
+  - name: 'web.hook'
+    webhook_configs:
+      - url: 'https://webhook.site/b5e2bfec-e4ba-4806-a52e-c24c5a196339'
+        send_resolved: true
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'instance']
+

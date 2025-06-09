@@ -1,0 +1,35 @@
+---
+dependencies: []
+
+galaxy_info:
+  author: "Jérémy Gardais"
+  namespace: ipr_cnrs
+  role_name: nftables
+  description: "Manage Nftables rules and packages"
+  license: WTFPL
+  company: IPR
+  issue_tracker_url: https://git.ipr.univ-rennes1.fr/cellinfo/ansible.nftables/issues
+  min_ansible_version: "2.5"
+  platforms:
+    - name: Debian
+      versions:
+        - bullseye
+        - buster
+        - stretch
+    - name: ArchLinux
+      versions:
+        - all
+    - name: Fedora
+      versions:
+        - all
+    - name: Gentoo
+      versions:
+        - all
+    - name: Ubuntu
+      versions:
+        - focal
+  galaxy_tags:
+    - system
+    - nftables
+    - firewall
+    - security

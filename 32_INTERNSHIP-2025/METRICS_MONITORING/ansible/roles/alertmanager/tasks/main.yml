@@ -1,0 +1,14 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for alertmanager
+- block:
+    - name: "Install alertmanager"
+      include_tasks: install.yml
+  
+    - name: "Deploying config file for alertmanager"
+      include_tasks: config.yml
+  when: alertmanager_enabled | bool
+
+- name: "Remove alertmanager"
+  include_tasks: remove.yml
+  when: not (alertmanager_enabled | bool)

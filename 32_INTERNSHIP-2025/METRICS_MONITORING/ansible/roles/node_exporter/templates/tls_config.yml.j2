@@ -1,0 +1,14 @@
+{% if node_exporter_tls_server_enabled | default('false') %}
+tls_server_config:
+  cert_file: {{ node_exporter_crt_file }}
+  key_file: {{ node_exporter_key_file }}
+{% if node_exporter_tls_client_enabled | default('false') %}
+  client_ca_file: {{ node_exporter_ca_file }}
+  client_auth_type: RequireAndVerifyClientCert
+  client_allowed_sans: 
+    - "prometheusclient"
+    - "prometheusclient2"
+    - "prometheusclient3"
+    - "wnn143"
+  {% endif %}
+{% endif %}

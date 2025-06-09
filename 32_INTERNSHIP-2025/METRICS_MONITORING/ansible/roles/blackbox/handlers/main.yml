@@ -1,0 +1,10 @@
+#SPDX-License-Identifier: MIT-0
+---
+# handlers file for install_blackbox
+- name: Restart blackbox
+  systemd:
+    name: blackbox_exporter.service
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+    force: false # Override existing symlinks

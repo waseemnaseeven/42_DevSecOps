@@ -1,0 +1,68 @@
+---
+default_locale: "{{ locales[0] }}"
+use_proxy: false
+additional_repos: []
+base_repos: []
+repo_keys: []
+ca_certificates: []
+locales:
+  - en_US.UTF-8
+  - C.UTF-8
+
+bootstrap_ipv6_disabled: false
+bootstrap_ipv6_disabled_allow_reboot: false
+bootstrap_manage_netplan_cloudinit: false
+
+bootstrap_polkit_rules: []
+
+# chrony_config_server:
+# - 0.pool.ntp.org
+# - 1.pool.ntp.org
+# - 2.pool.ntp.org
+# - 3.pool.ntp.org
+
+# timezone: Etc/UTC
+
+bootstrap_packages_installed: []
+bootstrap_packages_removed: []
+bootstrap_packages_unhold: []
+bootstrap_packages_hold: []
+swappiness: "10"
+host_values: {}
+host_localhost: true
+host_fqdn: true
+
+# unattended_package_blacklist: []
+# unattended_remove_unused_dependencies: true
+# unattended_upgrades: true
+# unattended_update_days: '{"Mon";"Fri"}'
+grub_cmdline_linux_default: ""
+
+bootstrap_cloudinit_disabled: false
+
+nodejs_major_version: "20"
+
+bootstrap_neovim_enabled: true
+neovim_version: "0.10.0"
+neovim_url: "https://github.com/neovim/neovim/releases/download/v{{ neovim_version }}/nvim-linux-x86_64.tar.gz"
+
+bootstrap_apt_disable_esm: true
+
+bootstrap_custom_motd_enabled: true
+# Default files to delete
+bootstrap_motd_delete_files:
+  - 00-header # replaced by 20-sysinfo
+  - 10-help-text # useless
+  - 50-motd-news # useless
+  - 50-landscape-sysinfo
+  - 90-updates-available # advertising + service masked
+  - 91-contract-ua-esm-status # esm
+  - 95-hwe-eol # useless
+
+bootstrap_motd_push_files:
+  - 10-hostname
+  - 20-sysinfo
+  - 20-uptime
+  - 35-diskspace
+
+bootstrap_vscode_enabled: false

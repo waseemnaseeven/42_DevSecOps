@@ -1,0 +1,80 @@
+---
+# roles/elasticsearch/tasks/install.yml
+
+- name: "1. Vérifier si Elasticsearch est déjà installé"
+  ansible.builtin.stat:
+    path: "{{ es_install_dir }}/current/bin/elasticsearch"
+  register: es_installed
+
+- name: "2. Créer le groupe système '{{ es_group }}'"
+  ansible.builtin.group:
+    name: "{{ es_group }}"
+    state: present
+
+- name: "3. Créer l’utilisateur système '{{ es_user }}'"
+  ansible.builtin.user:
+    name: "{{ es_user }}"
+    group: "{{ es_group }}"
+    system: yes
+    shell: /usr/sbin/nologin
+    create_home: no
+
+- block:
+    - name: "3.1. Créer le répertoire d’installation '{{ es_install_dir }}'"
+      ansible.builtin.file:
+        path: "{{ es_install_dir }}"
+        state: directory
+        owner: "{{ es_user }}"
+        group: "{{ es_group }}"
+        mode: '0755'
+
+    - name: "3.2. Télécharger l’archive Elasticsearch {{ es_version }}"
+      ansible.builtin.get_url:
+        url: "{{ es_archive_url }}"
+        dest: "{{ es_archive_dest }}"
+        mode: '0644'
+      # En production, activez le checksum si souhaité :
+      # checksum: "sha512:{{ lookup('url', es_archive_url + '.sha512') }}"
+
+    - name: "3.3. Extraire l’archive dans '{{ es_install_dir }}'"
+      ansible.builtin.unarchive:
+        src: "{{ es_archive_dest }}"
+        dest: "{{ es_install_dir }}"
+        remote_src: yes
+        owner: "{{ es_user }}"
+        group: "{{ es_group }}"
+
+    - name: "3.4. Créer le lien symbolique 'current' → version installée"
+      ansible.builtin.file:
+        src: "{{ es_install_dir }}/elasticsearch-{{ es_version }}"
+        dest: "{{ es_install_dir }}/current"
+        state: link
+
+    - name: "3.5. Créer les répertoires data, logs & pid"
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ es_user }}"
+        group: "{{ es_group }}"
+        mode: '0755'
+      loop:
+        - "{{ es_data_dir }}"
+        - "{{ es_logs_dir }}"
+        - "{{ es_pid_dir }}"
+
+    - name: "3.6. Créer le répertoire temporaire pour JNA"
+      ansible.builtin.file:
+        path: "{{ es_jna_tmpdir }}"
+        state: directory
+        owner: "{{ es_user }}"
+        group: "{{ es_group }}"
+        mode: '0755'
+
+
+
+  when: not es_installed.stat.exists
+
+- name: "4. Elasticsearch est déjà installé → Ignorer l’installation"
+  ansible.builtin.debug:
+    msg: "Elasticsearch {{ es_version }} existe déjà, installation ignorée."
+  when: es_installed.stat.exists

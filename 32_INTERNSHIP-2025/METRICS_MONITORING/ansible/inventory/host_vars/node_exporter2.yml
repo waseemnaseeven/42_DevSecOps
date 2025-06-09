@@ -1,0 +1,16 @@
+ntp_servers:
+  - "10.15.3.246"
+
+vault_cert: 
+
+  - owner: "node_exporter"
+    group: "node_exporter"
+    base_path: "/etc/node_exporter_ssl/"
+    issue_path: "rd/pki/monitoring/sign/services"
+    common_name: "nodeexporter2.com"
+    cert_path: "node_exporter.crt"
+    key_path: "node_exporter.key"
+    ip_sans: 
+      - "{{ ansible_host }}"
+      - "10.15.62.76"
+    # force_renew: true

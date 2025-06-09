@@ -1,0 +1,101 @@
+---
+- name: Check if binary exist
+  stat:
+    path: "{{ node_exporter_binary }}"
+  register: binary_file
+
+- name: Check if config exist
+  stat:
+    path: "{{ node_exporter_install_dir }}"
+  register: config_folder
+
+- name: Installing common dependencies
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - software-properties-common
+      - wget
+      - openssl
+    state: present
+    update_cache: yes
+  when: not config_folder.stat.exists
+
+- name: Register node_exporter version
+  ansible.builtin.lineinfile:
+    path: /var/versions
+    regexp: "^node_exporter="
+    create: true
+    line: "node_exporter={{ node_exporter_version }}"
+  register: binary_version
+
+- name: Add group
+  ansible.builtin.group:
+    name: "{{ node_exporter_group }}"
+    system: yes
+    state: present
+
+- name: Add user
+  ansible.builtin.user:
+    name: "{{ node_exporter_user }}"
+    group: "{{ node_exporter_group }}"
+    shell: /usr/sbin/nologin
+    create_home: no
+    system: yes
+    state: present
+
+- name: Download node_exporter from the doc
+  ansible.builtin.get_url:
+    url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.{{ os }}-{{ cpu_arch }}.tar.gz"
+    dest: "/tmp/node_exporter-{{ node_exporter_version }}.tar.gz"
+  when: not config_folder.stat.exists
+
+- name: Extraction of the node_exporter.zip
+  ansible.builtin.unarchive:
+    src: "/tmp/node_exporter-{{ node_exporter_version }}.tar.gz"
+    dest: "/tmp/"
+    remote_src: true
+  when: not config_folder.stat.exists
+
+- name: Remove node_exporter.zip
+  ansible.builtin.file:
+    path: "/tmp/node_exporter-{{ node_exporter_version }}.tar.gz"
+    state: absent
+  when: not config_folder.stat.exists
+
+- name: Move node_exporter config folder
+  ansible.builtin.command: mv /tmp/node_exporter-{{ node_exporter_version }}.{{ os }}-{{ cpu_arch }} {{ node_exporter_install_dir }}
+  args:
+    creates: "{{ node_exporter_install_dir }}"
+  when: not config_folder.stat.exists
+
+- name: Changing the owner of the folder node_exporter
+  ansible.builtin.file:
+    path: "{{ node_exporter_install_dir }}"
+    owner: "{{ node_exporter_user }}"
+    group: "{{ node_exporter_group }}"
+    recurse: yes
+  when: not config_folder.stat.exists
+
+- name: Copy node_exporter binary
+  ansible.builtin.copy:
+    src: "{{ node_exporter_install_dir }}/node_exporter"
+    dest: "{{ node_exporter_binary }}"
+    remote_src: true
+  when: not binary_file.stat.exists or not config_folder.stat.exists
+
+- name: Remove binary from config file
+  ansible.builtin.file:
+    path: "{{ node_exporter_install_dir }}/node_exporter"
+    state: absent
+  when: not config_folder.stat.exists
+
+- name: Changing the owner of the node_exporter binary
+  ansible.builtin.file:
+    path: "{{ node_exporter_binary }}"
+    owner: "{{ node_exporter_user }}"
+    group: "{{ node_exporter_group }}"
+    mode: '0100'
+  when: not config_folder.stat.exists
+
+
+

@@ -1,0 +1,50 @@
+---
+- name: Deploying certificates everywhere
+  hosts: all
+  roles:
+    - vgn.base.vault_cert
+
+- name: Install node_exporter everywhere 
+  hosts: all
+  roles:
+    - node_exporter
+
+- name: Install 1 Blackbox
+  hosts: blackbox
+  roles:
+    - blackbox
+
+- name: Install 3 Prometheus
+  hosts: prometheus
+  roles:
+    - prometheus
+
+- name: Install 3 Alertmanagers
+  hosts: alertmanagers
+  roles:
+    - alertmanager
+
+- name: Install 1 Grafana
+  hosts: grafana
+  roles:
+    - grafana
+
+- name: Install 1 Thanos Compactor
+  hosts: thanos_compactor
+  roles:
+    - thanos_compactor
+
+- name: Install 1 Thanos Rule
+  hosts: thanos_rule
+  roles:
+    - thanos_rule
+
+- name: Install 1 Thanos Store
+  hosts: thanos_store
+  roles:
+    - thanos_store
+
+- name: Install 3 Thanos Query
+  hosts: thanos_query
+  roles:
+    - thanos_query

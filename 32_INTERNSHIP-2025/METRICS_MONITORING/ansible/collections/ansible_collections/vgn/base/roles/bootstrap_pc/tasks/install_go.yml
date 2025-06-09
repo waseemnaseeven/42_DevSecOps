@@ -1,0 +1,39 @@
+- name: Register go version
+  ansible.builtin.lineinfile:
+    path: /var/versions
+    regexp: "^go="
+    create: true
+    line: "go={{ go_version }}"
+  register: binary_version
+
+- name: Managing go
+  when: binary_version.changed or (go_force_install | default(false))
+  block:
+    - name: Ensure go is deleted
+      ansible.builtin.file:
+        path: /usr/local/go
+        state: absent
+
+    - name: "Download go {{ go_version }}"
+      ansible.builtin.unarchive:
+        src: "https://go.dev/dl/go{{ go_version }}.linux-amd64.tar.gz"
+        dest: "/usr/local/"
+        remote_src: true
+
+    - name: Create go folder
+      ansible.builtin.file:
+        path: /usr/local/go
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+  rescue:
+    - name: "Registering go failure"
+      ansible.builtin.lineinfile:
+        path: /var/versions
+        regexp: "^go="
+        line: "go=failure"
+
+    - name: Force failure
+      ansible.builtin.fail:
+        msg: "Installation of go failed."

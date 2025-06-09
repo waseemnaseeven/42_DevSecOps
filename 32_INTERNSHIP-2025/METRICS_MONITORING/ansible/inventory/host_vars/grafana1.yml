@@ -1,0 +1,37 @@
+ntp_servers:
+  - "10.15.3.246"
+
+
+vault_cert: 
+
+  - owner: "grafana"
+    group: "grafana"
+    base_path: "/etc/grafana_ssl/"
+    issue_path: "rd/pki/monitoring/sign/services"
+    common_name: "grafana.com"
+    cert_path: "grafana.crt"
+    key_path: "grafana.key"
+    ip_sans: "{{ ansible_host }}, {{ grafana_private_ip }}"
+    alt_names: "localhost"
+    # force_renew: true
+
+  - owner: "grafana"
+    group: "grafana"
+    base_path: "/etc/grafana_ssl_client/"
+    issue_path: "rd/pki/monitoring/sign/clients"
+    common_name: "grafanaclient"
+    cert_path: "grafana_client.crt"
+    key_path: "grafana_client.key"
+    # force_renew: true
+
+  - owner: "node_exporter"
+    group: "node_exporter"
+    base_path: "/etc/node_exporter_ssl/"
+    issue_path: "rd/pki/monitoring/sign/services"
+    common_name: "nodeexportergrafana.com"
+    cert_path: "node_exporter.crt"
+    key_path: "node_exporter.key"
+    ip_sans: 
+      - "{{ ansible_host }}"
+      - "{{ grafana_private_ip }}"
+    # force_renew: true

@@ -1,0 +1,50 @@
+---
+- name: Add Brave GPG
+  ansible.builtin.copy:
+    src: brave.gpg
+    dest: /etc/apt/keyrings/brave.gpg
+    mode: "0644"
+
+- name: Remove old brave repo
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/brave.list
+    state: absent
+
+- name: "Add brave repo"
+  ansible.builtin.deb822_repository:
+    types: "deb"
+    uris: https://brave-browser-apt-release.s3.brave.com/
+    suites: stable
+    components:
+      - main
+    signed_by: /etc/apt/keyrings/brave.gpg
+    name: "brave"
+  register: brave_repo
+
+- name: Update cache
+  ansible.builtin.apt:
+    update_cache: true
+  when: brave_repo.changed
+
+- name: Install Brave
+  ansible.builtin.apt:
+    name: brave-browser
+    state: present
+
+- name: Create brave folder
+  ansible.builtin.file:
+    path: /etc/brave/policies/managed/
+    mode: "0755"
+    state: "directory"
+
+- name: Copy extensions
+  ansible.builtin.copy:
+    src: OldTweetDeckChrome.crx
+    dest: /etc/brave/OldTweetDeckChrome.crx
+    mode: "0644"
+
+- name: Install Brave Policy
+  ansible.builtin.template:
+    src: policies.json.j2
+    dest: /etc/brave/policies/managed/policies.json
+    mode: "0644"

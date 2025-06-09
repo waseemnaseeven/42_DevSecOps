@@ -1,0 +1,7 @@
+---
+# vars file for Archlinux-based distros
+nft_pkg_list:
+  - nftables
+  - ulogd2
+# iptables cannot be removed on Arch
+nft_old_pkg_manage: false

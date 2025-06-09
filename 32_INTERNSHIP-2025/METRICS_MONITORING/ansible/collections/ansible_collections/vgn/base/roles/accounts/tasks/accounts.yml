@@ -1,0 +1,56 @@
+---
+- name: "[{{ item.name }}] Create group account"
+  ansible.builtin.group:
+    name: "{{ item.name }}"
+    gid: "{{ item.gid | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    system: "{{ item.system | default(omit) }}"
+  when: (item.state | default('present')) != 'absent'
+
+- name: "[{{ item.name }}] Create or remove user account"
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    uid: "{{ item.uid | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    system: "{{ item.system | default(omit) }}"
+    group: "{{ item.name }}"
+    create_home: "{{ item.create_home | default(omit) }}"
+    shell: "{{ item.shell | default(omit) }}"
+    comment: "{{ item.comment | default(omit) }}"
+    groups: "{{ item.groups | default([]) }}"
+    home: "{{ item.home | default(omit) }}"
+    move_home: true
+    password: "{{ item.password | default(omit) }}"
+    remove: true
+  when: (item.state | default('present')) != 'absent' or accounts_remove_accounts
+
+- name: "[{{ item.name }}] Manage subuid"
+  ansible.builtin.lineinfile:
+    path: /etc/subuid
+    regexp: "^{{ item.name }}:"
+    state: "{{ item.state | default('present') }}"
+    line: "{{ item.name }}:{{ item.subuid.start }}:{{ item.subuid.size | default('65536') }}"
+  when: item.subuid is defined
+
+- name: "[{{ item.name }}] Manage subgid"
+  ansible.builtin.lineinfile:
+    path: /etc/subgid
+    regexp: "^{{ item.name }}:"
+    state: "{{ item.state | default('present') }}"
+    line: "{{ item.name }}:{{ item.subgid.start }}:{{ item.subgid.size | default('65536') }}"
+  when: item.subgid is defined
+
+- name: "[{{ item.name }}] Manage SSH Keys"
+  ansible.builtin.authorized_key:
+    key: "{{ item.ssh_keys | join('\n') }}"
+    user: "{{ item.name }}"
+    exclusive: True
+  when: item.ssh_keys is defined and (item.state | default('present')) != 'absent'
+
+- name: "[{{ item.name }}] Remove group account"
+  ansible.builtin.group:
+    name: "{{ item.name }}"
+    gid: "{{ item.gid | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    system: "{{ item.system | default(omit) }}"
+  when: (item.state | default('present')) != 'absent' or accounts_remove_accounts

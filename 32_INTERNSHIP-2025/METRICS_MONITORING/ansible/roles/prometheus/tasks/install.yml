@@ -1,0 +1,80 @@
+---
+- name: Check if binary exist
+  stat:
+    path: "{{ prometheus_binary }}"
+  register: binary_file
+
+- name: Check if config exist
+  stat:
+    path: "{{ prometheus_install_dir }}"
+  register: config_folder
+
+- name: Add group
+  ansible.builtin.group:
+    name: "{{ prometheus_group }}"
+    system: yes
+    state: present
+
+- name: Create user for prometheus
+  ansible.builtin.user:
+    name: "{{ prometheus_user }}"
+    shell: /usr/sbin/nologin
+    system: yes
+    create_home: no
+  when: not config_folder.stat.exists 
+
+- name: Download prometheus from the doc
+  ansible.builtin.get_url:
+    url: "https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.{{ os }}-{{ cpu_arch }}.tar.gz"
+    dest: "/tmp/prometheus-{{ prometheus_version }}.tar.gz"
+    mode: '0644'
+    timeout: 90
+  when: not config_folder.stat.exists 
+
+- name: Extraction of the prometheus.zip
+  ansible.builtin.unarchive:
+    src: "/tmp/prometheus-{{ prometheus_version }}.tar.gz"
+    dest: "/tmp/"
+    remote_src: yes
+  when: not config_folder.stat.exists
+
+- name: Remove prometheus.zip
+  ansible.builtin.file:
+    path: "/tmp/prometheus-{{ prometheus_version }}.tar.gz"
+    state: absent
+  when: not config_folder.stat.exists
+
+- name: Move the folder prometheus
+  ansible.builtin.command: mv /tmp/prometheus-{{ prometheus_version }}.{{ os }}-{{ cpu_arch }} {{ prometheus_install_dir }}
+  args:
+    creates: "{{ prometheus_install_dir }}"
+  when: not config_folder.stat.exists
+
+- name: Copy prometheus binary
+  ansible.builtin.copy:
+    src: "{{ prometheus_install_dir }}/prometheus"
+    dest: "{{ prometheus_binary }}"
+    remote_src: true
+  when: not binary_file.stat.exists or not config_folder.stat.exists
+
+- name: Remove binary from config file
+  ansible.builtin.file:
+    path: "{{ prometheus_install_dir }}/prometheus"
+    state: absent
+  when: not config_folder.stat.exists
+
+- name: Changing the owner of the folder prometheus
+  ansible.builtin.file:
+    path: "{{ prometheus_install_dir }}"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    recurse: yes
+  when: not config_folder.stat.exists
+
+- name: Changing the owner of the prometheus binary
+  ansible.builtin.file:
+    path: "{{ prometheus_binary }}"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: '0100'
+  when: not config_folder.stat.exists

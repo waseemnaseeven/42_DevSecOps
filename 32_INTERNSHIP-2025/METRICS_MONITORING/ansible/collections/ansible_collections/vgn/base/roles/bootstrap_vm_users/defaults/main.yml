@@ -1,0 +1,5 @@
+---
+pc_users_config: []
+
+torbrowser_version: "13.0.14"
+torbrowser_url: "https://www.torproject.org/dist/torbrowser/{{ torbrowser_version }}/tor-browser-linux-x86_64-{{ torbrowser_version }}.tar.xz"

@@ -1,0 +1,56 @@
+---
+- name: Register yed version
+  ansible.builtin.lineinfile:
+    path: /var/versions
+    regexp: "^yed="
+    create: true
+    line: "yed={{ yed_version }}"
+  register: binary_version
+
+- name: Managing yed
+  when: binary_version.changed or (yed_force_install | default(false))
+  block:
+    - name: Remove yed
+      ansible.builtin.file:
+        path: "/opt/yed"
+        state: absent
+
+    - name: Download yed
+      ansible.builtin.unarchive:
+        remote_src: true
+        src: "{{ yed_url }}"
+        dest: "/opt"
+
+    - name: Copy yed
+      ansible.builtin.copy:
+        remote_src: true
+        src: /opt/yed-{{ yed_version }}/
+        dest: /opt/yed/
+
+    - name: Remove old yed
+      ansible.builtin.file:
+        path: /opt/yed-{{ yed_version }}/
+        state: absent
+
+  rescue:
+    - name: "Registering yed failure"
+      ansible.builtin.lineinfile:
+        path: /var/versions
+        regexp: "^yed="
+        line: "yed=failure"
+
+- name: Add Desktop shortcut
+  ansible.builtin.copy:
+    content: |
+      #!/usr/bin/env xdg-open
+      [Desktop Entry]
+      Type=Application
+      Name=yEd Graph Editor
+      Exec=java -jar /opt/yed/yed.jar %U
+      Icon=/opt/yed/icons/yed.ico
+      Categories=Application;
+      StartupWMClass=install4j-com-yworks-A-yEd
+    dest: /usr/share/applications/yed.desktop
+    mode: "0644"
+    owner: root
+    group: root

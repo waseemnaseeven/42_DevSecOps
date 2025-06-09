@@ -1,0 +1,93 @@
+{
+ "policies": {
+    "AppAutoUpdate": true,
+    "BlockAboutAddons": false,
+    "BlockAboutConfig": true,
+    "BlockAboutProfiles": false,
+    "BlockAboutSupport": true,
+    "Bookmarks": [
+      {% for bookmark in firefox_bookmarks %}
+        {
+          "Title": {{ bookmark.title | tojson }},
+          "URL": {{ bookmark.url | tojson }},
+          "Folder": {{ bookmark.folder | tojson }},
+          "Placement": {{ bookmark.placement | tojson }}
+        }{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ],
+    "CaptivePortal": false,
+    "Certificates": {
+      "Install": [{{ firefox_crts }}]
+    },
+
+    "DisableAppUpdate": false,
+    "DisableBuiltinPDFViewer": false,
+
+    "DisableFirefoxAccounts": true,
+    "DisableFirefoxStudies": true,
+    "DisableMasterPasswordCreation": true,
+    "DisablePasswordReveal": true,
+    "DisableProfileImport": true,
+    "DisableSetDesktopBackground": true,
+    "DisplayBookmarksToolbar": "always",
+    "DisablePocket": true,
+    "DisableSecurityBypass": {
+      "InvalidCertificate": {{ firefox_disableinvalidcertificatebypass }},
+      "SafeBrowsing": {{ firefox_disablesafebrowsingbypass }}
+    },
+    "DisableSetDesktopBackground": true,
+    "DisableTelemetry": true,
+    "DisplayBookmarksToolbar": "newtab",
+    "DNSOverHTTPS": {
+      "Enabled":  false,
+      "Locked": true
+    },
+    "ExtensionSettings": {
+      {{ firefox_extensions }}
+    },
+    "FirefoxHome": {
+      "Search": true,
+      "TopSites": true,
+      "SponsoredTopSites": false,
+      "Highlights": true,
+      "Pocket": false,
+      "SponsoredPocket": false,
+      "Snippets": true,
+      "Locked": true
+    },
+    "Homepage": {
+      "URL": "{{ firefox_homepage }}",
+      "Locked": true,
+      "Additional": [],
+      "StartPage": "previous-session"
+    },
+    "ManagedBookmarks": [
+      {{ firefox_managed_bookmarks | default(omit) }}
+    ],
+    "NoDefaultBookmarks": true,
+    "OfferToSaveLogins": false,
+    "OfferToSaveLoginsDefault": false,
+    "PasswordManagerEnabled": false,
+    {% if use_proxy %}
+    "Proxy": {
+      "Mode": "manual",
+      "Locked": true,
+      "HTTPProxy": "{{ http_proxy | replace('https://', '') | replace('http://', '') }}",
+      "UseHTTPProxyForAllProtocols": false,
+      "SSLProxy": "{{ https_proxy | replace('https://', '') | replace('http://', '') }}",
+      "Passthrough": "{{ no_proxy }}"
+    },
+    {% endif %}
+    "Preferences": {
+      "browser.fixup.domainsuffixwhitelist.vgn": {
+        "Value": true,
+        "Status": "locked"
+      },
+      "browser.fixup.domainsuffixwhitelist.skynet": {
+        "Value": true,
+        "Status": "locked"
+      }
+    },
+    "ShowHomeButton": true
+ }
+}

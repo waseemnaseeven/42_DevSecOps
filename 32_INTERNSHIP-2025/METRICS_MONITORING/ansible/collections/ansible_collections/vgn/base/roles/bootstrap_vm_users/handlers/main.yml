@@ -1,0 +1,9 @@
+---
+- name: bootstrap_vm_users - netplan apply
+  ansible.builtin.shell:
+    cmd: "netplan apply"
+
+- name: bootstrap_vm_users - Restart polkit
+  ansible.builtin.systemd:
+    name: polkit
+    state: restarted

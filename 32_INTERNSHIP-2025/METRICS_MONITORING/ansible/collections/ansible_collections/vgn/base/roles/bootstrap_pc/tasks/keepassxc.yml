@@ -1,0 +1,32 @@
+---
+- name: Add KeepassXC GPG
+  ansible.builtin.copy:
+    src: keepassxc.gpg
+    dest: /etc/apt/keyrings/keepassxc.gpg
+    mode: "0644"
+
+- name: Remove old keepassxc repo
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/keepassxc.list
+    state: absent
+
+- name: Add keepassxc repo
+  ansible.builtin.deb822_repository:
+    name: keepassxc
+    types: deb
+    uris: https://ppa.launchpadcontent.net/phoerious/keepassxc/ubuntu
+    suites: "{{ keepassxc_distribution_release }}"
+    signed_by: /etc/apt/keyrings/keepassxc.gpg
+    components:
+      - main
+  register: keepassxc_repo
+
+- name: Refresh cache
+  ansible.builtin.apt:
+    update_cache: true
+  when: keepassxc_repo.changed
+
+- name: Install Keepassxc
+  ansible.builtin.apt:
+    name: keepassxc
+    state: present

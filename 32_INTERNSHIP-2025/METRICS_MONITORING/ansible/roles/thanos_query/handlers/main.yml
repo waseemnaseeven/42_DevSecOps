@@ -1,0 +1,12 @@
+#SPDX-License-Identifier: MIT-0
+---
+# handlers file for thanos_query
+- name: Restart query
+  ansible.builtin.systemd_service:
+    name: query.service
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+
+
+

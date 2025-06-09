@@ -1,0 +1,68 @@
+---
+- name: "Configuration of {{ item }}"
+  become_user: "{{ item.name }}"
+  become: true
+  block:
+    - name: Get terminal default profile
+      ansible.builtin.command:
+        cmd: "gsettings get org.gnome.Terminal.ProfilesList default"
+      changed_when: false
+      register: _terminal_profile
+
+    - name: Set font
+      community.general.dconf:
+        key: '/org/gnome/terminal/legacy/profiles:/:{{ _terminal_profile.stdout | replace("''", '''') }}/use-system-font'
+        value: "false"
+
+    - name: Set font
+      community.general.dconf:
+        key: '/org/gnome/terminal/legacy/profiles:/:{{ _terminal_profile.stdout | replace("''", '''') }}/font'
+        value: "'Hack Nerd Font Mono 12'"
+
+    - name: Create gtk-3.0 config folder
+      ansible.builtin.file:
+        path: ~{{ item.name }}/.config/gtk-3.0
+        state: directory
+
+    - ansible.builtin.lineinfile:
+        line: "{{ bookmark }}"
+        path: ~{{ item.name }}/.config/gtk-3.0/bookmarks
+        create: true
+      loop: "{{ item.nautilus_bookmarks | default([]) }}"
+      loop_control:
+        loop_var: bookmark
+
+    # - name: Create ProtonVPN folder
+    #   ansible.builtin.file:
+    #     path: "~{{ item.name }}/.config/protonvpn"
+    #     state: directory
+    #     owner: "{{ item.name }}"
+    #     group: "{{ item.name }}"
+    #     mode: "0755"
+
+    # - name: Create ProtonVPN config
+    #   ansible.builtin.template:
+    #     src: user_configurations.json.j2
+    #     dest: "~{{ item.name }}/.config/protonvpn/user_configurations.json"
+    #     owner: "{{ item.name }}"
+    #     group: "{{ item.name }}"
+    #     mode: "0644"
+
+    # - name: Get user numerical id
+    #   ansible.builtin.shell:
+    #     cmd: id -u
+    #   register: _user_id
+    #   changed_when: false
+
+    # - ansible.builtin.debug:
+    #     msg: "{{ _user_id.stdout }}"
+
+    # - name: Set ProtonVPN SessionData
+    #   ansible.builtin.shell:
+    #     cmd: unset SUDO_UID; protonvpn-cli login {{ protonvpn_account_email }}
+    #   environment:
+    #     DISPLAY: ":0"
+    #     DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ _user_id.stdout }}/bus"
+    #   when: protonvpn_force_login | default(false)
+    #   args:
+    #     stdin: "{{ protonvpn_account_password }}"

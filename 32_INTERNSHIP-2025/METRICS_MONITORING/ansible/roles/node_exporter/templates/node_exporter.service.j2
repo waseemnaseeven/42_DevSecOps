@@ -1,0 +1,30 @@
+[Unit]
+Description=Node_Exporter Version {{ node_exporter_version }}
+Documentation=https://github.com/prometheus/node_exporter
+After=network-online.target
+
+[Service]
+User={{ node_exporter_user }}
+Group={{ node_exporter_group }}
+Restart=on-failure
+ExecStart={{ node_exporter_binary }} \
+  --web.listen-address=:{{ node_exporter_port }} \
+{% if node_exporter_tls_server_enabled | default('false') %}
+  --web.config.file={{ node_exporter_tls_config }} \
+{% endif %}
+  --log.level={{ node_exporter_log_level }} \
+{% for collector in node_exporter_enabled_collectors %}
+  --collector.{{collector}} \
+{% endfor %}
+{% for collector in node_exporter_disabled_collectors %}
+  --no-collector.{{ collector }}
+{% endfor %}
+{% if node_exporter_filesystem is defined %}
+  --collector.filesystem.ignored-mount-points="{{ node_exporter_filesystem.ignored_mount_points | join('|') }}" \
+  --collector.filesystem.ignored-fs-types="{{ node_exporter_filesystem.ignored_fs_types | join('|') }}" \
+{% endif %}    
+
+[Install]
+WantedBy=multi-user.target
+
+

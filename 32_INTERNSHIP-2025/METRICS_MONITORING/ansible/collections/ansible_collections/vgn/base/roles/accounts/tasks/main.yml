@@ -1,0 +1,31 @@
+---
+- include_tasks: groups.yml
+  loop: "{{ accounts_groups }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- include_tasks: accounts.yml
+  loop: "{{ accounts_users }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- include_tasks: user_config_home.yml
+  loop: "{{ accounts_users }}"
+  when: (item.state | default('present')) != 'absent' and (item.manage_home | default(false))
+  loop_control:
+    label: "{{ item.name }}"
+
+- include_tasks: user_config_zsh.yml
+  loop: "{{ accounts_users }}"
+  when: (item.state | default('present')) != 'absent' and (item.manage_zsh | default(false))
+  loop_control:
+    label: "{{ item.name }}"
+
+- include_tasks: pip.yml
+  loop: "{{ accounts_users }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Manage sudoers
+  when: accounts_manage_sudoers
+  ansible.builtin.include_tasks: manage_sudoers.yml

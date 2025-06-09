@@ -1,0 +1,14 @@
+#!/bin/bash
+
+{% if ansible_distribution_release != "noble" %}
+if [ "$1" == "tun0" ]; then
+{% else %}
+if [[ "$1" =~ ^"nm-xfrm" ]]; then
+{% endif %}
+    if [ "$2" == "vpn-pre-down" ]; then
+{% for mount in pc_nfs_mounts %}
+        echo "Unmounting {{ mount.path }}"
+        umount -f {{ mount.path }}
+{% endfor %}
+    fi
+fi

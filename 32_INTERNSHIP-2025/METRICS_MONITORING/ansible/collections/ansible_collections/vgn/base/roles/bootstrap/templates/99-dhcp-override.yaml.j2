@@ -1,0 +1,11 @@
+network:
+    ethernets:
+        eth0:
+            dhcp4: true
+            dhcp4-overrides:
+              use-domains: false
+            dhcp6: false
+            match:
+                macaddress: {{ ansible_default_ipv4.macaddress }}
+            set-name: eth0
+    version: 2

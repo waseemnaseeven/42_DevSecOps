@@ -1,0 +1,38 @@
+ntp_servers:
+  - "10.15.3.246"
+
+
+vault_cert: 
+
+  - owner: "alertmanager"
+    group: "alertmanager"
+    base_path: "/etc/alertmanager_ssl/"
+    issue_path: "rd/pki/monitoring/sign/services"
+    common_name: "alertmanager3.com"
+    cert_path: "alertmanager.crt"
+    key_path: "alertmanager.key"
+    ip_sans: 
+      - "{{ ansible_host }}"
+      - "{{ alertmanager3_private_ip }}"
+    # force_renew: true
+
+  - owner: "alertmanager"
+    group: "alertmanager"
+    base_path: "/etc/alertmanager_ssl_client/"
+    issue_path: "rd/pki/monitoring/sign/clients"
+    common_name: "alertmanagerclient3"
+    cert_path: "alertmanager_client.crt"
+    key_path: "alertmanager_client.key"
+    # force_renew: true
+
+  - owner: "node_exporter"
+    group: "node_exporter"
+    base_path: "/etc/node_exporter_ssl/"
+    issue_path: "rd/pki/monitoring/sign/services"
+    common_name: "nodeexporteralertmanager3.com"
+    cert_path: "node_exporter.crt"
+    key_path: "node_exporter.key"
+    ip_sans: 
+      - "{{ ansible_host }}"
+      - "{{ alertmanager3_private_ip }}"
+    # force_renew: true

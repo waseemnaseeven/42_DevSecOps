@@ -1,0 +1,5 @@
+---
+- name: Install thanos rule
+  hosts: thanos_rule
+  roles:
+    - thanos_rule

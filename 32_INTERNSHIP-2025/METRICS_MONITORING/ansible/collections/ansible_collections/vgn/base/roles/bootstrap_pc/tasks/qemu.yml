@@ -1,0 +1,5 @@
+---
+- name: Install QEMU with Virt Manager
+  ansible.builtin.apt:
+    name:
+      - virt-manager

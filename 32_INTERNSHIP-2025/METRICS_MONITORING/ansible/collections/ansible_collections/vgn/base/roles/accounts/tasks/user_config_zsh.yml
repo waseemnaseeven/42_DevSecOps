@@ -1,0 +1,77 @@
+---
+- name: "Installation de Oh My ZSH pour {{ item }}"
+  become_user: "{{ item.name }}"
+  become: true
+  block:
+    - name: "[{{ item.name }}] Creation du dossier bin"
+      file:
+        path: ~{{ item.name }}/bin
+        state: directory
+        mode: "0700"
+
+    - name: "[{{ item.name }}] Installation de la base"
+      git:
+        repo: "https://github.com/ohmyzsh/ohmyzsh.git"
+        dest: ~{{ item.name }}/.oh-my-zsh
+        clone: true
+        update: true
+
+    - name: "[{{ item.name }}] Installation de zsh-autosuggestions"
+      git:
+        repo: "https://github.com/zsh-users/zsh-autosuggestions.git"
+        dest: ~{{ item.name }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+        clone: true
+        update: true
+
+    - name: "[{{ item.name }}] Installation de ZSH Syntax Highlighting"
+      git:
+        repo: "https://github.com/zsh-users/zsh-syntax-highlighting.git"
+        dest: ~{{ item.name }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+        clone: true
+        update: true
+
+    - name: "[{{ item.name }}] Installation de ZSH Completions"
+      git:
+        repo: "https://github.com/zsh-users/zsh-completions.git"
+        dest: ~{{ item.name }}/.oh-my-zsh/custom/plugins/zsh-completions
+        clone: true
+        update: true
+
+    - name: "[{{ item.name }}] Deploiement de la configuration ZSH"
+      template:
+        src: zshrc.j2
+        dest: ~{{ item.name }}/.zshrc
+        backup: true
+        mode: "u=rwx,go=r"
+
+    - name: "[{{ item.name }}] Suppression de la configuration ZSH Pre OMZSH"
+      ansible.builtin.file:
+        path: ~{{ item.name }}/.zshrc.pre-oh-my-zsh
+        state: absent
+
+    - name: "[{{ item.name }}] Creation du dossier completions"
+      file:
+        path: ~{{ item.name }}/.oh-my-zsh/completions
+        state: directory
+        mode: "0700"
+
+    - name: "[{{ item.name }}] Install cheat autocompletion"
+      ansible.builtin.copy:
+        src: _cheat # curl https://raw.githubusercontent.com/cheat/cheat/master/scripts/cheat.zsh > roles/accounts/files/_cheat
+        dest: ~{{ item.name }}/.oh-my-zsh/completions/_cheat
+        force: true
+        mode: 0660
+
+    - name: "[{{ item.name }}] Install delta autocompletion"
+      ansible.builtin.copy:
+        src: _delta # delta --generate-completion zsh > roles/accounts/files/_delta
+        dest: ~{{ item.name }}/.oh-my-zsh/completions/_delta
+        force: true
+        mode: 0660
+
+    - name: "[{{ item.name }}] Install ripgrep autocompletion"
+      ansible.builtin.copy:
+        src: _rg # delta --generate-completion zsh > roles/accounts/files/_rg
+        dest: ~{{ item.name }}/.oh-my-zsh/completions/_rg
+        force: true
+        mode: 0660

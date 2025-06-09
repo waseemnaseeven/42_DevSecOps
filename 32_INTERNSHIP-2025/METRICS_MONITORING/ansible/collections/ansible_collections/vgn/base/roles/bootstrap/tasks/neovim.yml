@@ -1,0 +1,57 @@
+---
+- name: "Configuration of neovim"
+  block:
+    - name: Register neovim version
+      ansible.builtin.lineinfile:
+        path: /var/versions
+        regexp: "^neovim="
+        create: true
+        line: "neovim={{ neovim_version }}"
+      register: binary_version
+
+    - name: Managing neovim
+      when: binary_version.changed or (neovim_force_install | default(false))
+      block:
+        - name: Remove neovim
+          ansible.builtin.file:
+            path: /opt/neovim
+            state: absent
+
+        - name: Create neovim tmp folder
+          ansible.builtin.file:
+            path: /opt/neovim-tmp
+            state: directory
+
+        - name: Create neovim folder
+          ansible.builtin.file:
+            path: /opt/neovim-tmp
+            state: directory
+
+        - name: Download neovim
+          ansible.builtin.unarchive:
+            remote_src: true
+            src: "{{ neovim_url }}"
+            dest: "/opt/neovim-tmp"
+
+        - name: Copy neovim
+          ansible.builtin.copy:
+            remote_src: true
+            dest: "/opt/neovim/"
+            src: "/opt/neovim-tmp/nvim-linux-x86_64/"
+
+        - name: Remove neovim-tmp
+          ansible.builtin.file:
+            path: /opt/neovim-tmp
+            state: absent
+
+      rescue:
+        - name: "Registering neovim failure"
+          ansible.builtin.lineinfile:
+            path: /var/versions
+            regexp: "^neovim="
+            line: "neovim=failure"
+
+        - name: Remove neovim-tmp
+          ansible.builtin.file:
+            path: /opt/neovim-tmp
+            state: absent

@@ -1,0 +1,17 @@
+#
+# Ansible-managed. Any manual change will be lost.
+#
+[Unit]
+Description=Filebrowser
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/filebrowser --noauth --disable-exec -r {{ filebrowser_base_directory }} -a 0.0.0.0
+WorkingDirectory=/home/{{ filebrowser_linux_user }}/.local/share/filebrowser
+Restart=on-failure
+Type=simple
+User={{ filebrowser_linux_user }}
+Group={{ filebrowser_linux_group }}
+
+[Install]
+WantedBy=multi-user.target

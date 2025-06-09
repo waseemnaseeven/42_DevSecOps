@@ -1,0 +1,14 @@
+---
+- name: Give sudo permissions to local_users
+  ansible.builtin.template:
+    src: sudoers.j2
+    dest: /etc/sudoers
+    owner: root
+    group: root
+    mode: "0440"
+    validate: visudo -cf %s
+
+- name: Remove unwanted sudoers
+  ansible.builtin.file:
+    dest: "/etc/sudoers.d"
+    state: absent

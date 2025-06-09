@@ -1,0 +1,30 @@
+protonvpn_repo_deb: https://repo.protonvpn.com/debian/dists/stable/main/binary-all/protonvpn-stable-release_{{ protonvpnrepo_version }}_all.deb
+protonvpnrepo_version: 1.0.4
+protonvpn_version: "0.4.0" # https://repo.protonvpn.com/debian/dists/stable/main/binary-all/Packages
+
+openrefine_version: "3.7.9"
+openrefine_url: "https://github.com/OpenRefine/OpenRefine/releases/download/{{ openrefine_version }}/openrefine-linux-{{ openrefine_version }}.tar.gz"
+
+filebrowser_version: "2.30.0"
+filebrowser_url: "https://github.com/filebrowser/filebrowser/releases/download/v{{ filebrowser_version }}/linux-amd64-filebrowser.tar.gz"
+filebrowser_base_directory: /tmp
+filebrowser_linux_user: "user"
+filebrowser_linux_group: "user"
+
+bootstrap_python_deadsnakes_packages: []
+
+brave_extensions: []
+vm_packages: []
+vm_snaps: []
+
+bootstrap_enable_wayland: true
+
+brave_bookmarks: ""
+
+firefox_bookmarks: []
+
+bootstrap_vm_disks: []
+# bootstrap_vm_disks:
+# - uuid: ""
+#   name: ""
+#   state: present

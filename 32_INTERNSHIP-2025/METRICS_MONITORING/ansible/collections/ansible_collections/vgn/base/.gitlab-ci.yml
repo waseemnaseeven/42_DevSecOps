@@ -1,0 +1,12 @@
+---
+default:
+  image:
+    name: registry.adm.vgn/devops/ci:main
+
+stages:
+  - lint
+
+ansible-lint:
+  stage: lint
+  script:
+    - ansible-lint

@@ -1,0 +1,36 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for install_prometheus
+prometheus_version: "3.3.1"
+prometheus_install_dir: "/etc/prometheus"
+prometheus_binary: "/usr/local/bin/prometheus"
+prometheus_user: "prometheus"
+prometheus_group: "prometheus"
+prometheus_service_file: "/etc/systemd/system/prometheus.service"
+prometheus_config_file: "{{ prometheus_install_dir }}/prometheus.yml"
+prometheus_tls_config: "{{ prometheus_install_dir }}/tls_config.yml"
+prometheus_log_level: "info"
+prometheus_enabled: true
+
+prometheus_thanos_version: "0.38.0"
+prometheus_sidecar_install_dir: "/etc/thanos/"
+prometheus_sidecar_binary: "/usr/local/bin/thanos"
+prometheus_bucket_file: "/etc/prometheus/bucket.yml"
+prometheus_http_client_file: "/etc/prometheus/prometheus.http-client.yml"
+prometheus_sidecar_service_file: "/etc/systemd/system/sidecar.service"
+prometheus_sidecar_enabled: false
+
+prometheus_tls_server_enabled: false
+prometheus_tls_client_enabled: false
+prometheus_ssl_path: "/etc/prometheus_ssl"
+prometheus_tls_server:
+  ca_file: "/etc/prometheus/ca_client.crt"
+  cert_file: "/etc/prometheus_ssl/prometheus.crt"
+  key_file: "/etc/prometheus_ssl/prometheus.key"
+
+prometheus_tls_client:
+  ca_file: "/etc/prometheus/ca_client.crt"
+  cert_file: "/etc/prometheus_ssl_client/prometheus_client.crt"
+  key_file: "/etc/prometheus_ssl_client/prometheus_client.key"
+
+prometheus_ca_file: "{{ prometheus_install_dir }}/ca_client.crt"

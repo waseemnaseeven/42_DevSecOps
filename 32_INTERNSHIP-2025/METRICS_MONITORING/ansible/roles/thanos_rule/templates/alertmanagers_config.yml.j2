@@ -1,0 +1,26 @@
+alertmanagers:
+- http_config:
+    basic_auth:
+      username: ""
+      password: ""
+      password_file: ""
+    bearer_token: ""
+    bearer_token_file: ""
+    proxy_url: ""
+    tls_config:
+      ca_file: "{{ thanos_ca_file }}"
+      cert_file: "{{ thanos_crt_client_http }}"
+      key_file: "{{ thanos_key_client_http }}"
+      server_name: ""
+      insecure_skip_verify: false
+  static_configs:
+      - {{ alertmanager_private_ip }}:{{ alertmanager_port }}
+      - {{ alertmanager2_private_ip }}:{{ alertmanager_port }}
+      - {{ alertmanager3_private_ip }}:{{ alertmanager_port }}
+  file_sd_configs:
+  - files: 
+    - "/etc/thanos/sd_alertmanagers.yml"
+    refresh_interval: 2m
+  scheme: https
+  path_prefix: ""
+  timeout: 10m

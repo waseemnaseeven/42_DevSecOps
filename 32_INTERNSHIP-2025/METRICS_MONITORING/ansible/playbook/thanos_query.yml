@@ -1,0 +1,5 @@
+---
+- name: Install thanos query
+  hosts: thanos_query
+  roles:
+    - thanos_query

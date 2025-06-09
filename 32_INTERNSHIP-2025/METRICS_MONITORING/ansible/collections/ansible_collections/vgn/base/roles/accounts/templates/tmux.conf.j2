@@ -1,0 +1,6 @@
+{% for plugin in item.tmux.plugins | default([]) %}
+set -g @plugin '{{ plugin }}'
+{% endfor %}
+set -g mouse {{ item.tmux.mouse | default('on') }}
+
+run "~/.tmux/plugins/tpm/tpm"

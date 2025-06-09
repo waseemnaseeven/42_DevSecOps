@@ -1,0 +1,2 @@
+python3 -c 'input("Après avoir choisi votre pays et votre serveur, choisissez bien\n====> tcp - better reliability <====\ndans la fenêtre qui suivra !\n\nAppuyez sur entrée pour choisir votre pays...")'
+protonvpn-cli connect

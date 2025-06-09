@@ -1,0 +1,9 @@
+#SPDX-License-Identifier: MIT-0
+---
+# handlers file for thanos_store
+- name: Restart store
+  systemd:
+    name: store.service
+    state: restarted
+    enabled: yes
+    daemon_reload: yes

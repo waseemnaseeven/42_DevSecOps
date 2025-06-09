@@ -1,0 +1,111 @@
+export PATH="$HOME/bin:/usr/local/bin:$HOME/.local/bin:{% for path in item.path_folders | default([]) %}{{ path }}:{% endfor %}{% if zsh_go_path_enabled %}{{ zsh_go_path }}:{% endif %}$PATH"
+export ZSH="$HOME/.oh-my-zsh"
+
+{% if zsh_neovim_enabled %}
+export PATH="$PATH:/opt/neovim/bin"
+{% endif %}
+
+{% if zsh_aws_enabled %}
+export PATH="$PATH:/opt/aws/dist"
+export AWS_PAGER="bat -p -l json"
+
+# Make AWS checksum calculations optional
+# This is because outscale is not yet compatible with these
+# More info on https://docs.outscale.com/fr/userguide/Avertissement-sur-la-compatibilit%C3%A9-des-SDK-et-de-la-CLI-AWS.html
+# TODO Delete those environmenet variable when outscale fix this
+export AWS_REQUEST_CHECKSUM_CALCULATION=WHEN_REQUIRED
+export AWS_RESPONSE_CHECKSUM_VALIDATION=WHEN_REQUIRED
+{% endif %}
+
+{% if ansible_os_family == 'Debian' %}
+export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+export NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
+{% endif %}
+
+{% if zsh_use_proxy %}
+export http_proxy={{ http_proxy }}
+export https_proxy={{ https_proxy }}
+export no_proxy={{ no_proxy }}
+{% endif %}
+
+if [[ -n $SSH_CONNECTION ]]; then
+  ZSH_THEME="{{ item.zsh.theme_ssh | default(item.zsh.theme) | default('robbyrussel') }}"
+  export EDITOR='{{ item.editor_ssh | default(item.editor) | default('nano') }}'
+else
+  ZSH_THEME="{{ item.zsh.theme | default('robbyrussel') }}"
+  export EDITOR='{{ item.editor | default('nano') }}'
+fi
+
+HISTFILE=~/.zsh_history
+COMPLETION_WAITING_DOTS="true"
+DISABLE_UNTRACKED_FILES_DIRTY="true"
+DISABLE_AUTO_UPDATE="true"
+
+# Uncomment the following line if you want to change the command execution time
+# stamp shown in the history command output.
+# You can set one of the optional three formats:
+# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
+# or set a custom format using the strftime function format specifications,
+# see 'man strftime' for details.
+# HIST_STAMPS="mm/dd/yyyy"
+
+{% if item.zsh.docker_rootless_enabled | default(false) %}
+export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
+{% endif %}
+
+plugins=({{ (item.zsh.plugins | default([]) + oh_my_zsh_plugins_force) | join(' ') }})
+
+fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
+
+source $ZSH/oh-my-zsh.sh
+
+{% for alias in (item.aliases | default([])) %}
+alias {{ alias }}
+{% endfor %}
+
+eval "$(mcfly init zsh)"
+
+{% if item.tmux.auto_start | default(false) %}
+if [[ $- == *i* ]] && [[ -z "$TMUX" ]] && [[ -n "$SSH_TTY" ]];  then
+  tmux new-session -A -s ssh_tmux_$USER
+fi
+{% endif %}
+
+autoload -U +X bashcompinit && bashcompinit
+
+{% if zsh_tofu_enabled %}
+complete -o nospace -C /usr/local/bin/tofu tofu
+{% endif %}
+
+{% if zsh_vault_enabled %}
+complete -o nospace -C /usr/local/bin/vault vault
+{% endif %}
+
+{% if zsh_aws_enabled %}
+complete -C /opt/aws/dist/aws_completer aws
+{% endif %}
+
+{% if zsh_oapi_cli_enabled %}
+source <(/usr/local/bin/oapi-cli --bash-completion)
+{% endif %}
+
+{% if zsh_direnv_enabled %}
+eval "$(direnv hook zsh)"
+{% endif %}
+
+{% if item.zsh.docker_rootless_enabled | default(false) %}
+if [ -z ${XDG_RUNTIME_DIR} ];
+then
+  echo "!!!!---- XDG_RUNTIME_DIR LOOKS EMPTY - ARE YOU SURE YOU LAUNCHED THE SESSION CORRECTLY ? docker might not work ----!!!!"
+  echo "If you want to use rootless docker and user scoped systemd, logout the account ('exit' command) and access it with 'sudo machinectl shell TheUser@'."
+  echo "If you have already done this, you may safely ignore this message."
+fi
+{% endif %}
+
+{% if item.zsh.sign_ssh_onload_enabled | default(false) %}
+# Sign SSH key on load if it doesn't exists or the key hasn't been signed yet today
+if [ ! -e {{ item.zsh.sign_ssh_onload_key_location }} ] || [ "$(date -r {{ item.zsh.sign_ssh_onload_key_location }} +%Y%m%d)" != "$(date +%Y%m%d)" ]; then
+  load_vault_env
+  (sign_ssh_admin && echo "Signature de la clef SSH réussie.") || (echo "La signature a échoué !" && rm {{ item.zsh.sign_ssh_onload_key_location }})
+fi
+{% endif %}

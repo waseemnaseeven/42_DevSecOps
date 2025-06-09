@@ -1,0 +1,20 @@
+---
+- name: Nat table - Enable ip forwarding
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: "{{ '1' if nft__nat_table_manage |bool else '0' }}"
+    sysctl_set: true
+    reload: true
+  when: nft_enabled|bool and nft_manage_sysctl_ip_forward|bool
+
+- name: Import nftables.yml
+  import_tasks: nftables.yml
+
+# Manage conntrack
+- name: Import conntrack.yml
+  import_tasks: conntrack.yml
+  when: nft_customize_conntrack
+
+# Manage logging
+- name: Import logging.yml
+  import_tasks: logging.yml

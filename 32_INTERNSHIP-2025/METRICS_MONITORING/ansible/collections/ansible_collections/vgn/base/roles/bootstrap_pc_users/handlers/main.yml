@@ -1,0 +1,9 @@
+---
+- name: bootstrap_pc_users - netplan apply
+  ansible.builtin.shell:
+    cmd: "netplan apply"
+
+- name: bootstrap_pc_users - Restart NetworkManager
+  ansible.builtin.systemd:
+    name: NetworkManager
+    state: restarted

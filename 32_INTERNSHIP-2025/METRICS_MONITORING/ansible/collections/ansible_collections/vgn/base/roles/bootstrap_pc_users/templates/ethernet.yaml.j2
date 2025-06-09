@@ -1,0 +1,27 @@
+network:
+  version: 2
+  ethernets:
+    NM-{{ ( item.1.name+item.0.name) | to_uuid(namespace='0b8bd971-d694-45e3-b246-87e5184c9a9c') }}:
+      renderer: NetworkManager
+      match:
+        # Used to match eth* and enp*
+        name: "e*"
+      dhcp4: true
+      dhcp6: true
+      wakeonlan: false
+      networkmanager:
+        uuid: "{{ ( item.1.name+item.0.name) | to_uuid(namespace='0b8bd971-d694-45e3-b246-87e5184c9a9c') }}"
+        name: "{{ item.1.name }}-{{ item.0.name }}"
+        passthrough:
+          ethernet._: ""
+          ipv6.addr-gen-mode: "default"
+          ipv6.ip6-privacy: "-1"
+          proxy._: ""
+{% if item.1.eap_tls.enabled %}
+          802-1x.ca-cert: "/usr/local/share/ca-certificates/{{ item.1.eap_tls.ca_certificate }}.crt"
+          802-1x.client-cert: "/home/{{ item.0.name }}/.certs/{{ item.0.name }}.crt"
+          802-1x.eap: "tls;"
+          802-1x.identity: "{{ item.0.name }}@{{ item.1.eap_tls.identity_domain }}"
+          802-1x.private-key: "/home/{{ item.0.name }}/.certs/{{ item.0.name }}.key"
+          802-1x.private-key-password: "123456789"
+{% endif %}

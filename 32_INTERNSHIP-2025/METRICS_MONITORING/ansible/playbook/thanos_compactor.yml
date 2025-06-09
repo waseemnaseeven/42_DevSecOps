@@ -1,0 +1,5 @@
+---
+- name: Install thanos compactor
+  hosts: thanos_compactor
+  roles:
+    - thanos_compactor

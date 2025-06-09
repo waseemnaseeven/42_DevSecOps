@@ -1,0 +1,5 @@
+---
+- name: Deploy Alertmanager HA
+  hosts: alertmanagers
+  roles:
+    - alertmanager

@@ -1,0 +1,66 @@
+- name: Check if service exist
+  stat:
+    path: "{{ thanos_compactor_service_file }}"
+  register: service_file
+
+- name: Check if binary exist
+  stat:
+    path: "{{ thanos_binary }}"
+  register: binary_file
+
+- name: Check if config exist
+  stat:
+    path: "{{ thanos_install_dir }}"
+  register: config_folder
+
+- name: Check if ssl_server http exist
+  stat:
+    path: "/etc/thanos_ssl_http"
+  register: ssl_server_http
+
+- name: Disable service
+  ansible.builtin.systemd_service:
+    state: "stopped"
+    name: compactor.service
+    enabled: false
+  when: service_file.stat.exists
+  
+- name: Remove service
+  ansible.builtin.file:
+    path: "{{ thanos_compactor_service_file }}"
+    state: absent
+  when: service_file.stat.exists
+
+- name: Refresh systemd
+  ansible.builtin.systemd_service:
+    daemon_reload: yes
+  when: service_file.stat.exists
+
+- name: Remove binary
+  ansible.builtin.file:
+    path: "{{ thanos_binary }}"
+    state: absent
+  when: binary_file.stat.exists
+
+- name: Remove thanos config folder
+  ansible.builtin.file:
+    path: "{{ thanos_install_dir }}"
+    state: absent
+  when: config_folder.stat.exists
+
+- name: Remove ssl http
+  ansible.builtin.file:
+    path: "/etc/thanos_ssl_http"
+    state: absent
+  when: ssl_server_http.stat.exists
+
+- name: Remove user
+  ansible.builtin.user:
+    name: "{{ thanos_user }}"
+    state: absent
+    remove: yes
+
+- name: Remove group
+  ansible.builtin.group:
+    name: "{{ thanos_group }}"
+    state: absent

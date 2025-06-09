@@ -1,0 +1,29 @@
+---
+- name: Fix ugrep /var/version pollution - stat. Delete this task after 18/07/2025
+  ansible.builtin.stat:
+    path: /var/versions
+  register: _install_binaries_versions_file
+
+- name: Fix ugrep /var/version pollution - delete. Delete this task after 18/07/2025
+  ansible.builtin.lineinfile:
+    path: /var/versions
+    state: absent
+    regexp: "{{ item }}"
+  loop:
+    - '^ug\+='
+    - '^ugrep\+='
+  when: _install_binaries_versions_file.stat.exists
+
+- name: Install binaries
+  include_tasks: install_binaries.yml
+  loop: "{{ binaries | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when: (item.value.state | default('present')) == 'present'
+
+- name: Remove binaries
+  include_tasks: remove_binaries.yml
+  loop: "{{ binaries | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when: (item.value.state | default('present')) == 'absent'

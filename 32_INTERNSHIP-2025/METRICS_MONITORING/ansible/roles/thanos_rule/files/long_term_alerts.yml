@@ -1,0 +1,26 @@
+groups:
+  - name: "CPU[LT]"
+    rules:
+      - alert: HostCpuIsUnderutilized
+        # Calcule pour chaque instance le taux par seconde auquel le CPU reste inactif durant la dernière semaine,
+        # prend la valeur la plus faible parmi ces taux (pour identifier le cas le plus critique) et vérifie si
+        # cette valeur minimale est supérieure à 85% d'inactivité.
+        expr: (min by (instance) (rate(node_cpu_seconds_total{mode="idle"}[1w]))) > 0.85
+        for: 1w
+        labels:
+          severity: info
+        annotations:
+          summary: "Host CPU is underutilized (instance {{ $labels.instance }})"
+          description: "CPU load has been < 15% for 1 week. Consider reducing the number of CPUs.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+  - name: "MEMORY[LT]"
+    rules:
+      - alert: HostMemoryIsUnderutilized
+        expr: min_over_time(node_memory_MemFree_bytes[1w]) > node_memory_MemTotal_bytes * .8
+        for: 0m
+        labels:
+          severity: info
+        annotations:
+          summary: Host Memory is underutilized (instance {{ $labels.instance }})
+          description: "Node memory usage is < 20% for 1 week. Consider reducing memory space. (instance {{ $labels.instance }})\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+

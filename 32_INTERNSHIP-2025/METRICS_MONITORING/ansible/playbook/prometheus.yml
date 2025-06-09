@@ -1,0 +1,5 @@
+---
+- name: Install prometheus
+  hosts: prometheus
+  roles:
+    - prometheus

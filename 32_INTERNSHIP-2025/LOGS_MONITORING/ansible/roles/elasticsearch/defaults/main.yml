@@ -2,9 +2,44 @@
 ---
 # defaults file for elasticsearch
 es_version: "9.0.0"
+
+# URL de téléchargement de l’archive tar.gz
 es_archive_url: "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-{{ es_version }}-linux-x86_64.tar.gz"
-es_archive_checksum_url: "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-{{ es_version }}-linux-x86_64.tar.gz.sha512"
+es_archive_dest: "/tmp/elasticsearch-{{ es_version }}.tar.gz"
+
+# Répertoire d’installation principal
 es_install_dir: "/etc/elasticsearch"
-es_user: elasticsearch
-es_group: elasticsearch
-es_heap_size: "1g"
+
+# Repertoire certfs
+es_certs_path: "/etc/elasticsearch/current/certs"
+es_kibana_path:
+
+# Utilisateur et groupe système pour Elasticsearch
+es_user: "elasticsearch"
+es_group: "elasticsearch"
+
+# Répertoires de données, logs & pid
+es_data_dir: "/var/lib/elasticsearch"
+es_logs_dir: "/var/log/elasticsearch"
+es_pid_dir: "/var/run/elasticsearch"
+
+# Répertoire pour JNA temporaire (si /tmp est monté noexec)
+es_jna_tmpdir: "/var/lib/elasticsearch/jna_tmp"
+
+# Taille du heap Java (1g par défaut, ajuster en prod)
+es_jvm_heap_size: "4g"
+
+# Limites système recommandées
+es_limits_nofile: 65535       # Nombre max de fichiers ouverts
+es_limits_nproc: 4096         # Nombre max de processus (threads) 
+es_limits_memlock: unlimited  # memlock pour éviter le swap de la heap
+
+# Paramètres sysctl recommandés
+es_swappiness: 1              # Faiblesse de swap
+es_vm_max_map_count: 262144   # Maximum mappages mémoire
+es_tcp_retries2: 5            # Ré-essais TCP (timeout client elasticsearch)
+
+# Répertoire où créer les liens symboliques vers les binaires (pour appel sans ./)
+es_symlink_dir: "/usr/local/bin"
+
+es_enabled: true

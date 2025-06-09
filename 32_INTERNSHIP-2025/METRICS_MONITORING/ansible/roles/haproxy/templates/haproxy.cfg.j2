@@ -1,0 +1,23 @@
+global
+    log /dev/log local0
+    maxconn 4000
+    user haproxy
+    group haproxy
+    daemon
+
+defaults
+    log global
+    mode {{ mode }}
+    option {{ option }}
+    timeout connect 10s
+    timeout client 1m
+    timeout server 1m
+
+listen {{ listen }}
+    bind *:9090
+    balance roundrobin
+    option {{ listen_option }}
+    tcp-check connect port 9090
+{% for server in haproxy_servers %}
+    server {{ server.name }} {{ server.address }}:9090 check
+{% endfor %}

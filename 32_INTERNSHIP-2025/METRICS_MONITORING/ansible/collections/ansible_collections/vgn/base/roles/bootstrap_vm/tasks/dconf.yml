@@ -1,0 +1,88 @@
+---
+- name: Create user profile
+  ansible.builtin.copy:
+    content: |
+      user-db:user
+      system-db:local
+    dest: /etc/dconf/profile/user
+    owner: root
+    group: root
+
+- name: Create gdm profile
+  ansible.builtin.copy:
+    content: |
+      user-db:user
+      system-db:gdm
+      file-db:/usr/share/gdm/greeter-dconf-defaults
+    dest: /etc/dconf/profile/gdm
+    owner: root
+    group: root
+
+- name: Create dconf db
+  ansible.builtin.file:
+    path: /etc/dconf/db/local.d/
+    state: directory
+
+- name: Create dconf gdm db
+  ansible.builtin.file:
+    path: /etc/dconf/db/gdm.d/
+    state: directory
+
+- name: Create dconf db locks
+  ansible.builtin.file:
+    path: /etc/dconf/db/local.d/locks
+    state: directory
+
+- name: Create dconf gdm locks
+  ansible.builtin.file:
+    path: /etc/dconf/db/gdm.d/locks
+    state: directory
+
+- name: Disable location
+  ansible.builtin.copy:
+    content: |
+      [org/gnome/system/location]
+      enabled=false
+    dest: /etc/dconf/db/local.d/00-location
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - bootstrap_vm - Update dconf
+
+- name: Deploy location lock
+  ansible.builtin.copy:
+    content: |
+      /org/org/gnome/system/location/enabled
+    dest: /etc/dconf/db/local.d/locks/location
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - bootstrap_vm - Update dconf
+
+- name: Restrict login dconf
+  ansible.builtin.copy:
+    content: |
+      [org/gnome/login-screen]
+      # Do not show the user list
+      disable-user-list=true
+    dest: /etc/dconf/db/gdm.d/00-login
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - bootstrap_vm - Update dconf
+
+- name: Deploy login lock
+  ansible.builtin.copy:
+    content: |
+      /org/gnome/login-screen/disable-user-list
+    dest: /etc/dconf/db/gdm.d/locks/login
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - bootstrap_vm - Update dconf
+
+- meta: flush_handlers

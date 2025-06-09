@@ -1,0 +1,13 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for install_blackbox
+blackbox_version: "0.26.0"
+blackbox_install_dir: "/etc/blackbox"
+blackbox_binary: "/usr/local/bin/blackbox"
+blackbox_user: "blackbox"
+blackbox_group: "blackbox"
+blackbox_service_file: "/etc/systemd/system/blackbox_exporter.service"
+blackbox_config_file: "{{ blackbox_install_dir }}/blackbox.yml"
+blackbox_tls_config: "{{ blackbox_install_dir }}/tls_config.yml"
+blackbox_enabled: true
+blackbox_tls_server_enabled: false

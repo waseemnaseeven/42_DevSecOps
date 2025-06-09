@@ -1,0 +1,67 @@
+- name: Ensure local conf for firefox enabled
+  ansible.builtin.copy:
+    src: usr.bin.firefox
+    dest: /etc/apparmor.d/usr.bin.firefox
+    owner: root
+    group: root
+    mode: "0644"
+  when: ansible_distribution_release != 'noble'
+  notify:
+    - bootstrap_pc - Reload AppArmor
+
+- name: Write custom conf for firefox
+  ansible.builtin.copy:
+    content: |
+      # Site-specific additions and overrides for usr.bin.firefox.
+      # For more details, please see /etc/apparmor.d/local/README.
+      # Native Messaging
+      owner @{HOME}/.mozilla/**/native-messaging-hosts/** ixr,
+      /usr/bin/keepassxc-proxy ixr,
+      /run/user/*/org.keepassxc.KeePassXC.BrowserServer ixr,
+      /run/user/*/app/org.keepassxc.KeePassXC/org.keepassxc.KeePassXC.BrowserServer wr,
+
+      # https://bugs.launchpad.net/ubuntu/+source/apparmor/+bug/2044304
+      /sys/devices/pci*/**/{config,revision} r,
+      @{PROC}/[0-9]*/**/comm r,
+      @{PROC}/[0-9]*/**/oom_score_adj w,
+    dest: /etc/apparmor.d/local/usr.bin.firefox
+    owner: root
+    group: root
+    mode: "0644"
+  when: ansible_distribution_release != 'noble'
+  notify:
+    - bootstrap_pc - Reload AppArmor
+
+- name: Ensure usr.bin.firefox conf removed on noble
+  ansible.builtin.file:
+    path: "/etc/apparmor.d/usr.bin.firefox"
+    state: absent
+  when: ansible_distribution_release == 'noble'
+  notify:
+    - bootstrap_pc - Reload AppArmor
+
+- name: Ensure usr.bin.firefox local conf removed on noble
+  ansible.builtin.file:
+    path: "/etc/apparmor.d/local/usr.bin.firefox"
+    state: absent
+  when: ansible_distribution_release == 'noble'
+  notify:
+    - bootstrap_pc - Reload AppArmor
+
+- name: Write custom conf for firefox noble
+  ansible.builtin.copy:
+    content: |
+      # Site-specific additions and overrides for usr.bin.firefox.
+      # For more details, please see /etc/apparmor.d/local/README.
+      # Native Messaging
+      owner @{HOME}/.mozilla/**/native-messaging-hosts/** ixr,
+      /usr/bin/keepassxc-proxy ixr,
+      /run/user/*/org.keepassxc.KeePassXC.BrowserServer ixr,
+      /run/user/*/app/org.keepassxc.KeePassXC/org.keepassxc.KeePassXC.BrowserServer wr,
+    dest: /etc/apparmor.d/local/firefox
+    owner: root
+    group: root
+    mode: "0644"
+  when: ansible_distribution_release == 'noble'
+  notify:
+    - bootstrap_pc - Reload AppArmor

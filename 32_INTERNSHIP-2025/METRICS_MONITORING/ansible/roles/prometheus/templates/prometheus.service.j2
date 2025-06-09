@@ -1,0 +1,27 @@
+[Unit]
+Description=Prometheus Version {{ prometheus_version }}
+Documentation=https://prometheus.io/docs/introduction/overview/
+After=network-online.target
+
+[Service]
+User={{ prometheus_user }}
+Group={{ prometheus_group }}
+Restart=on-failure
+ExecStart={{ prometheus_binary }} \
+  --config.file={{ prometheus_config_file }} \
+  --storage.tsdb.path={{ prometheus_install_dir }}/data \
+  --storage.tsdb.retention.time=15d \
+  --log.level={{ prometheus_log_level }} \
+  --log.format=json \
+{% if prometheus_tls_server_enabled | default('false') %}
+  --web.config.file={{ prometheus_tls_config }} \
+{% endif %}
+{% if prometheus_sidecar_enabled | default('false') %}
+  --storage.tsdb.min-block-duration=2h \
+  --storage.tsdb.max-block-duration=2h \
+  --web.enable-lifecycle \
+{% endif %}
+
+[Install]
+WantedBy=multi-user.target
+

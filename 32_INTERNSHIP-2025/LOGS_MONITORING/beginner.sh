@@ -72,7 +72,6 @@ helm upgrade --install gitlab gitlab/gitlab \
 kubectl get secret gitlab-gitlab-initial-root-password \
   -n gitlab -o jsonpath='{.data.password}' | base64 --decode
 
-
 # SOURCES
 https://surajsoni3332.medium.com/setting-up-elk-stack-on-kubernetes-a-step-by-step-guide-227690eb57f4
 https://betterstack.com/community/guides/scaling-docker/kind/

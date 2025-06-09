@@ -147,7 +147,7 @@
 - API REST json
 - haute dispo
 - communication via port 9300
-- noeud est un serveur ayant un service elastic, differents type: masterr, data, client
+- noeud est un serveur ayant un service elastic, differents type: master, data, client
 - index est une instance de database
 - shards est un decoupage logique d'un index 
 - replicas sont les replicas de shards d'un index : redondance, mais aussi performance

@@ -1,0 +1,166 @@
+---
+- name: Include OS-specific variables
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ ansible_distribution }}.yml"
+    - "{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ ansible_os_family }}.yml"
+  tags:
+    - always
+
+- name: Setup network
+  ansible.builtin.include_tasks: "network.yml"
+
+- name: Install work packages
+  ansible.builtin.apt:
+    name: "{{ pc_packages }}"
+    state: present
+
+- name: Install work snaps
+  community.general.snap:
+    name: "{{ pc_snaps }}"
+
+- name: Setup flatpak remotes
+  community.general.flatpak_remote:
+    name: "{{ item.key }}"
+    flatpakrepo_url: "{{ item.value.flatpakrepo_url }}"
+    state: "{{ item.value.state | default(omit) }}"
+  loop: "{{ pc_flatpak_remotes | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Install flatpak packages
+  community.general.flatpak:
+    name: "{{ item.value.name }}"
+    state: "{{ item.value.state | default(omit) }}" # warning : tried default(latest), but raise error. Could not match any installed flatpaks to the name `org.mozilla.Thunderbird`. If you used a URL, try using the reverse DNS name of the flatpak
+    remote: "{{ item.value.remote | default(omit) }}"
+    method: "{{ item.value.method | default(omit) }}"
+  loop: "{{ pc_flatpak_packages | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Copy TTF fonts
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: /usr/share/fonts/truetype/
+    mode: "0755"
+  loop:
+    - HackNerd
+    - DejaVuSansMono Nerd Font
+    - FiraCode
+
+# TODO delete this after 3rd of april 2025
+- name: Remove old scripts - You can delete this after 3rd of april 2025
+  ansible.builtin.file:
+    path: "/usr/bin/{{ item }}"
+    state: absent
+  loop:
+    - disk_password_test
+    - disk_password_change
+    - usb_password_change
+    - usb_password_test
+    - vpn_debug
+    - vpn_debug_full
+
+- name: Deploy root scripts
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: /usr/local/sbin/{{ item }}
+    owner: root
+    group: root
+    mode: "0700"
+    validate: /usr/bin/shellcheck %s
+  loop:
+    - disk_password_test
+    - disk_password_change
+    - usb_password_change
+    - usb_password_test
+    - wifi_capture
+
+- name: Ensure initial setup is disabled
+  ansible.builtin.lineinfile:
+    path: /etc/gdm3/custom.conf
+    insertafter: '\[daemon\]'
+    line: "InitialSetupEnable=False"
+
+- name: Manage Wayland
+  ansible.builtin.lineinfile:
+    path: /etc/gdm3/custom.conf
+    regexp: ^#?WaylandEnable=
+    insertafter: '\[daemon\]'
+    line: "{% if bootstrap_enable_wayland %}#{% endif %}WaylandEnable=false"
+
+- name: Deploy dconf
+  ansible.builtin.include_tasks: "dconf.yml"
+
+- name: Install Firefox
+  ansible.builtin.include_tasks: "mozilla.yml"
+
+- name: Install go
+  ansible.builtin.include_tasks: "install_go.yml"
+  when: bootstrap_pc_go_enabled
+
+- name: Install Terminator
+  ansible.builtin.include_tasks: "terminator.yml"
+  when: bootstrap_pc_terminator_enabled
+
+- name: Install KeepassXC
+  ansible.builtin.include_tasks: "keepassxc.yml"
+
+- name: Install QEMU
+  ansible.builtin.include_tasks: "qemu.yml"
+  when: bootstrap_pc_qemu_enabled
+
+- name: Install Google Earth
+  ansible.builtin.include_tasks: "googleearth.yml"
+  when: bootstrap_pc_googleearth_enabled
+
+- name: Install QGIS
+  ansible.builtin.include_tasks: "qgis.yml"
+  when: bootstrap_pc_qgis_enabled
+
+- name: Install Zotero
+  ansible.builtin.include_tasks: "zotero.yml"
+  when: bootstrap_pc_zotero_enabled
+
+- name: Install YED
+  ansible.builtin.include_tasks: "yed.yml"
+  when: bootstrap_pc_yed_enabled
+
+- name: Install Gephi
+  ansible.builtin.include_tasks: "gephi.yml"
+  when: bootstrap_pc_gephi_enabled
+
+- name: Install OBS Studio
+  ansible.builtin.include_tasks: "obs.yml"
+  when: bootstrap_pc_obs_enabled
+
+- name: Manage aws
+  ansible.builtin.include_tasks: "aws.yml"
+  when: bootstrap_pc_aws_enabled
+
+- name: Install Mattermost
+  ansible.builtin.include_tasks: "mattermost.yml"
+
+- name: Install Flameshot
+  ansible.builtin.include_tasks: "flameshot.yml"
+  when: bootstrap_pc_flameshot_enabled
+
+# - name: Deploy polkit
+#   ansible.builtin.include_tasks: "polkit.yml"
+
+- name: Deploy apparmor
+  ansible.builtin.include_tasks: "apparmor.yml"
+
+- name: Deploy nfs
+  ansible.builtin.include_tasks: "nfs.yml"
+
+- name: Install python via deadsnakes
+  ansible.builtin.include_tasks: "python.yml"
+
+- name: Deploy remote-screen
+  ansible.builtin.include_tasks: "assist.yml"
+
+- name: Force all notified handlers to run at this point, not waiting for normal sync points
+  ansible.builtin.meta: flush_handlers

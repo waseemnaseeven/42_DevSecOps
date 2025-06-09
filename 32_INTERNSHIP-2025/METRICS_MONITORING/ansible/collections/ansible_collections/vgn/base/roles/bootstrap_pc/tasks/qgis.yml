@@ -1,0 +1,35 @@
+---
+- name: Install qgis key
+  # wget -O roles/bootstrap_pc/files/qgis.gpg https://download.qgis.org/downloads/qgis-archive-keyring.gpg
+  ansible.builtin.copy:
+    src: qgis.gpg
+    dest: "/etc/apt/keyrings/qgis.gpg"
+    mode: "0644"
+
+- name: Remove old qgis repo
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/qgis.list
+    state: absent
+
+- name: "Add qgis repo"
+  ansible.builtin.deb822_repository:
+    types: "deb"
+    uris: https://qgis.org/debian
+    suites: "{{ ansible_distribution_release }}"
+    components:
+      - main
+    signed_by: /etc/apt/keyrings/qgis.gpg
+    name: "qgis"
+  register: qgis_repo
+
+- name: Update cache
+  ansible.builtin.apt:
+    update_cache: true
+  when: qgis_repo.changed
+
+- name: Install qgis
+  ansible.builtin.apt:
+    name:
+      - qgis
+      - qgis-plugin-grass
+    state: present

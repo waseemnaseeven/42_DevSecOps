@@ -1,0 +1,30 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for alertmanager
+alertmanager_version: "0.28.0"
+alertmanager_install_dir: "/etc/alertmanager"
+alertmanager_binary: "/usr/local/bin/alertmanager"
+alertmanager_user: "alertmanager"
+alertmanager_group: "alertmanager"
+alertmanager_service_file: "/etc/systemd/system/alertmanager.service"
+alertmanager_config_file: "{{ alertmanager_install_dir }}/alertmanager.yml"
+alertmanager_tls_file: "{{ alertmanager_install_dir }}/tls_config.yml"
+alertmanager_gossip_config: "{{ alertmanager_install_dir }}/gossip_config.yml"
+alertmanager_storage_path: "/var/lib/alertmanager/data"
+alertmanager_log_level: "info"
+alertmanager_enabled: true
+
+alertmanager_tls_server_enabled: false
+alertmanager_tls_client_enabled: false 
+alertmanager_tls_client_gossip: false
+
+alertmanager_tls_server:
+  ca_file: "/etc/alertmanager/ca_client.crt"
+  cert_file: "/etc/alertmanager_ssl/alertmanager.crt"
+  key_file: "/etc/alertmanager_ssl/alertmanager.key"
+
+alertmanager_tls_client:
+  ca_file: "/etc/alertmanager/ca_client.crt"
+  cert_file: "/etc/alertmanager_ssl_client/alertmanager_client.crt"
+  key_file: "/etc/alertmanager_ssl_client/alertmanager_client.key"
+

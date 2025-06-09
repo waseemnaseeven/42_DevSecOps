@@ -1,0 +1,26 @@
+# Ignore error because snap get system proxy.http can error if http.proxy is not set
+- name: Get snap http proxy
+  ansible.builtin.shell:
+    cmd: "snap get system proxy.http"
+  when: use_proxy
+  register: _snap_http_proxy
+  ignore_errors: true
+  changed_when: false
+
+- name: Set snap http proxy
+  ansible.builtin.shell:
+    cmd: "snap set system proxy.http={{ http_proxy }}"
+  when: use_proxy and (_snap_http_proxy.stdout != http_proxy or _snap_http_proxy is failed)
+
+- name: Get snap https proxy
+  ansible.builtin.shell:
+    cmd: "snap get system proxy.https"
+  when: use_proxy
+  register: _snap_https_proxy
+  ignore_errors: true
+  changed_when: false
+
+- name: Set snap https proxy
+  ansible.builtin.shell:
+    cmd: "snap set system proxy.https={{ https_proxy }}"
+  when: use_proxy and (_snap_https_proxy.stdout != https_proxy or _snap_http_proxy is failed)

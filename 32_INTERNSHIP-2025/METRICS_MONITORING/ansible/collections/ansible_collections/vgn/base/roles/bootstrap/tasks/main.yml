@@ -1,0 +1,158 @@
+---
+- name: Print OS Info
+  ansible.builtin.debug:
+    msg: "Distrib : {{ ansible_distribution }}, Release: {{ ansible_distribution_release }}, Family : {{ ansible_os_family }}, Major Version : {{ ansible_distribution_major_version }}"
+
+- name: Include OS-specific variables
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ ansible_distribution }}.yml"
+    - "{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ ansible_os_family }}.yml"
+  tags:
+    - always
+
+- name: Override netplan to avoid dhcp options
+  ansible.builtin.template:
+    src: 99-dhcp-override.yaml.j2
+    dest: /etc/netplan/99-dhcp-override.yaml
+    mode: "0644"
+  when: bootstrap_manage_netplan_cloudinit
+  notify:
+    - netplan apply
+
+- name: Create polkit rules folder
+  ansible.builtin.file:
+    path: /etc/polkit-1/rules.d/
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Remove polkit rules
+  ansible.builtin.file:
+    path: /etc/polkit-1/rules.d/{{ item.filename }}
+    state: absent
+  when: item.state | default('present') == 'absent'
+  loop: "{{ bootstrap_polkit_rules }}"
+  notify:
+    - restart polkit
+
+- name: Polkit rules
+  ansible.builtin.copy:
+    content: "{{ item.content }}"
+    dest: /etc/polkit-1/rules.d/{{ item.filename }}
+    mode: "0600"
+    owner: root
+    group: root
+  when: item.state | default('present') == 'absent'
+  loop: "{{ bootstrap_polkit_rules }}"
+  notify:
+    - restart polkit
+
+# TODO : huge mess - ipv6 should not be disabled
+# TODO : the role should disable and enable ipv6.disabled
+# - name: Change /etc/default/grub to dis/enable IPv6
+#   replace:
+#     dest: /etc/default/grub
+#     regexp: '^(GRUB_CMDLINE_LINUX=".*?)(ipv6.disable=1)?(")$'
+#     replace: '\1 {{ "ipv6.disable=1" if bootstrap_ipv6_disabled else "" }}\2'
+#   register: _ipv6_disabling
+
+# - name: Update grub
+#   ansible.builtin.command:
+#     cmd: "update-grub"
+#   when: _ipv6_disabling is changed
+
+# - name: Reboot instance
+#   reboot:
+#   when: _ipv6_disabling is changed and bootstrap_ipv6_disabled_allow_reboot
+
+- name: Install custom certs
+  ansible.builtin.include_tasks: "ca_certificates.yml"
+
+- name: Configure /etc/hosts
+  ansible.builtin.template:
+    src: hosts.j2
+    dest: /etc/hosts
+
+- name: Set a hostname
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+
+- name: Set Swapiness
+  ansible.posix.sysctl:
+    sysctl_file: /etc/sysctl.d/99-swapiness.conf
+    name: vm.swappiness
+    value: "{{ swappiness }}"
+    state: present
+
+- name: Manage locale
+  ansible.builtin.include_tasks: "locale.yml"
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: Manage APT
+  ansible.builtin.include_tasks: "apt.yml"
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: Manage snap
+  ansible.builtin.include_tasks: "snap.yml"
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Manage neovim
+  ansible.builtin.include_tasks: "neovim.yml"
+  when: bootstrap_neovim_enabled
+
+- name: Manage dnf
+  ansible.builtin.include_tasks: "dnf.yml"
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Fedora'
+
+- name: Ensure splash screen enabled
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub
+    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="{{ grub_cmdline_linux_default }}"'
+  register: grub_console
+
+- name: Check if cloudinit folder exists
+  ansible.builtin.stat:
+    path: /etc/cloud
+  register: cloudfolder
+
+- name: Enable cloudinit
+  block:
+    - name: Deploy cloudconfig conf
+      ansible.builtin.template:
+        src: 99ansible.cfg.j2
+        dest: /etc/cloud/cloud.cfg.d/99ansible.cfg
+        mode: "0644"
+        owner: root
+        group: root
+    - name: Ensure cloud-init is enabled
+      ansible.builtin.file:
+        path: /etc/cloud/cloud-init.disabled
+        state: absent
+  when: cloudfolder.stat.exists and not bootstrap_cloudinit_disabled
+
+- name: Ensure cloud-init is disabled
+  ansible.builtin.copy:
+    dest: /etc/cloud/cloud-init.disabled
+    content: ""
+  when: cloudfolder.stat.exists and bootstrap_cloudinit_disabled
+
+- name: Update grub
+  ansible.builtin.shell:
+    cmd: update-grub
+  when: grub_console.changed
+
+- name: Install NodeJS
+  ansible.builtin.include_tasks: "nodejs.yml"
+
+- name: Setup motd
+  ansible.builtin.include_tasks: "motd.yml"
+  when: bootstrap_custom_motd_enabled
+
+- name: Install VSCode
+  ansible.builtin.include_tasks: "vscode.yml"
+  when: bootstrap_vscode_enabled

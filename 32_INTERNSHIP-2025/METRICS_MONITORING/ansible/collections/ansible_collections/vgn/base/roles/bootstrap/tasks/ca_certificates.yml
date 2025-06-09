@@ -1,0 +1,28 @@
+---
+- name: Install ca-certificates on system
+  ansible.builtin.package:
+    name: "ca-certificates"
+    state: present
+
+- name: Remove not used certs
+  ansible.builtin.file:
+    path: "{{ ca_store_path }}/{{ item.name }}.crt"
+    state: "{{ item.state }}"
+  loop: "{{ ca_certificates }}"
+  when: "(item.state | default('present')) == 'absent'"
+  notify: Update CA Store
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Set cert value
+  ansible.builtin.copy:
+    dest: "{{ ca_store_path }}/{{ item.name }}.crt"
+    content: "{{ item.content }}"
+  when: "(item.state | default('present')) == 'present'"
+  notify: Update CA Store
+  loop: "{{ ca_certificates }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Force all notified handlers to run at this point, not waiting for normal sync points
+  ansible.builtin.meta: flush_handlers

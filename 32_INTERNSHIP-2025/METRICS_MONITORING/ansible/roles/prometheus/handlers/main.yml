@@ -1,0 +1,16 @@
+#SPDX-License-Identifier: MIT-0
+---
+# handlers file for install_prometheus
+- name: Restart prometheus
+  ansible.builtin.systemd_service:
+    name: prometheus.service
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+
+- name: Restart sidecar
+  ansible.builtin.systemd_service:
+    name: sidecar.service
+    state: restarted
+    enabled: yes
+    daemon_reload: yes

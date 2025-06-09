@@ -1,0 +1,23 @@
+---
+- name: Add proxy
+  ansible.builtin.lineinfile:
+    line: "proxy={{ http_proxy }}"
+    path: /etc/dnf/dnf.conf
+    state: "{{ 'present' if use_proxy else 'absent' }}"
+
+- name: Update packages list
+  ansible.builtin.dnf:
+    update_cache: true
+
+- name: Remove dependencies that are no longer required
+  ansible.builtin.dnf:
+    autoremove: yes
+
+- name: Add EPEL
+  ansible.builtin.dnf:
+    name: epel-release
+    state: latest
+
+- name: Update packages list
+  ansible.builtin.dnf:
+    update_cache: true

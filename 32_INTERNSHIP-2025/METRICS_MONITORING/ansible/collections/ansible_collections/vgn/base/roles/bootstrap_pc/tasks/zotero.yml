@@ -1,0 +1,57 @@
+---
+- name: Register zotero version
+  ansible.builtin.lineinfile:
+    path: /var/versions
+    regexp: "^zotero="
+    create: true
+    line: "zotero={{ zotero_version }}"
+  register: binary_version
+
+- name: Managing zotero
+  when: binary_version.changed or (zotero_force_install | default(false))
+  block:
+    - name: Remove zotero
+      ansible.builtin.file:
+        path: "/opt/zotero"
+        state: absent
+
+    - name: Download zotero
+      ansible.builtin.unarchive:
+        remote_src: true
+        src: "{{ zotero_url }}"
+        dest: "/opt"
+
+    - name: Copy zotero
+      ansible.builtin.copy:
+        remote_src: true
+        src: /opt/Zotero_linux-x86_64/
+        dest: /opt/zotero/
+
+    - name: Remove old zotero
+      ansible.builtin.file:
+        path: /opt/Zotero_linux-x86_64
+        state: absent
+
+  rescue:
+    - name: "Registering zotero failure"
+      ansible.builtin.lineinfile:
+        path: /var/versions
+        regexp: "^zotero="
+        line: "zotero=failure"
+
+- name: Add Desktop shortcut
+  ansible.builtin.copy:
+    content: |
+      [Desktop Entry]
+      Name=Zotero
+      Exec=bash -c "/opt/zotero/zotero -url %U"
+      Icon=/opt/zotero/chrome/icons/default/default256.png
+      Type=Application
+      Terminal=false
+      Categories=Office;
+      MimeType=text/plain;x-scheme-handler/zotero;application/x-research-info-systems;text/x-research-info-systems;text/ris;application/x-endnote-refer;application/x-inst-for-Scientific-info;application/mods+xml;application/rdf+xml;application/x-bibtex;text/x-bibtex;application/marc;application/vnd.citationstyles.style+xml
+      X-GNOME-SingleWindow=true
+    dest: /usr/share/applications/zotero.desktop
+    mode: "0644"
+    owner: root
+    group: root

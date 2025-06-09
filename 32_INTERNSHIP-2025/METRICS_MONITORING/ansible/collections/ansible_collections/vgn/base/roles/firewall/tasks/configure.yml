@@ -1,0 +1,42 @@
+---
+- name: Reset UFW
+  community.general.ufw:
+    state: reset
+
+- name: Applying rules non routed
+  community.general.ufw:
+    rule: "{{ rule.rule | default(ufw_default_rule) }}"
+    direction: "{{ rule.direction | default(omit) }}"
+    interface: "{{ rule.interface | default(omit) }}"
+    comment: Ansible Managed - {{ rule.comment | default('') }}
+    from_ip: "{{ rule.from_ip | default('any') }}"
+    from_port: "{{ rule.from_port | default('any') }}"
+    to_ip: "{{ item.to_ip | default('any') }}"
+    interface_in: "{{ rule.interface_in | default(omit) }}"
+    interface_out: "{{ rule.interface_out | default(omit) }}"
+    to_port: "{{ rule.to_port }}"
+    route: "{{ rule.route | default(omit) }}"
+    proto: "{{ rule.proto | default('any') }}"
+    insert_relative_to: "{{ rule.insert_relative_to | default('zero') }}"
+  loop: "{{ lookup('varnames', '^ufw_rules_', wantlist=True) }}"
+  when:
+    - rule.enabled
+  vars:
+    rule: "{{ lookup('vars', item) }}"
+
+- name: Default output policy
+  ansible.builtin.lineinfile:
+    path: /etc/default/ufw
+    regexp: "^DEFAULT_OUTPUT_POLICY="
+    line: DEFAULT_OUTPUT_POLICY={{ ufw_default_output_policy }}
+
+- name: Default input policy
+  ansible.builtin.lineinfile:
+    path: /etc/default/ufw
+    regexp: "^DEFAULT_INPUT_POLICY="
+    line: DEFAULT_INPUT_POLICY={{ ufw_default_input_policy }}
+
+- name: Enable UFW
+  community.general.ufw:
+    state: enabled
+  when: ufw_enabled

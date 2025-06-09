@@ -1,0 +1,5 @@
+---
+- name: Install thanos store
+  hosts: thanos_store
+  roles:
+    - thanos_store

@@ -1,0 +1,66 @@
+- name: Check if service exist
+  stat:
+    path: "{{ node_exporter_service_file }}"
+  register: service_file
+
+- name: Check if binary exist
+  stat:
+    path: "{{ node_exporter_binary }}"
+  register: binary_file
+
+- name: Check if config exist
+  stat:
+    path: "{{ node_exporter_install_dir }}"
+  register: config_folder
+
+- name: Check if ssl_folder exist
+  stat:
+    path: "/etc/node_exporter_ssl"
+  register: ssl_folder
+
+- name: Disable service
+  ansible.builtin.systemd_service:
+    state: "stopped"
+    name: node_exporter.service
+    enabled: false
+  when: service_file.stat.exists
+  
+- name: Remove service
+  ansible.builtin.file:
+    path: "{{ node_exporter_service_file }}"
+    state: absent
+  when: service_file.stat.exists
+
+- name: Refresh systemd
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  when: service_file.stat.exists
+
+- name: Remove binary
+  ansible.builtin.file:
+    path: "{{ node_exporter_binary }}"
+    state: absent
+  when: binary_file.stat.exists
+
+- name: Remove node_exporter config folder
+  ansible.builtin.file:
+    path: "{{ node_exporter_install_dir }}"
+    state: absent
+  when: config_folder.stat.exists
+
+- name: Remove ssl
+  ansible.builtin.file:
+    path: "/etc/node_exporter_ssl"
+    state: absent
+  when: ssl_folder.stat.exists
+
+- name: Remove user
+  ansible.builtin.user:
+    name: "{{ node_exporter_user }}"
+    state: absent
+    remove: yes
+
+- name: Remove group
+  ansible.builtin.group:
+    name: "{{ node_exporter_group }}"
+    state: absent

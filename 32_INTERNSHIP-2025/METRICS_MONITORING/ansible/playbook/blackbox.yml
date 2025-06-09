@@ -1,0 +1,4 @@
+- name: Install blackbox
+  hosts: blackbox
+  roles:
+    - blackbox

@@ -1,0 +1,37 @@
+---
+- name: Copy ca-cert 
+  ansible.builtin.copy:
+    content: "{{ lookup('pipe', 'vault read -field=certificate rd/pki/monitoring/cert/ca') }}"
+    dest: "{{ node_exporter_ca_file }}"
+    owner: "{{ node_exporter_user }}"
+    group: "{{ node_exporter_group }}"
+    mode: '0644'
+  when: node_exporter_tls_client_enabled
+
+- name: Deploying TLS config file 
+  ansible.builtin.template:
+    src: tls_config.yml.j2
+    dest: "{{ node_exporter_tls_config }}"
+    owner: "{{ node_exporter_user }}"
+    group: "{{ node_exporter_group }}"
+    mode: '0644'
+  when: node_exporter_tls_server_enabled
+
+- name: Deploying the systemd service 
+  ansible.builtin.template:
+    src: node_exporter.service.j2
+    dest: "{{ node_exporter_service_file }}"
+    mode: '0644'
+  notify:
+    - Restart node_exporter
+
+- name: Launch and activate the systemd service
+  ansible.builtin.systemd_service:
+    name: node_exporter.service
+    state: restarted
+    enabled: true
+    daemon_reload: true
+    force: false # Override existing symlinks
+  notify:
+    - Restart node_exporter
+

@@ -2,7 +2,11 @@
 ---
 # handlers file for elasticsearch
 - name: restart elasticsearch
-  ansible.builtin.service:
+  ansible.builtin.systemd_service:
     name: elasticsearch
     daemon_reload: yes
     state: restarted
+
+# Permet à Ansible de relire PATH si nécessaire après création des symlinks.
+- name: refresh shell cache
+  ansible.builtin.meta: flush_handlers

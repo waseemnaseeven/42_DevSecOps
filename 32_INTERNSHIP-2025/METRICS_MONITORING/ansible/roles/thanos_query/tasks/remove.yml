@@ -1,0 +1,100 @@
+- name: Check if service exist
+  stat:
+    path: "{{ thanos_query_service_file }}"
+  register: service_file
+
+- name: Check if binary exist
+  stat:
+    path: "{{ thanos_binary }}"
+  register: binary_file
+
+- name: Check if config exist
+  stat:
+    path: "{{ thanos_install_dir }}"
+  register: config_folder
+
+- name: Check if ssl_server_http exist
+  stat:
+    path: "/etc/thanos_ssl_http"
+  register: ssl_server_http
+
+- name: Check if ssl_client exist
+  stat:
+    path: "/etc/thanos_ssl_client_http"
+  register: ssl_client_http
+
+- name: Check if ssl_server_grpc exist
+  stat:
+    path: "/etc/thanos_ssl_grpc"
+  register: ssl_server_grpc
+
+- name: Check if ssl_client exist
+  stat:
+    path: "/etc/thanos_ssl_client_grpc"
+  register: ssl_client_grpc
+
+- name: Disable service
+  ansible.builtin.systemd_service:
+    state: "stopped"
+    name: query.service
+    enabled: false
+  when: service_file.stat.exists
+  
+- name: Remove service
+  ansible.builtin.file:
+    path: "{{ thanos_query_service_file }}"
+    state: absent
+  when: service_file.stat.exists
+
+- name: Refresh systemd
+  ansible.builtin.systemd_service:
+    daemon_reload: yes
+  when: service_file.stat.exists
+
+- name: Remove binary
+  ansible.builtin.file:
+    path: "{{ thanos_binary }}"
+    state: absent
+  when: binary_file.stat.exists
+
+- name: Remove thanos config folder
+  ansible.builtin.file:
+    path: "{{ thanos_install_dir }}"
+    state: absent
+  when: config_folder.stat.exists
+
+- name: Remove ssl http
+  ansible.builtin.file:
+    path: "/etc/thanos_ssl_http"
+    state: absent
+  when: ssl_server_http.stat.exists
+
+- name: Remove ssl client http
+  ansible.builtin.file:
+    path: "/etc/thanos_ssl_client_http"
+    state: absent
+  when: ssl_client_http.stat.exists
+
+- name: Remove ssl grpc
+  ansible.builtin.file:
+    path: "/etc/thanos_ssl_grpc"
+    state: absent
+  when: ssl_server_grpc.stat.exists
+
+- name: Remove ssl client grpc
+  ansible.builtin.file:
+    path: "/etc/thanos_ssl_client_grpc"
+    state: absent
+  when: ssl_client_grpc.stat.exists
+
+- name: Remove user
+  ansible.builtin.user:
+    name: "{{ thanos_user }}"
+    state: absent
+    remove: yes
+    
+- name: Remove group
+  ansible.builtin.group:
+    name: "{{ thanos_group }}"
+    state: absent
+

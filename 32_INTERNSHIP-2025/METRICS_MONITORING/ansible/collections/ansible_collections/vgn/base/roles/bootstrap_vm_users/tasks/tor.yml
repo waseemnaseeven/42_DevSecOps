@@ -1,0 +1,27 @@
+---
+- name: "Configuration of {{ item }}"
+  become_user: "{{ item.name }}"
+  become: true
+  block:
+    - name: Remove torbrowser version
+      ansible.builtin.lineinfile:
+        path: ~{{ item.name }}/.versions
+        regexp: "^torbrowser="
+        create: true
+        state: absent
+      register: binary_version
+
+    - name: Managing torbrowser
+      when: binary_version.changed or (torbrowser_force_install | default(false))
+      block:
+        - name: Remove tor-browser
+          ansible.builtin.file:
+            path: ~{{ item.name }}/.tor-browser
+            state: absent
+
+      rescue:
+        - name: "Registering torbrowser failure"
+          ansible.builtin.lineinfile:
+            path: ~{{ item.name }}/.versions
+            regexp: "^torbrowser="
+            line: "torbrowser=failure"

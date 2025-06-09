@@ -1,0 +1,108 @@
+---
+- name: Verify if prometheus rules directory is installed
+  stat:
+    path: "{{ prometheus_install_dir }}/rules"
+  register: rules_folder
+
+- name: Create rules directory
+  ansible.builtin.file:
+    path: "{{ prometheus_install_dir }}/rules"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    recurse: yes
+  when: not rules_folder.stat.exists
+
+- name: Copy self_monitoring_alerts 
+  ansible.builtin.copy:
+    src: self_monitoring_alerts.yml
+    dest: "{{ prometheus_install_dir }}/rules/"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: '0644' 
+
+- name: Copy self_monitoring_alerts_test 
+  ansible.builtin.copy:
+    src: self_monitoring_alerts_test.yml
+    dest: "{{ prometheus_install_dir }}/rules/"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: '0644' 
+
+- name: Copy node_exporter_alerts 
+  ansible.builtin.copy:
+    src: node_exporter_alerts.yml
+    dest: "{{ prometheus_install_dir }}/rules/"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: '0644'
+
+- name: Copy node_exporter_alerts_test 
+  ansible.builtin.copy:
+    src: node_exporter_alerts_test.yml
+    dest: "{{ prometheus_install_dir }}/rules/"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: '0644' 
+
+- name: Copy blackbox_exporter_alerts
+  ansible.builtin.copy:
+    src: blackbox_exporter_alerts.yml
+    dest: "{{ prometheus_install_dir }}/rules/"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: '0644'
+
+- name: Copy thanos_alerts
+  ansible.builtin.copy:
+    src: thanos_alerts.yml
+    dest: "{{ prometheus_install_dir }}/rules/"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: '0644'
+  when: prometheus_sidecar_enabled
+
+- name: Deploy the config file (prometheus.yml) 
+  ansible.builtin.template:
+    src: prometheus.yml.j2
+    dest: "{{ prometheus_config_file }}"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: '0644'
+
+- name: Copy ca-cert 
+  ansible.builtin.copy:
+    content: "{{ lookup('pipe', 'vault read -field=certificate rd/pki/monitoring/cert/ca') }}"
+    dest: "/etc/prometheus/ca_client.crt"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: '0644'
+  when: prometheus_tls_client_enabled
+
+- name: Deploy the tls config file (tls_config.yml) 
+  ansible.builtin.template:
+    src: tls_config.yml.j2
+    dest: "{{ prometheus_tls_config }}"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: '0644'
+  notify:
+    - Restart prometheus
+  when: prometheus_tls_server_enabled
+
+- name: Deploying the systemd service 
+  ansible.builtin.template:
+    src: prometheus.service.j2
+    dest: "{{ prometheus_service_file }}"
+    mode: '0644'
+  notify:
+    - Restart prometheus
+
+- name: Launch and activate the systemd service
+  ansible.builtin.systemd_service:
+    name: prometheus.service
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+    force: false # Override existing symlinks
+  notify:
+    - Restart prometheus

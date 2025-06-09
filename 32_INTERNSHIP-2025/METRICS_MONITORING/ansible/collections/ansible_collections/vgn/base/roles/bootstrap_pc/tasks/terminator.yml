@@ -1,0 +1,32 @@
+---
+# - name: Add Terminator GPG
+#   ansible.builtin.copy:
+#     src: terminator.gpg
+#     dest: /etc/apt/keyrings/terminator.gpg
+#     mode: "0644"
+
+# - name: Remove old terminator repo
+#   ansible.builtin.file:
+#     path: /etc/apt/sources.list.d/terminator.list
+#     state: absent
+
+# - name: 'Add terminator repo'
+#   ansible.builtin.deb822_repository:
+#     types: "deb"
+#     uris: https://ppa.launchpadcontent.net/gnome-terminator/ppa/ubuntu
+#     suites: "{{ terminator_distribution_release }}"
+#     components:
+#       - main
+#     signed_by: /etc/apt/keyrings/terminator.gpg
+#     name: "terminator"
+#   register: terminator_repo
+
+# - name: Update cache
+#   ansible.builtin.apt:
+#     update_cache: true
+#   when: terminator_repo.changed
+
+- name: Install terminator packages
+  ansible.builtin.apt:
+    name: "terminator"
+    state: present

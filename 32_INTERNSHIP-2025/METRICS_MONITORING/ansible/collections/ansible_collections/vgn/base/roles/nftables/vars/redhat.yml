@@ -1,0 +1,9 @@
+---
+# vars file for RedHat-based distros
+nft_pkg_list:
+  - nftables
+  - ulogd2
+
+# Use Red Hat flavored paths for main config and included file(s) location:
+nft_main_conf_path: "/etc/sysconfig/nftables.conf"
+nft_conf_dir_path: "/etc/nftables"

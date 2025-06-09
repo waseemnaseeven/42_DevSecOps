@@ -1,0 +1,51 @@
+---
+# - name: Include OS-specific variables
+#   include_vars: "{{ item }}"
+#   with_first_found:
+#     - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+#     - "{{ ansible_distribution }}.yml"
+#     - "{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml"
+#     - "{{ ansible_os_family }}.yml"
+#   tags:
+#     - always
+
+- name: Install psutil
+  ansible.builtin.apt:
+    name:
+      - python3-psutil
+    state: present
+
+- name: Create polkit rules folder
+  ansible.builtin.file:
+    path: /etc/polkit-1/rules.d/
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy NetworkManager rules
+  ansible.builtin.copy:
+    content: |
+      polkit.addRule(function(action, subject) {
+          if (action.id.startsWith("org.freedesktop.NetworkManager") && subject.active && subject.user == "user") {
+              return polkit.Result.YES;
+          }
+      });
+    dest: /etc/polkit-1/rules.d/network-manager-restrictions-user.rules
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - bootstrap_vm_users - Restart polkit
+
+- name: Manage user configs
+  ansible.builtin.include_tasks: "user.yml"
+  loop: "{{ vm_users_config }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Manage user tor
+  ansible.builtin.include_tasks: "tor.yml"
+  loop: "{{ vm_users_config }}"
+  loop_control:
+    label: "{{ item.name }}"

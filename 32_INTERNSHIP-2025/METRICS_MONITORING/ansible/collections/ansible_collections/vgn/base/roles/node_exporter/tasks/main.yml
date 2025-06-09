@@ -1,0 +1,11 @@
+---
+- name: "Installation de node_exporter"
+  include_tasks: install.yml
+  when: node_exporter_enabled
+
+- name: "Suppression de node_exporter"
+  include_tasks: remove.yml
+  when: not node_exporter_enabled
+
+- name: Force all notified handlers to run at this point, not waiting for normal sync points
+  ansible.builtin.meta: flush_handlers

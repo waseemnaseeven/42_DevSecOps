@@ -1,0 +1,8 @@
+---
+- name: Generate certificate for all
+  hosts: all:!ntp
+  serial: 20
+  roles:
+    - vgn.base.vault_cert
+
+

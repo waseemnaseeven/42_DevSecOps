@@ -1,0 +1,35 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for install_node_exporter
+
+node_exporter_version: "1.9.1"
+node_exporter_install_dir: "/etc/node_exporter"
+node_exporter_binary: "/usr/local/bin/node_exporter"
+node_exporter_user: "node_exporter"
+node_exporter_group: "node_exporter"
+node_exporter_service_file: "/etc/systemd/system/node_exporter.service"
+node_exporter_tls_config: "/etc/node_exporter/tls_config.yml"
+node_exporter_log_level: "info"
+node_exporter_enabled: true
+
+node_exporter_enabled_collectors:
+  - systemd
+  - cpu_vulnerabilities
+  - logind
+  - network_route
+  - sysctl
+  - hwmon
+
+node_exporter_filesystem:
+  ignored_mount_points: 
+    - "^/(dev|proc|sys|var/lib/docker/.+|var/lib/kubelet/.+)($|/)"
+  ignored_fs_types: 
+    - "^(sys|proc|auto)fs$"
+
+node_exporter_disabled_collectors: []
+
+node_exporter_tls_server_enabled: false
+node_exporter_tls_client_enabled: false 
+node_exporter_crt_file: "/etc/node_exporter_ssl/node_exporter.crt"
+node_exporter_key_file: "/etc/node_exporter_ssl/node_exporter.key"
+node_exporter_ca_file: "{{ node_exporter_install_dir }}/ca_client.crt"

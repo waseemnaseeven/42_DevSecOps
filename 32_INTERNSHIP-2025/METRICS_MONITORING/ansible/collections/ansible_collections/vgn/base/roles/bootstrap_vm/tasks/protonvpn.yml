@@ -1,0 +1,147 @@
+---
+- name: Register protonvpnrepo version
+  ansible.builtin.lineinfile:
+    path: /var/versions
+    regexp: "^protonvpnrepo="
+    create: true
+    line: "protonvpn={{ protonvpnrepo_version }}"
+  register: binary_version
+
+- name: Managing protonvpnrepo
+  when: binary_version.changed or (protonvpnrepo_force_install | default(false))
+  block:
+    - name: Install ProtonVPN Repo
+      ansible.builtin.apt:
+        deb: "{{ protonvpn_repo_deb }}"
+    - name: Check if using old format
+      ansible.builtin.stat:
+        path: /etc/apt/sources.list.d/protonvpn-stable.list
+      register: _bootstrap_vm_proton_repo_old_format
+    - name: Replace all by amd64
+      ansible.builtin.command:
+        cmd: sed -i 's/arch="all"/arch="amd64"/g' /etc/apt/sources.list.d/protonvpn-stable.list
+      when: _bootstrap_vm_proton_repo_old_format.stat.exists
+    - name: Clean APT
+      ansible.builtin.apt:
+        clean: yes
+    - name: Update APT
+      ansible.builtin.apt:
+        update_cache: yes
+    - name: Upgrade full
+      ansible.builtin.apt:
+        upgrade: full
+  rescue:
+    - name: "Registering protonvpnrepo failure"
+      ansible.builtin.lineinfile:
+        path: /var/versions
+        regexp: "^protonvpnrepo="
+        line: "protonvpnrepo=failure"
+
+- name: Unhold proton-vpn-gnome-desktop
+  ansible.builtin.dpkg_selections:
+    name: proton-vpn-gnome-desktop
+    selection: install
+  ignore_errors: true
+
+- name: Update APT
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Install proton-vpn-gnome-desktop
+  ansible.builtin.apt:
+    name: proton-vpn-gnome-desktop={{ protonvpn_version }}
+  register: _bootstrap_vm_protoninstall
+
+- name: Hold proton-vpn-gnome-desktop
+  ansible.builtin.dpkg_selections:
+    name: proton-vpn-gnome-desktop
+    selection: hold
+
+- name: Full upgrade APT
+  ansible.builtin.apt:
+    upgrade: full
+  when: _bootstrap_vm_protoninstall.changed
+
+- name: Autoremove APT
+  ansible.builtin.apt:
+    autoremove: true
+  when: _bootstrap_vm_protoninstall.changed
+# - name: Add Desktop icon
+#   ansible.builtin.copy:
+#     src: protonvpn.svg
+#     dest: /opt/protonvpn.svg
+#     mode: "0644"
+#     owner: root
+#     group: root
+
+# - name: Copy wrapper
+#   ansible.builtin.copy:
+#     src: protonvpn-cli-wrapper
+#     dest: /usr/local/bin/protonvpn-cli-wrapper
+#     mode: "0755"
+#     owner: root
+#     group: root
+
+# - name: Add classic Desktop shortcut
+#   ansible.builtin.copy:
+#     content: |
+#       [Desktop Entry]
+#       Type=Application
+#       Name=ProtonVPN Choose
+#       GenericName=VPN
+#       Comment=ProtonVPN v3
+#       Categories=Network;Security;
+#       Terminal=true
+#       Exec=/usr/local/bin/protonvpn-cli-wrapper
+#       Icon=/opt/protonvpn.svg
+#     dest: /usr/share/applications/proton.desktop
+#     mode: "0644"
+#     owner: root
+#     group: root
+
+# - name: Add tor Desktop shortcut
+#   ansible.builtin.copy:
+#     content: |
+#       [Desktop Entry]
+#       Type=Application
+#       Name=Tor via ProtonVPN
+#       GenericName=VPN
+#       Comment=ProtonVPN v3
+#       Categories=Network;Security;
+#       Terminal=true
+#       Exec=protonvpn-cli connect --tor --protocol tcp
+#       Icon=/opt/protonvpn.svg
+#     dest: /usr/share/applications/protontor.desktop
+#     mode: "0644"
+#     owner: root
+#     group: root
+
+# - name: Add fatest Desktop shortcut
+#   ansible.builtin.copy:
+#     content: |
+#       [Desktop Entry]
+#       Type=Application
+#       Name=Instant ProtonVPN
+#       GenericName=VPN
+#       Comment=ProtonVPN v3
+#       Categories=Network;Security;
+#       Terminal=true
+#       Exec=protonvpn-cli connect --fastest --protocol tcp
+#       Icon=/opt/protonvpn.svg
+#     dest: /usr/share/applications/protonfastest.desktop
+#     mode: "0644"
+#     owner: root
+#     group: root
+
+# - name: Install ProtonVPN
+#   ansible.builtin.apt:
+#     name:
+#       - proton-vpn-gnome-desktop
+#       - libayatana-appindicator3-1
+#       - gir1.2-ayatanaappindicator3-0.1
+#       - gnome-shell-extension-appindicator
+
+# - name: Install ProtonVPN Cli
+#   ansible.builtin.pip:
+#     name: protonvpn-cli
+#extra_args: --break-system-packages

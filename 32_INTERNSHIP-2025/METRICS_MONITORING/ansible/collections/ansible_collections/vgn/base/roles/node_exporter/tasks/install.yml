@@ -1,0 +1,96 @@
+---
+- name: Register node exporter version
+  ansible.builtin.lineinfile:
+    path: /var/versions
+    regexp: "^node_exporter="
+    create: true
+    line: "node_exporter={{ node_exporter_version }}"
+  register: binary_version
+
+- name: Managing node_exporter
+  when: binary_version.changed or (node_exporter_force_install | default(false))
+  notify:
+    - Restart node-exporter service
+  block:
+    - name: Create temp folder
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: "node_exporter"
+      register: tempfolder
+
+    - name: "Download node exporter {{ node_exporter_version }}"
+      ansible.builtin.unarchive:
+        src: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-{{ cpu_arch }}.tar.gz"
+        dest: "{{ tempfolder.path }}"
+        remote_src: true
+
+    - name: Copy node_exporter
+      ansible.builtin.copy:
+        remote_src: true
+        src: "{{ tempfolder.path }}/node_exporter-{{ node_exporter_version }}.linux-{{ cpu_arch }}/node_exporter"
+        dest: "/usr/local/bin/node_exporter"
+        mode: 0755
+
+    - name: Remove temp folder
+      ansible.builtin.file:
+        path: "{{ tempfolder.path }}"
+        state: absent
+
+  rescue:
+    - name: "Registering node_exporter failure"
+      ansible.builtin.lineinfile:
+        path: /var/versions
+        regexp: "^node_exporter="
+        line: "node_exporter=failure"
+
+    - name: Remove temp folder
+      ansible.builtin.file:
+        path: "{{ tempfolder.path }}"
+        state: absent
+      when: tempfolder.path is defined
+
+    - name: Force failure
+      ansible.builtin.fail:
+        msg: "Installation of node_exporter failed."
+
+- name: Add the user node_exporter
+  ansible.builtin.user:
+    name: node_exporter
+    system: true
+    shell: "/bin/false"
+    create_home: false
+
+- name: Create node exporter config folder
+  ansible.builtin.file:
+    path: /etc/node-exporter
+    state: directory
+    owner: node_exporter
+    group: node_exporter
+
+- name: Add node_exporter config
+  ansible.builtin.template:
+    src: config.yml.j2
+    dest: /etc/node-exporter/config.yml
+    owner: node_exporter
+    group: node_exporter
+  notify:
+    - Restart node-exporter service
+
+- name: Deploy service
+  ansible.builtin.template:
+    src: service.j2
+    dest: /etc/systemd/system/node_exporter.service
+  register: node_exporter_service
+  notify:
+    - Restart node-exporter service
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    name: node_exporter
+    daemon_reload: yes
+  when: node_exporter_service.changed
+
+- name: Ensure service enabled
+  ansible.builtin.systemd:
+    name: node_exporter
+    enabled: "{{ node_exporter_enabled }}"

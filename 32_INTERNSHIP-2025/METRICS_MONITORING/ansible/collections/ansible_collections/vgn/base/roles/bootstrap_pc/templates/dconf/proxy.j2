@@ -1,0 +1,19 @@
+{% if use_proxy %}
+[system/proxy]
+mode='manual'
+use-same-proxy=true
+{% set ignored = [] %}
+{% for ignore in (no_proxy.split(',')) %}
+{{ ignored.append("'"+ignore+"'") }}
+{% endfor %}
+ignore-hosts=[{{ ignored | join(",") }}]
+
+[system/proxy/http]
+host='{{ http_proxy.split(':')[1] | replace('//','') }}'
+port={{ http_proxy.split(':')[2] }}
+
+[system/proxy/https]
+host='{{ https_proxy.split(':')[1] | replace('//','') }}'
+port={{ https_proxy.split(':')[2] }}
+{% endif %}
+

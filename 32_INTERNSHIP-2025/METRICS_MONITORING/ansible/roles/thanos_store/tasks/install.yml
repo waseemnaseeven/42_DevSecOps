@@ -1,0 +1,82 @@
+---
+- name: Check if binary exist
+  stat:
+    path: "{{ thanos_binary }}"
+  register: binary_file
+
+- name: Check if config exist
+  stat:
+    path: "{{ thanos_install_dir }}"
+  register: config_folder
+
+- name: Verify if data folder was created
+  stat:
+    path: "{{ thanos_data_dir }}"
+  register: data_folder
+
+- name: Add group
+  ansible.builtin.group:
+    name: "{{ thanos_group }}"
+    system: yes
+    state: present
+
+- name: Create user for thanos
+  ansible.builtin.user:
+    name: "{{ thanos_user }}"
+    shell: /usr/sbin/nologin
+    system: yes
+    create_home: no
+
+- name: Download thanos from the doc
+  ansible.builtin.get_url:
+    url: "https://github.com/thanos-io/thanos/releases/download/v{{ thanos_version }}/thanos-{{ thanos_version }}.{{ os }}-{{ cpu_arch }}.tar.gz"
+    dest: "/tmp/thanos-{{ thanos_version }}.{{ os }}-{{ cpu_arch }}.tar.gz"
+    mode: '0644'
+  when: not config_folder.stat.exists
+
+- name: Extraction of the thanos.zip
+  ansible.builtin.unarchive:
+    src: "/tmp/thanos-{{ thanos_version }}.{{ os }}-{{ cpu_arch }}.tar.gz"
+    dest: "/tmp/"
+    remote_src: yes
+  when: not config_folder.stat.exists
+
+- name: Remove thanos.zip
+  ansible.builtin.file:
+    path: "/tmp/thanos-{{ thanos_version }}.{{ os }}-{{ cpu_arch }}.tar.gz"
+    state: absent
+  when: not config_folder.stat.exists
+
+- name: Move the folder thanos
+  ansible.builtin.command: mv /tmp/thanos-{{ thanos_version }}.{{ os }}-{{ cpu_arch }} {{ thanos_install_dir }}
+  args:
+    creates: "{{ thanos_install_dir }}"
+  when: not config_folder.stat.exists
+
+- name: Changing the owner of the folder thanos
+  ansible.builtin.file:
+    path: "{{ thanos_install_dir }}"
+    owner: "{{ thanos_user }}"
+    group: "{{ thanos_group }}"
+    recurse: yes
+  when: not config_folder.stat.exists
+
+- name: Copy thanos binary
+  ansible.builtin.copy:
+    src: "{{ thanos_install_dir }}/thanos"
+    dest: "{{ thanos_binary }}"
+    remote_src: true
+  when: not binary_file.stat.exists or not config_folder.stat.exists
+
+- name: Remove binary from config file
+  ansible.builtin.file:
+    path: "{{ thanos_install_dir }}/thanos"
+    state: absent
+  when: not config_folder.stat.exists
+
+- name: Changing the owner of the thanos binary
+  ansible.builtin.file:
+    path: "{{ thanos_binary }}"
+    owner: "{{ thanos_user }}"
+    group: "{{ thanos_group }}"
+    mode: '0100'

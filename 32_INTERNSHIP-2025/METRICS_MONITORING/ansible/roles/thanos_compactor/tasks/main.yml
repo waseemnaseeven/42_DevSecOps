@@ -1,0 +1,14 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for thanos_compactor
+- block:
+    - name: "Install thanos compactor"
+      include_tasks: install.yml
+
+    - name: "Deploying config file for thanos compactor"
+      include_tasks: config.yml
+  when: thanos_compactor_enabled | bool
+
+- name: "Remove thanos compactor"
+  include_tasks: remove.yml
+  when: not (thanos_compactor_enabled | bool)

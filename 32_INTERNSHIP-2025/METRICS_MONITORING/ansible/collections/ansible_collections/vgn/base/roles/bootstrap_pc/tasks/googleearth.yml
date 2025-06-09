@@ -1,0 +1,21 @@
+---
+- name: Register googleearth version
+  ansible.builtin.lineinfile:
+    path: /var/versions
+    regexp: "^googleearth="
+    create: true
+    line: "googleearth={{ googleearth_version }}"
+  register: binary_version
+
+- name: Managing googleearth
+  when: binary_version.changed or (googleearth_force_install | default(false))
+  block:
+    - name: Install Google Earth
+      ansible.builtin.apt:
+        deb: "{{ google_earth_deb }}"
+  rescue:
+    - name: "Registering googleearth failure"
+      ansible.builtin.lineinfile:
+        path: /var/versions
+        regexp: "^googleearth="
+        line: "googleearth=failure"

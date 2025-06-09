@@ -1,0 +1,12 @@
+{% for i in range(1, 1000) %}
+Host vm-{{ '%03d' % i }}.np.vgn
+   Port 22954
+   HostKeyAlias vm-{{ '%03d' % i }}
+{% endfor %}
+
+{% for i in range(1, 1000) %}
+{% for j in range(1, 99) %}
+Host vm-{{ '%03d' % i }}-{{ '%02d' % j }}.np.vgn
+   HostKeyAlias vm-{{ '%03d' % i }}-{{ '%02d' % j }}
+{% endfor %}
+{% endfor %}

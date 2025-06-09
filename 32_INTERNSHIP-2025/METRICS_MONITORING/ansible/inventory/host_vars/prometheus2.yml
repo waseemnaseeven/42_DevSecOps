@@ -1,0 +1,62 @@
+ntp_servers:
+  - "10.15.3.246"
+
+vault_cert: 
+
+  - owner: "prometheus"
+    group: "prometheus"
+    base_path: "/etc/prometheus_ssl/"
+    issue_path: "rd/pki/monitoring/sign/services"
+    common_name: "prometheus2.com"
+    cert_path: "prometheus.crt"
+    key_path: "prometheus.key"
+    ip_sans: 
+      - "{{ ansible_host }}"
+      - "{{ prometheus2_private_ip }}"
+      - "127.0.0.1"
+    alt_names: "localhost"
+    # force_renew: true
+
+  - owner: "prometheus"
+    group: "prometheus"
+    base_path: "/etc/prometheus_ssl_client/"
+    issue_path: "rd/pki/monitoring/sign/clients"
+    common_name: "prometheusclient2"
+    cert_path: "prometheus_client.crt"
+    key_path: "prometheus_client.key"
+    # force_renew: true
+
+  - owner: "prometheus"
+    group: "prometheus"
+    base_path: "/etc/prometheus_ssl/"
+    issue_path: "rd/pki/monitoring/sign/services"
+    common_name: "sidecarB.com"
+    cert_path: "sidecarB.crt"
+    key_path: "sidecarB.key"
+    ip_sans: 
+      - "{{ ansible_host }}"
+      - "{{ prometheus2_private_ip }}"
+      - "127.0.0.1"
+    alt_names: "localhost"
+    # force_renew: true
+
+  - owner: "prometheus"
+    group: "prometheus"
+    base_path: "/etc/prometheus_ssl_client/"
+    issue_path: "rd/pki/monitoring/sign/clients"
+    common_name: "sidecarB"
+    cert_path: "sidecarB.crt"
+    key_path: "sidecarB.key"
+    # force_renew: true
+
+  - owner: "node_exporter"
+    group: "node_exporter"
+    base_path: "/etc/node_exporter_ssl/"
+    issue_path: "rd/pki/monitoring/sign/services"
+    common_name: "nodeexporterprometheus2.com"
+    cert_path: "node_exporter.crt"
+    key_path: "node_exporter.key"
+    ip_sans: 
+      - "{{ ansible_host }}"
+      - "{{ prometheus2_private_ip }}"
+    # force_renew: true

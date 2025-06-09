@@ -1,0 +1,21 @@
+- name: Install pip packages for user
+  become_user: "{{ item.name }}"
+  become: true
+  ansible.builtin.pip:
+    name: "{{ _pip_package.name }}"
+    extra_args: "{% if _pip_package.state | default('latest') != 'absent' %}--user {% endif %}--break-system-packages"
+    state: "{{ _pip_package.state | default('latest') }}"
+  loop: "{{ item.pip_packages | default([]) }}"
+  loop_control:
+    loop_var: _pip_package
+
+- name: Install pipx packages for user
+  become_user: "{{ item.name }}"
+  become: true
+  community.general.pipx:
+    name: "{{ _pipx_package.name | default(omit) }}"
+    source: "{{ _pipx_package.source | default(omit) }}"
+    state: "{{ _pipx_package.state | default('latest') }}"
+  loop: "{{ item.pipx_packages | default([]) }}"
+  loop_control:
+    loop_var: _pipx_package

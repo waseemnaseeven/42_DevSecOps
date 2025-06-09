@@ -1,0 +1,34 @@
+# Variables globales a TOUS les hotes
+ansible_user: outscale
+ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+os: "linux"
+cpu_arch: amd64
+node_exporter_port: 9100
+alertmanager_port: 9093
+prometheus_port: 9090
+grafana_port: 3000
+blackbox_port: 9115
+prometheus_private_ip: "10.15.43.185"
+prometheus2_private_ip: "10.15.53.196"
+prometheus3_private_ip: "10.15.20.174"
+grafana_private_ip: "10.15.15.246"
+grafana2_private_ip: "10.15.17.231"
+alertmanager_private_ip: "10.15.49.147"
+alertmanager2_private_ip: "10.15.13.180"
+alertmanager3_private_ip: "10.15.62.247"
+blackbox_private_ip: "10.15.28.71"
+thanos_query_private_ip: "10.15.42.186"
+thanos_query2_private_ip: "10.15.24.190"
+thanos_query3_private_ip: "10.15.5.25"
+thanos_store_private_ip: "10.15.63.157"
+thanos_compactor_private_ip: "10.15.23.204"
+thanos_rule_private_ip: "10.15.63.251"
+
+ntp_private_ip: "10.15.3.246"
+
+private_ip_minio_ansible: "10.15.38.212"
+
+keepalived_query: "10.15.63.250"
+keepalived_store: "10.15.63.249"
+
+thanos_store2_private_ip: 10.15.44.23

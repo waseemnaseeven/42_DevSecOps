@@ -1,0 +1,71 @@
+---
+# https://support.mozilla.org/en-US/kb/install-firefox-linux#w_install-firefox-deb-package-for-debian-based-distributions
+# wget -O roles/bootstrap_vm/files/mozilla.asc https://packages.mozilla.org/apt/repo-signing-key.gpg
+
+- name: Remove Firefox Snap
+  community.general.snap:
+    name: firefox
+    state: absent
+  register: firefox_snap
+
+- name: Remove Firefox SNAP Apt
+  ansible.builtin.apt:
+    name: firefox
+    state: absent
+  when: firefox_snap.changed
+
+- name: Add Mozilla GPG
+  ansible.builtin.copy:
+    src: mozilla.asc
+    dest: /etc/apt/keyrings/mozilla.asc
+    mode: "0644"
+
+- name: Remove old mozilla repo
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/mozilla.list
+    state: absent
+
+- name: Add mozilla repo
+  ansible.builtin.deb822_repository:
+    name: "mozilla"
+    types: deb
+    uris: "https://packages.mozilla.org/apt"
+    signed_by: /etc/apt/keyrings/mozilla.asc
+    suites: mozilla
+    components:
+      - main
+  register: mozilla_repo
+
+- name: Update repositories cache
+  ansible.builtin.apt:
+    update_cache: yes
+  when: mozilla_repo.changed
+
+- name: Add apt pin
+  ansible.builtin.copy:
+    src: mozilla-pin-apt
+    dest: /etc/apt/preferences.d/mozilla
+  register: mozilla_pin
+
+- name: Update repositories cache
+  ansible.builtin.apt:
+    update_cache: yes
+  when: mozilla_pin.changed or mozilla_repo.changed
+
+- name: Install Firefox
+  ansible.builtin.apt:
+    name: firefox
+    state: present
+    allow_downgrade: true
+
+- name: Create Firefox folder
+  ansible.builtin.file:
+    path: /etc/firefox/policies
+    mode: "0755"
+    state: "directory"
+
+- name: Install Firefox Policy
+  ansible.builtin.template:
+    src: policies-firefox.json.j2
+    dest: /etc/firefox/policies/policies.json
+    mode: "0644"

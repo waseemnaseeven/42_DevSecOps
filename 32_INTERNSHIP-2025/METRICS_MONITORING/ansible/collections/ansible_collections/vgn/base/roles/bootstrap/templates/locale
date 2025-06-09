@@ -1,0 +1,11 @@
+# {{ ansible_managed }}
+LANG="{{ locale_lang | default(locales[0]) }}"
+LC_NUMERIC="{{ locale_numeric | default(locales[0]) }}"
+LC_TIME="{{ locale_time | default(locales[0]) }}"
+LC_MONETARY="{{ locale_monetary | default(locales[0]) }}"
+LC_PAPER="{{ locale_paper | default(locales[0]) }}"
+LC_NAME="{{ locale_name | default(locales[0]) }}"
+LC_ADDRESS="{{ locale_address | default(locales[0]) }}"
+LC_TELEPHONE="{{ locale_telephone | default(locales[0]) }}"
+LC_MEASUREMENT="{{ locale_measurement | default(locales[0]) }}"
+LC_IDENTIFICATION="{{ locale_identification | default(locales[0]) }}"

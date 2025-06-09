@@ -1,0 +1,42 @@
+---
+- name: "Configuration of aws"
+  block:
+    - name: Register aws version
+      ansible.builtin.lineinfile:
+        path: /var/versions
+        regexp: "^aws="
+        create: true
+        line: "aws={{ aws_version }}"
+      register: binary_version
+
+    - name: Managing aws
+      when: binary_version.changed or (aws_force_install | default(false))
+      block:
+        - name: Remove aws
+          ansible.builtin.file:
+            path: /opt/aws
+            state: absent
+
+        - name: Create aws tmp folder
+          ansible.builtin.tempfile:
+            state: directory
+          register: aws_temp_dir
+
+        - name: Download aws
+          ansible.builtin.unarchive:
+            remote_src: true
+            src: "{{ aws_url }}"
+            dest: "{{ aws_temp_dir.path }}"
+
+        - name: Copy aws
+          ansible.builtin.copy:
+            remote_src: true
+            src: "{{ aws_temp_dir.path }}/aws/dist"
+            dest: "/opt/aws"
+
+      rescue:
+        - name: "Registering aws failure"
+          ansible.builtin.lineinfile:
+            path: /var/versions
+            regexp: "^aws="
+            line: "aws=failure"

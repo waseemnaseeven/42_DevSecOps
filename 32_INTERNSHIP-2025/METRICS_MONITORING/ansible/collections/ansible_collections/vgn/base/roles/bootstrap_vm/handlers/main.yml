@@ -1,0 +1,9 @@
+---
+- name: bootstrap_vm - Update dconf
+  ansible.builtin.shell:
+    cmd: "dconf update"
+
+- name: bootstrap_vm - Restart filebrowser
+  ansible.builtin.systemd_service:
+    name: filebrowser
+    state: restarted

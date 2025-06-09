@@ -1,0 +1,45 @@
+---
+- name: Install node key
+  ansible.builtin.copy:
+    src: nodesource.asc
+    dest: "/etc/apt/keyrings/nodesource.asc"
+    mode: "0644"
+
+- name: Remove old nodesource.list
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/nodesource.list
+    state: absent
+
+- name: Add nodesource repo
+  ansible.builtin.deb822_repository:
+    name: nodesource
+    types: deb
+    uris: https://deb.nodesource.com/node_{{ nodejs_major_version }}.x
+    suites: nodistro
+    signed_by: /etc/apt/keyrings/nodesource.asc
+    components:
+      - main
+  register: node_repo
+
+- name: Refresh cache
+  ansible.builtin.apt:
+    update_cache: true
+  when: node_repo.changed
+
+- name: Install Node.Js
+  ansible.builtin.apt:
+    name: nodejs
+    state: present
+
+# Clear cache because it can cause error while npm is updating itself
+# example error : npm error invalid json response body at https://registry.npmjs.org/npm
+- name: Clear NPM cache
+  ansible.builtin.shell: /usr/bin/npm cache clean --force
+
+- name: Install npm packages
+  community.general.npm:
+    name: "{{ item }}"
+    state: latest
+    global: yes
+    production: yes
+  loop: "{{ node_modules }}"

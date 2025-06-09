@@ -1,0 +1,30 @@
+[Unit]
+Description=Thanos Version {{ thanos_version }}
+Documentation=https://thanos.io/tip/thanos/getting-started.md/
+After=network-online.target
+
+[Service]
+User={{ thanos_user }}
+Group={{ thanos_group }}
+Restart=on-failure
+ExecStart={{ thanos_binary }} query \
+  --http-address=0.0.0.0:9090 \
+  --grpc-address=0.0.0.0:10901 \
+  --store.sd-files={{ thanos_install_dir }}/store_sd_config.yml \
+  --http.config="{{ thanos_install_dir }}/tls_config.yml" \
+  --grpc-client-tls-ca={{ thanos_ca_file }} \
+  --grpc-client-tls-cert={{ thanos_crt_client_grpc }} \
+  --grpc-client-tls-key={{ thanos_key_client_grpc }} \
+  --grpc-server-tls-client-ca={{ thanos_ca_file }} \
+  --grpc-server-tls-cert={{ thanos_crt_server_grpc }} \
+  --grpc-server-tls-key={{ thanos_key_server_grpc }} \
+  --grpc-client-tls-secure \
+  --query.replica-label="replica" \
+  --query.auto-downsampling \
+  --query.partial-response \
+  --log.level={{ thanos_log_level }} \
+  --log.format=json
+
+[Install]
+WantedBy=multi-user.target
+

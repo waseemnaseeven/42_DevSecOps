@@ -1,0 +1,19 @@
+[Unit]
+Description=Blackbox Version {{ blackbox_version }}
+Documentation=https://github.com/prometheus/blackbox_exporter?tab=readme-ov-file
+After=network-online.target
+
+[Service]
+User={{ blackbox_user }}
+Group={{ blackbox_group }}
+Restart=on-failure
+ExecStart={{ blackbox_binary }} \
+  --config.file={{ blackbox_config_file }} \
+{% if blackbox_tls_server_enabled | default('false') %}
+  --web.config.file={{ blackbox_tls_config }} \
+{% endif %}
+  --log.level=info
+
+[Install]
+WantedBy=multi-user.target
+

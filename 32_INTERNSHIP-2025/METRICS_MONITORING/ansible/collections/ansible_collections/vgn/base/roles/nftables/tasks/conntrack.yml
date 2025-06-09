@@ -1,0 +1,31 @@
+- name: Set nf_conntrack hashsize value (should be 8 times less than nf_conntrack_max)
+  ansible.builtin.lineinfile:
+    path: /etc/modprobe.d/netfilter.conf
+    regexp: "nf_conntrack"
+    line: "options nf_conntrack hashsize={{ ( nft_nf_conntrack_max / 8 ) | int }}"
+    owner: root
+    group: root
+    mode: "0644"
+    create: yes
+  notify: restart instance
+
+- name: Flush handlers
+  meta: flush_handlers
+
+- name: Load nf_conntrack module
+  community.general.modprobe:
+    name: nf_conntrack
+
+- name: Set nf_conntrack_max
+  ansible.posix.sysctl:
+    name: net.netfilter.nf_conntrack_max
+    value: "{{ nft_nf_conntrack_max }}"
+    sysctl_set: true
+    reload: true
+
+- name: Set ip_conntrack_tcp_timeout_established
+  ansible.posix.sysctl:
+    name: net.netfilter.nf_conntrack_tcp_timeout_established
+    value: "{{ nft_nf_conntrack_tcp_timeout_established }}"
+    sysctl_set: true
+    reload: true

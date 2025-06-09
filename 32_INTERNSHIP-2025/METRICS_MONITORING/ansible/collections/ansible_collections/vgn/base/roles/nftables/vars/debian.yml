@@ -1,0 +1,5 @@
+---
+# vars file for Debian-based distros
+nft_pkg_list:
+  - nftables
+  - ulogd2

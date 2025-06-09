@@ -1,0 +1,19 @@
+---
+accounts_groups: []
+accounts_users: []
+additional_sudoers: []
+accounts_manage_sudoers: true
+accounts_remove_accounts: true
+zsh_go_path_enabled: false
+zsh_go_path: /usr/local/go/bin
+zsh_use_proxy: "{{ use_proxy }}"
+zsh_aws_enabled: false
+zsh_oapi_cli_enabled: false
+zsh_tofu_enabled: false
+zsh_vault_enabled: false
+zsh_direnv_enabled: false
+zsh_neovim_enabled: false
+zsh_sign_ssh_onload_enabled: false
+zsh_sign_ssh_onload_key_location: ""
+accounts_ssh_config: ""
+accounts_ssh_known_hosts: ""

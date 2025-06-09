@@ -1,0 +1,66 @@
+---
+- name: Register gephi version
+  ansible.builtin.lineinfile:
+    path: /var/versions
+    regexp: "^gephi="
+    create: true
+    line: "gephi={{ gephi_version }}"
+  register: binary_version
+
+- name: Managing Gephi
+  when: binary_version.changed or (gephi_force_install | default(false))
+  block:
+    - name: Remove Gephi
+      ansible.builtin.file:
+        path: "/opt/gephi"
+        state: absent
+
+    - name: Download Gephi
+      ansible.builtin.unarchive:
+        remote_src: true
+        src: "{{ gephi_url }}"
+        dest: "/opt"
+
+    - name: Copy gephi
+      ansible.builtin.copy:
+        remote_src: true
+        src: /opt/gephi-{{ gephi_version }}/
+        dest: /opt/gephi/
+
+    - name: Copy gephi icon
+      ansible.builtin.copy:
+        src: gephi.png
+        dest: /opt/gephi/gephi.png
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Remove old gephi
+      ansible.builtin.file:
+        path: /opt/gephi-{{ gephi_version }}
+        state: absent
+  rescue:
+    - name: "Registering gephi failure"
+      ansible.builtin.lineinfile:
+        path: /var/versions
+        regexp: "^gephi="
+        line: "gephi=failure"
+
+- name: Add Desktop shortcut
+  ansible.builtin.copy:
+    content: |
+      [Desktop Entry]
+      Name=Gephi - The Open Graph Viz Platform
+      Comment=An interactive graph visualization and exploration platform
+      GenericName=Graph Editor
+      Exec=/opt/gephi/bin/gephi
+      Icon=/opt/gephi/gephi.png
+      Type=Application
+      StartupNotify=false
+      StartupWMClass=Code
+      Categories=Development;Office;
+      Keywords=gephi;
+    dest: /usr/share/applications/gephi.desktop
+    mode: "0644"
+    owner: root
+    group: root

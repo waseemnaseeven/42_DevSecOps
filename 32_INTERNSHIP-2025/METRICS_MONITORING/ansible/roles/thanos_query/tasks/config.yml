@@ -1,0 +1,49 @@
+- name: Copy ca-cert 
+  ansible.builtin.copy:
+    content: "{{ lookup('pipe', 'vault read -field=certificate rd/pki/monitoring/cert/ca') }}"
+    dest: "{{ thanos_ca_file }}"
+    owner: "{{ thanos_user }}"
+    group: "{{ thanos_group }}"
+    mode: '0644'
+
+- name: Deploy the tls config file (tls_config.yml) 
+  ansible.builtin.template:
+    src: tls_config.yml.j2
+    dest: "{{ thanos_install_dir }}/tls_config.yml"
+    owner: "{{ thanos_user }}"
+    group: "{{ thanos_group }}"
+    mode: '0644'
+
+- name: Deploying prometheus endpoints config files
+  ansible.builtin.template:
+    src: store_sd_config.yml.j2
+    dest: "{{ thanos_install_dir }}/store_sd_config.yml"
+    mode: '0644'
+
+- name: Deploying the query systemd service 
+  ansible.builtin.template:
+    src: query.service.j2
+    dest: "{{ thanos_query_service_file }}"
+    owner: "{{ thanos_user }}"
+    group: "{{ thanos_group }}"
+    mode: '0644'
+
+- name: Launch and activate the systemd service
+  ansible.builtin.systemd_service:
+    name: query.service
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+    force: false # Override existing symlinks
+  notify:
+    - Restart query
+
+# - name: Launch the systemd service
+#   ansible.builtin.systemd_service:
+#     name: query-frontend.service
+#     state: restarted
+#     enabled: yes
+#     daemon_reload: yes
+#     force: false # Override existing symlinks
+#   notify:
+#     - Restart query-frontend

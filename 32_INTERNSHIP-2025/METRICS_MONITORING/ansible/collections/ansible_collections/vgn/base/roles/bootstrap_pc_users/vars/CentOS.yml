@@ -1,0 +1,3 @@
+---
+update_ca_command: update-ca-trust extract
+ca_store_path: "/etc/pki/ca-trust/source/anchors"

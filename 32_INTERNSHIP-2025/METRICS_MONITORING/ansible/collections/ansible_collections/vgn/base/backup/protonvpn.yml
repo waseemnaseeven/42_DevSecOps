@@ -1,0 +1,60 @@
+- name: Create ProtonVPN folder
+  ansible.builtin.file:
+    path: "~{{ item.name }}/.config/protonvpn"
+    state: directory
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    mode: "0755"
+
+- name: Create ProtonVPN config
+  ansible.builtin.template:
+    src: user_configurations.json.j2
+    dest: "~{{ item.name }}/.config/protonvpn/user_configurations.json"
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    mode: "0644"
+
+- name: Get user numerical id
+  ansible.builtin.shell:
+    cmd: id -u
+  register: _user_id
+  changed_when: false
+
+- name: Set ProtonVPN SessionData
+  ansible.builtin.shell:
+    cmd: echo -n '{{ proton_keyring_sessiondata }}' | secret-tool store --label="Password for 'SessionData' on 'ProtonVPN'" 'application' 'Python keyring library' 'service' 'ProtonVPN' 'username' 'SessionData' xdg:schema org.freedesktop.Secret.Generic
+  environment:
+    DISPLAY: ":0"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ _user_id.stdout }}/bus"
+
+- ansible.builtin.copy:
+    content: |
+      {"proton_username": "{{ protonvpn_email }}"}
+    dest: /tmp/.pvpn_user
+
+- name: Set ProtonVPN User
+  ansible.builtin.shell:
+    cmd: cat /tmp/.pvpn_user | secret-tool store --label="Password for 'ProtonUser' on 'ProtonVPN'" 'application' 'Python keyring library' 'service' 'ProtonVPN' 'username' 'ProtonUser' xdg:schema org.freedesktop.Secret.Generic
+  environment:
+    DISPLAY: ":0"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ _user_id.stdout }}/bus"
+
+- ansible.builtin.file:
+    path: /tmp/.pvpn_user
+    state: absent
+
+- ansible.builtin.copy:
+    content: |
+      {"username": "{{ protonvpn_username }}", "password": "{{ protonvpn_password }}", "tier": 2, "max_connections": 11, "delinquent": 0, "warnings": []}
+    dest: /tmp/.pvpn_pass
+
+- name: Set ProtonVPN UserData
+  ansible.builtin.shell:
+    cmd: cat /tmp/.pvpn_pass | secret-tool store --label="Password for 'UserData' on 'ProtonVPN'" 'application' 'Python keyring library' 'service' 'ProtonVPN' 'username' 'UserData' xdg:schema org.freedesktop.Secret.Generic
+  environment:
+    DISPLAY: ":0"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ _user_id.stdout }}/bus"
+
+- ansible.builtin.file:
+    path: /tmp/.pvpn_pass
+    state: absent

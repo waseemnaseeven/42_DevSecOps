@@ -1,0 +1,72 @@
+---
+- name: Register filebrowser version
+  ansible.builtin.lineinfile:
+    path: /var/versions
+    regexp: "^filebrowsere="
+    create: true
+    line: "filebrowser={{ filebrowser_version }}"
+  register: binary_version
+
+- name: Managing filebrowser
+  when: binary_version.changed or (filebrowser_force_install | default(false))
+  block:
+    - name: Create temp folder
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: filebrowser
+      register: tempfolder
+
+    - name: Download and extract filebrowser
+      ansible.builtin.unarchive:
+        src: "{{ filebrowser_url }}"
+        dest: "{{ tempfolder.path }}"
+        remote_src: true
+
+    - name: Copy filebrowser
+      ansible.builtin.copy:
+        remote_src: true
+        src: "{{ tempfolder.path }}/filebrowser"
+        dest: "/usr/local/bin/filebrowser"
+        mode: "0755"
+
+    - name: Remove temp folder
+      ansible.builtin.file:
+        path: "{{ tempfolder.path }}"
+        state: absent
+  rescue:
+    - name: "Registering filebrowser failure"
+      ansible.builtin.lineinfile:
+        path: /var/versions
+        regexp: "^filebrowser="
+        line: "filebrowser=failure"
+
+    - name: Remove temp folder
+      ansible.builtin.file:
+        path: "{{ tempfolder.path }}"
+        state: absent
+
+- name: Creates directory for DB
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ filebrowser_linux_user }}"
+    group: "{{ filebrowser_linux_group }}"
+  loop:
+    - "{{ filebrowser_base_directory }}"
+    - "/home/{{ filebrowser_linux_user }}/.local/share/filebrowser"
+
+- name: Create the filebrowser service
+  ansible.builtin.template:
+    src: filebrowser_service.j2
+    dest: /etc/systemd/system/filebrowser.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: bootstrap_vm - Restart filebrowser
+
+- name: Enable and start the service
+  ansible.builtin.systemd_service:
+    name: filebrowser
+    state: started
+    daemon_reload: true
+    enabled: true

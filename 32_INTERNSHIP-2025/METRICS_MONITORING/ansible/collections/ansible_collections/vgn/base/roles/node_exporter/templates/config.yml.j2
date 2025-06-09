@@ -1,0 +1,9 @@
+#tls_server_config:
+#  cert_file: node_exporter.crt
+#  key_file: node_exporter.key
+{% if node_exporter_basic_auth_users | length > 0 %}
+basic_auth_users:
+{% for user, password in node_exporter_basic_auth_users.items() %}
+  {{ user }}: {{ password }}
+{% endfor %}
+{% endif %}

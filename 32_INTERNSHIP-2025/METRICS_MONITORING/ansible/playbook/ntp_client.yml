@@ -1,0 +1,6 @@
+---
+- name: Install ntp client 
+  hosts: "all:!ntp"
+  serial: 20
+  roles:
+    - ntp_client

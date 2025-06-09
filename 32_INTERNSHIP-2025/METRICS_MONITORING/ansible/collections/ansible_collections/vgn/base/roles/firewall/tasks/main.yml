@@ -1,0 +1,23 @@
+---
+# tasks file for larueli.firewall
+
+- name: Install UFW
+  ansible.builtin.package:
+    name: ufw
+    state: present
+
+- name: Disable UFW
+  community.general.ufw:
+    state: disabled
+
+- name: Configuring ufw
+  import_tasks: configure.yml
+  when:
+    - ufw_enabled
+
+- name: "Restart ufw"
+  ansible.builtin.service:
+    name: ufw
+    state: restarted
+  when:
+    - ufw_enabled

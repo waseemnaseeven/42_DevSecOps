@@ -1,0 +1,6 @@
+---
+# vars file for Gentoo
+nft_pkg_list:
+  - net-firewall/nftables
+  - ulogd2
+nft__bin_location: "/sbin/nft"

@@ -1,0 +1,32 @@
+rule_files:
+  - self_monitoring_alerts.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: "Prometheus up" 
+    interval: 1m
+    input_series:
+      - series: 'up{job="prometheus"}'
+        values: '1 1 1 1 1'
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: ServiceDown
+        exp_alerts: []  # Aucune alerte attendue
+  
+  - name: "Prometheus down"
+    interval: 1m
+    input_series:
+      - series: 'up{job="prometheus", instance="localhost:9090"}'
+        values: '0 0 0 0 0'
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: ServiceDown
+        exp_alerts:
+          - exp_labels:
+              job: prometheus
+              instance: "localhost:9090"
+              severity: critical
+            exp_annotations:
+              summary: ".*"
+              description: ".*"

@@ -1,0 +1,136 @@
+- name: Set allowed methods
+  set_fact:
+    allowed_methods:
+      - apt
+      - get_url
+      - unarchive
+      - shell
+      - pip
+      - git
+
+- name: Register {{ item.key }} version
+  ansible.builtin.lineinfile:
+    path: /var/versions
+    regexp: "^{{ item.key }}="
+    create: true
+    line: "{{ item.key }}={{ item.value.version }}"
+  register: binary_version
+
+- name: Managing {{ item.key }}
+  when: binary_version.changed or (item.value.force_install | default(false))
+  block:
+    - name: No method set
+      ansible.builtin.fail:
+        msg: "No method set for {{ item.key }}."
+      when: item.value.method not in allowed_methods
+
+    - name: Create temp folder to download file
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: "{{ item.key }}-download"
+      register: tempfolderdownload
+
+    - name: Create temp folder for unarchive
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: "{{ item.key }}-unarchive"
+      register: tempfolder
+
+    - name: "Using unarchive"
+      when: item.value.method == "unarchive"
+      block:
+        - name: "Download {{ item.key }} {{ item.value.version }}"
+          ansible.builtin.get_url:
+            url: "{{ item.value.src }}"
+            dest: "{{ tempfolderdownload.path }}/tmpdownloadedfile"
+            checksum: "{{ item.value.checksum | default(omit) }}"
+
+        - name: "unarchive {{ item.key }} {{ item.value.version }}"
+          ansible.builtin.unarchive:
+            src: "{{ tempfolderdownload.path }}/tmpdownloadedfile"
+            dest: "{{ tempfolder.path }}"
+            remote_src: true
+
+        - name: Copy {{ item.key }}
+          ansible.builtin.copy:
+            remote_src: true
+            src: "{{ tempfolder.path }}/{{ item.value.extract_path | default(item.key) }}"
+            dest: "{{ item.value.dest | default('/usr/local/bin/'~item.key) }}"
+            mode: "{{ item.value.mode | default('0755') }}"
+
+    - name: "Using get_url"
+      when: item.value.method == "get_url"
+      block:
+        - name: "Install {{ item.key }} {{ item.value.version }} using get_url"
+          ansible.builtin.get_url:
+            url: "{{ item.value.src }}"
+            dest: "{{ item.value.dest | default('/usr/local/bin/'~item.key) }}"
+            checksum: "{{ item.value.checksum | default(omit) }}"
+            force: true
+            mode: "{{ item.value.mode | default('0755') }}"
+            timeout: 30
+
+    - name: "Using pip"
+      when: item.value.method == "pip"
+      block:
+        - name: "Install {{ item.key }} {{ item.value.version }} using pip"
+          ansible.builtin.pip:
+            name: "{{ item.key }}=={{ item.value.version }}"
+
+    - name: "Using git"
+      when: item.value.method == "git"
+      block:
+        - name: "Install {{ item.key }} {{ item.value.version }} using git"
+          ansible.builtin.git:
+            repo: "{{ item.value.src }}"
+            dest: "{{ item.value.dest }}"
+            single_branch: true
+            version: "{{ item.value.version  }}"
+
+    - name: "Using shell"
+      when: item.value.method == "shell"
+      block:
+        - name: "Install {{ item.key }} {{ item.value.version }} using shell"
+          ansible.builtin.shell:
+            cmd: "{{ item.value.cmd }}"
+            chdir: "{{ tempfolder.path }}"
+
+    - name: "Using apt"
+      when: item.value.method == "apt"
+      block:
+        - name: "Install {{ item.key }} {{ item.value.version }} using apt"
+          ansible.builtin.apt:
+            deb: "{{ item.value.src }}"
+
+    - name: Remove temp folder download
+      ansible.builtin.file:
+        path: "{{ tempfolderdownload.path }}"
+        state: absent
+
+    - name: Remove temp folder unarchive
+      ansible.builtin.file:
+        path: "{{ tempfolder.path }}"
+        state: absent
+
+  rescue:
+    - name: "Registering {{ item.key }} failure"
+      ansible.builtin.lineinfile:
+        path: /var/versions
+        regexp: "^{{ item.key }}="
+        line: "{{ item.key }}=failure"
+
+    - name: Remove temp folder download
+      ansible.builtin.file:
+        path: "{{ tempfolderdownload.path }}"
+        state: absent
+      when: tempfolder.path is defined
+
+    - name: Remove temp folder unarchive
+      ansible.builtin.file:
+        path: "{{ tempfolder.path }}"
+        state: absent
+      when: tempfolder.path is defined
+
+    - name: Force failure
+      ansible.builtin.fail:
+        msg: "Installation of {{ item.key }} failed."

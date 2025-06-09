@@ -1,0 +1,46 @@
+modules:
+  http_2xx:
+    prober: http # Requete http
+    timeout: 5s
+    http:
+      valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+      valid_status_codes: []  # N'importe quel code 200
+      method: GET
+      preferred_ip_protocol: "ip4" # Force ipV4, par defaut ipV6
+      ip_protocol_fallback: false  # N'essaie pas ipV6 si ipV4 echoue
+      follow_redirects: true # Suit les redirections HTTP
+  https_2xx:
+    prober: http
+    timeout: 5s
+    http:
+      method: GET
+      preferred_ip_protocol: "ip4"
+      ip_protocol_fallback: false
+      follow_redirects: true
+      valid_status_codes: []
+      tls_config:
+        insecure_skip_verify: false # Verification TLS activé
+  icmp:
+    prober: icmp # Sonde de type ping
+    timeout: 5s
+    icmp:
+      preferred_ip_protocol: "ip4"
+      ip_protocol_fallback: false
+      source_ip_address: "1.1.1.1"
+  tcp_connect: 
+    prober: tcp # Simple test d'ouverture de socket TCP
+    timeout: 5s
+    tcp:
+      preferred_ip_protocol: "ip4"
+      ip_protocol_fallback: false
+  dns:
+    prober: dns
+    timeout: 5s
+    dns:
+      preferred_ip_protocol: "ip4"
+      ip_protocol_fallback: false
+      transport_protocol: udp 
+      query_name: "google.com" # domain name a résoudre 
+      query_type: "A"
+      valid_rcodes: ["NOERROR"]
+

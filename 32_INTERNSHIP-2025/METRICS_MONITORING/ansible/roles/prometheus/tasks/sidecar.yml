@@ -1,0 +1,95 @@
+---
+- name: Check if sidecar exist
+  stat:
+    path: "{{ prometheus_sidecar_binary }}"
+  register: binary_file
+
+- name: Check if config exist
+  stat:
+    path: "{{ prometheus_sidecar_install_dir }}"
+  register: config_folder
+
+- name: Download thanos from the doc
+  ansible.builtin.get_url:
+    url: "https://github.com/thanos-io/thanos/releases/download/v{{ prometheus_thanos_version }}/thanos-{{ prometheus_thanos_version }}.{{ os }}-{{ cpu_arch }}.tar.gz"
+    dest: "/tmp/thanos-{{ prometheus_thanos_version }}.{{ os }}-{{ cpu_arch }}.tar.gz"
+    mode: '0644'
+  when: not config_folder.stat.exists
+
+- name: Extraction of the prometheus.zip
+  ansible.builtin.unarchive:
+    src: "/tmp/thanos-{{ prometheus_thanos_version }}.{{ os }}-{{ cpu_arch }}.tar.gz"
+    dest: "/tmp/"
+    remote_src: yes
+  when: not config_folder.stat.exists
+
+- name: Remove prometheus.zip
+  ansible.builtin.file:
+    path: "/tmp/thanos-{{ prometheus_thanos_version }}.{{ os }}-{{ cpu_arch }}.tar.gz"
+    state: absent
+  when: not config_folder.stat.exists
+
+- name: Move the folder prometheus
+  ansible.builtin.command: mv /tmp/thanos-{{ prometheus_thanos_version }}.{{ os }}-{{ cpu_arch }} {{ prometheus_sidecar_install_dir }}
+  args:
+    creates: "{{ prometheus_sidecar_install_dir }}"
+  when: not config_folder.stat.exists
+
+- name: Changing the owner of the folder thanos
+  ansible.builtin.file:
+    path: "{{ prometheus_sidecar_install_dir }}"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    recurse: yes
+  when: not config_folder.stat.exists
+
+- name: Copy thanos binary
+  ansible.builtin.copy:
+    src: "{{ prometheus_sidecar_install_dir }}/thanos"
+    dest: "{{ prometheus_sidecar_binary }}"
+    remote_src: true
+  when: not binary_file.stat.exists or not config_folder.stat.exists
+
+- name: Remove binary from config file
+  ansible.builtin.file:
+    path: "{{ prometheus_sidecar_install_dir }}/thanos"
+    state: absent
+  when: not config_folder.stat.exists
+
+- name: Changing the owner of the thanos binary
+  ansible.builtin.file:
+    path: "{{ prometheus_sidecar_binary }}"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: '0100'
+
+- name: Deploy bucket config file (bucket.yml) 
+  ansible.builtin.template:
+    src: bucket.yml.j2
+    dest: "{{ prometheus_bucket_file }}"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: '0777'
+
+- name: Deploy prometheus http client config file  
+  ansible.builtin.template:
+    src: prometheus.http-client.yml.j2
+    dest: "{{ prometheus_http_client_file }}"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: '0777'
+
+- name: Deploying the sidecar systemd service 
+  ansible.builtin.template:
+    src: sidecar.service.j2
+    dest: "{{ prometheus_sidecar_service_file }}"
+    mode: '0777'
+
+- name: Launch and activate the systemd service
+  ansible.builtin.systemd:
+    name: sidecar.service
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  notify:
+    - Restart sidecar

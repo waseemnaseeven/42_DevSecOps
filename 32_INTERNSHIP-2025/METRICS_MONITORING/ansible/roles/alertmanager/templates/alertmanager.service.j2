@@ -1,0 +1,28 @@
+[Unit]
+Description=AlertManager Version {{ alertmanager_version }}
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User={{ alertmanager_user }}
+Group={{ alertmanager_group }}
+Restart=on-failure
+ExecStart={{ alertmanager_binary }} \
+    --config.file={{ alertmanager_config_file }} \
+    --storage.path={{ alertmanager_storage_path }} \
+{% if alertmanager_tls_server_enabled | default('false') %}
+    --web.config.file={{ alertmanager_tls_file }} \
+{% endif %}
+{% if alertmanager_tls_client_gossip | default('false') %}
+    --cluster.tls-config={{ alertmanager_gossip_config }} \
+    --cluster.listen-address=0.0.0.0:9094 \
+    --cluster.advertise-address={{ ansible_private_host }}:9094 \
+    {% set peers = groups['alertmanagers'] | difference([inventory_hostname]) %}
+    {% for peer in peers %}
+    --cluster.peer={{ hostvars[peer]['ansible_private_host'] ~ ':9094' }} \
+    {% endfor %}
+{% endif %}
+    --log.level=info
+
+[Install]
+WantedBy=multi-user.target

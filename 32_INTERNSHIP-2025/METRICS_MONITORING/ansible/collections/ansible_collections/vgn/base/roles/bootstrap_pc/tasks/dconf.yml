@@ -1,0 +1,253 @@
+---
+- name: Create user profile
+  ansible.builtin.copy:
+    content: |
+      user-db:user
+      system-db:local
+    dest: /etc/dconf/profile/user
+    owner: root
+    group: root
+
+- name: Create gdm profile
+  ansible.builtin.copy:
+    content: |
+      user-db:user
+      system-db:gdm
+      file-db:/usr/share/gdm/greeter-dconf-defaults
+    dest: /etc/dconf/profile/gdm
+    owner: root
+    group: root
+
+- name: Create dconf db
+  ansible.builtin.file:
+    path: /etc/dconf/db/local.d/
+    state: directory
+
+- name: Create dconf gdm db
+  ansible.builtin.file:
+    path: /etc/dconf/db/gdm.d/
+    state: directory
+
+- name: Create dconf db locks
+  ansible.builtin.file:
+    path: /etc/dconf/db/local.d/locks
+    state: directory
+
+- name: Create dconf gdm locks
+  ansible.builtin.file:
+    path: /etc/dconf/db/gdm.d/locks
+    state: directory
+
+- name: Create Wallpaper directory
+  ansible.builtin.file:
+    path: '{{ wallpaper_path_directory }}'
+    state: directory
+    owner: root
+    group: root
+    mode: '0711'
+
+- name: Deploy Wallpaper
+  ansible.builtin.copy:
+    src: wallpapers/{{ wallpaper_src_file }}
+    dest: '{{ wallpaper_path_file }}'
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Deploy Wallpaper dconf
+  ansible.builtin.template:
+    src: dconf/00-background.j2
+    dest: /etc/dconf/db/local.d/00-background
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - bootstrap_pc - Update dconf
+
+- name: Manage Wallpaper lock
+  ansible.builtin.copy:
+    content: |
+      {% if bootstrap_pc_lock_wallpaper %}
+      /org/gnome/desktop/background/picture-uri
+      /org/gnome/desktop/background/picture-uri-dark
+      /org/gnome/desktop/background/picture-options
+      {% endif %}
+    dest: /etc/dconf/db/local.d/locks/background
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - bootstrap_pc - Update dconf
+
+- name: Disable location
+  ansible.builtin.copy:
+    content: |
+      [org/gnome/system/location]
+      enabled=false
+    dest: /etc/dconf/db/local.d/00-location
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - bootstrap_pc - Update dconf
+
+- name: Deploy location lock
+  ansible.builtin.copy:
+    content: |
+      /org/org/gnome/system/location/enabled
+    dest: /etc/dconf/db/local.d/locks/location
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - bootstrap_pc - Update dconf
+
+- name: Enforce proxy
+  ansible.builtin.template:
+    src: dconf/proxy.j2
+    dest: /etc/dconf/db/local.d/00-proxy
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - bootstrap_pc - Update dconf
+
+- name: Deploy proxy lock
+  ansible.builtin.copy:
+    content: |
+      /system/proxy/mode
+      /system/proxy/use-same-proxy
+      /system/proxy/ignore-hosts
+      /system/proxy/http/host
+      /system/proxy/http/port
+      /system/proxy/https/host
+      /system/proxy/https/port
+    dest: /etc/dconf/db/local.d/locks/proxy
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - bootstrap_pc - Update dconf
+
+- name: Set dock position
+  ansible.builtin.copy:
+    content: |
+      [org/gnome/shell/extensions/dash-to-dock]
+      extend-height=false
+      autohide=true
+      dock-position='BOTTOM'
+      multi-monitor=true
+      show-mounts=false
+      dock-fixed=false
+    dest: /etc/dconf/db/local.d/00-dock
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - bootstrap_pc - Update dconf
+
+- name: Set favorite apps
+  ansible.builtin.copy:
+    content: |
+      [org/gnome/shell]
+      favorite-apps=['firefox.desktop', 'org.gnome.Nautilus.desktop', 'code.desktop', 'terminator.desktop', 'org.keepassxc.KeePassXC.desktop']
+    dest: /etc/dconf/db/local.d/00-favorites
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - bootstrap_pc - Update dconf
+
+- name: Deploy banner dconf
+  ansible.builtin.template:
+    src: dconf/00-banner.j2
+    dest: /etc/dconf/db/gdm.d/00-banner
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - bootstrap_pc - Update dconf
+
+- name: Deploy banner lock
+  ansible.builtin.copy:
+    content: |
+      /org/gnome/login-screen/banner-message-enable
+      /org/gnome/login-screen/banner-message-text
+    dest: /etc/dconf/db/gdm.d/locks/banner
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - bootstrap_pc - Update dconf
+
+- name: Restrict login dconf
+  ansible.builtin.copy:
+    content: |
+      [org/gnome/login-screen]
+      # Do not show the user list
+      disable-user-list=true
+    dest: /etc/dconf/db/gdm.d/00-login
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - bootstrap_pc - Update dconf
+
+- name: Deploy login lock
+  ansible.builtin.copy:
+    content: |
+      /org/gnome/login-screen/disable-user-list
+    dest: /etc/dconf/db/gdm.d/locks/login
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - bootstrap_pc - Update dconf
+
+- name: Deploy screensaver conf
+  ansible.builtin.template:
+    src: dconf/00-screensaver.j2
+    dest: /etc/dconf/db/local.d/00-screensaver
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - bootstrap_pc - Update dconf
+
+- name: Deploy screensaver lock
+  ansible.builtin.copy:
+    content: |
+      # Lock desktop screensaver settings
+      /org/gnome/desktop/session/idle-delay
+      /org/gnome/desktop/screensaver/lock-enabled
+      /org/gnome/desktop/screensaver/lock-delay
+    dest: /etc/dconf/db/local.d/locks/screensaver
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - bootstrap_pc - Update dconf
+
+- name: Deploy notification conf
+  ansible.builtin.template:
+    src: dconf/notifications.j2
+    dest: /etc/dconf/db/local.d/notifications
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - bootstrap_pc - Update dconf
+
+- name: Deploy notification lock
+  ansible.builtin.copy:
+    content: |
+      # Lock notifications settings
+      /org/gnome/desktop/notifications/show-in-lock-screen
+    dest: /etc/dconf/db/local.d/locks/notifications
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - bootstrap_pc - Update dconf
+
+- meta: flush_handlers

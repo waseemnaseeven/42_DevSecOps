@@ -1,0 +1,210 @@
+global:
+  scrape_interval: 20s # Default is every 1 minute.
+  evaluation_interval: 1m # Default is every 1 minute.
+  external_labels:
+    replica: {{ replica }}
+
+# Alertmanager configuration
+alerting:
+  alert_relabel_configs:
+    - action: labeldrop
+      regex: replica
+  alertmanagers:
+    - scheme: https
+      tls_config: {{ prometheus_tls_server | tojson }}
+      static_configs:
+        - targets:
+          - {{ alertmanager_private_ip }}:{{ alertmanager_port }}
+          - {{ alertmanager2_private_ip }}:{{ alertmanager_port }}
+          - {{ alertmanager3_private_ip }}:{{ alertmanager_port }}
+
+rule_files:
+  - "rules/self_monitoring_alerts.yml"
+  - "rules/node_exporter_alerts.yml"
+  - "rules/blackbox_exporter_alerts.yml"
+  - "rules/thanos_alerts.yml"
+
+scrape_configs:
+  - job_name: "prometheus"
+    scheme: https
+    tls_config: {{ prometheus_tls_client | tojson }}
+    static_configs:
+      - targets:
+        - {{ prometheus_private_ip }}:{{ prometheus_port }}
+        - {{ prometheus2_private_ip }}:{{ prometheus_port }}
+        - {{ prometheus3_private_ip }}:{{ prometheus_port }}
+
+  - job_name: "thanos_compactor"
+    scheme: https
+    tls_config: {{ prometheus_tls_server | tojson }}
+    static_configs:
+      - targets:
+        - {{ thanos_compactor_private_ip }}:10907
+
+  - job_name: "thanos_store"
+    scheme: https
+    tls_config: {{ prometheus_tls_server | tojson }}
+    static_configs:
+      - targets:
+        - {{ thanos_store_private_ip }}:10906
+
+  - job_name: "thanos_rule"
+    scheme: https
+    tls_config: {{ prometheus_tls_server | tojson }}
+    static_configs:
+      - targets:
+        - {{ thanos_rule_private_ip }}:10908
+
+  - job_name: "thanos_query"
+    scheme: https
+    tls_config: {{ prometheus_tls_server | tojson }}
+    static_configs:
+      - targets:
+        - {{ thanos_query_private_ip }}:9090
+        - {{ thanos_query2_private_ip }}:9090
+        - {{ thanos_query3_private_ip }}:9090
+
+  - job_name: "alertmanager"
+    scheme: https
+    tls_config: {{ prometheus_tls_server | tojson }}
+    static_configs:
+      - targets:
+        - {{ alertmanager_private_ip }}:{{ alertmanager_port }}
+        - {{ alertmanager2_private_ip }}:{{ alertmanager_port }}
+        - {{ alertmanager3_private_ip }}:{{ alertmanager_port }}
+
+  - job_name: "grafana"
+    scheme: https
+    tls_config: {{ prometheus_tls_server | tojson }}
+    static_configs:
+      - targets:
+        - {{ grafana_private_ip }}:{{ grafana_port }}
+        - {{ grafana2_private_ip }}:{{ grafana_port }}
+
+  - job_name: "blackbox"
+    metrics_path: '/metrics'
+    scheme: https
+    tls_config: {{ prometheus_tls_server | tojson }}
+    static_configs:
+      - targets:
+        - {{ blackbox_private_ip }}:{{ blackbox_port }}
+
+  - job_name: "monitoring_node_exporter"
+    scheme: https
+    tls_config: {{ prometheus_tls_client | tojson }}
+    metrics_path: '/metrics'
+    static_configs:
+      - targets:
+        - {{ prometheus_private_ip }}:{{ node_exporter_port }}
+        - {{ prometheus2_private_ip }}:{{ node_exporter_port }}
+        - {{ prometheus3_private_ip }}:{{ node_exporter_port }}
+        labels:
+          node_exporter_from: "prometheus"
+      - targets:
+        - {{ thanos_query_private_ip }}:{{ node_exporter_port }}
+        labels:
+          node_exporter_from: "thanos_query"
+      - targets:
+        - {{ thanos_store_private_ip }}:{{ node_exporter_port }}
+        labels:
+          node_exporter_from: "thanos_store"
+      - targets:
+        - {{ thanos_compactor_private_ip }}:{{ node_exporter_port }}
+        labels:
+          node_exporter_from: "thanos_compactor"
+      - targets:
+        - {{ alertmanager_private_ip }}:{{ node_exporter_port }}
+        - {{ alertmanager2_private_ip }}:{{ node_exporter_port }}
+        - {{ alertmanager3_private_ip }}:{{ node_exporter_port }}
+        labels:
+          node_exporter_from: "alertmanager"
+      - targets:
+        - {{ grafana_private_ip }}:{{ node_exporter_port }}
+        labels:
+          node_exporter_from: "grafana"
+      - targets:
+        - {{ blackbox_private_ip }}:{{ node_exporter_port }}
+        labels:
+          node_exporter_from: "blackbox"
+
+  - job_name: "node_exporter"
+    scheme: https
+    tls_config: {{ prometheus_tls_client | tojson }}
+    metrics_path: '/metrics'
+    static_configs:
+      - targets:
+        - 10.15.14.115:{{ node_exporter_port }}
+        labels:
+          zone: "Admin"
+          type: "host"
+      - targets:
+        - 10.15.51.136:{{ node_exporter_port }}
+        labels:
+          zone: "Management"
+          type: "host"
+      - targets:
+        - 10.15.0.168:{{ node_exporter_port }} # IP from host
+        labels:
+          zone: "NP"
+          type: "host"
+      - targets:
+        - 10.15.51.126:{{ node_exporter_port }} # IP from VM
+        labels:
+          zone: "NP"
+          type: "vm"
+
+  - job_name: 'blackbox_exporter'
+    scheme: https
+    tls_config: {{ prometheus_tls_server | tojson }}
+    metrics_path: '/probe'
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+        - "http://prometheus.io"
+        - "https://prometheus.io"
+        - "1.1.1.1"
+        - "127.0.0.1"
+        - "www.google.com:443"
+        - "https://cloudflare.com"
+        - "https://prometheus.io:53"
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+
+      # Mapping target sur protocole spécifique
+      # ICMP 
+      - source_labels: [__address__]
+        regex: ^[0-9.]+$
+        target_label: __param_module
+        replacement: icmp
+      
+      # TCP (ex : port 443)
+      - source_labels: [__address__]
+        regex: .*:443$
+        target_label: __param_module
+        replacement: tcp_connect
+
+      # HTTPS 
+      - source_labels: [__address__]
+        regex: ^https://.*
+        target_label: __param_module
+        replacement: https_2xx
+      
+      # HTTP
+      - source_labels: [__address__]
+        regex: ^http://.*
+        target_label: __param_module
+        replacement: http_2xx
+
+      # DNS
+      - source_labels: [__address__]
+        regex: .*:53$
+        target_label: __param_module
+        replacement: dns
+
+      - target_label: __address__
+        replacement: {{ blackbox_private_ip }}:{{ blackbox_port }}
+

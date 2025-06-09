@@ -1,0 +1,36 @@
+---
+# roles/elasticsearch/tasks/config.yml
+
+- name: "2. Déployer elasticsearch.yml en mode Dev"
+  ansible.builtin.template:
+    src: "templates/elasticsearch.yml.j2"
+    dest: "{{ es_install_dir }}/current/config/elasticsearch.yml"
+    owner: "{{ es_user }}"
+    group: "{{ es_group }}"
+    mode: '0644'
+  notify: restart elasticsearch
+
+- name: "3. Déployer jvm.options en mode Dev"
+  ansible.builtin.template:
+    src: "templates/jvm.options.j2"
+    dest: "{{ es_install_dir }}/current/config/jvm.options"
+    owner: "{{ es_user }}"
+    group: "{{ es_group }}"
+    mode: '0644'
+  notify: restart elasticsearch
+
+- name: "4. Déployer le service systemd elasticsearch en mode Dev"
+  ansible.builtin.template:
+    src: "templates/elasticsearch.service.j2"
+    dest: "/etc/systemd/system/elasticsearch.service"
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - restart elasticsearch
+
+- name: "5. Activer et démarrer Elasticsearch (Dev)"
+  ansible.builtin.systemd:
+    name: elasticsearch
+    enabled: yes
+    state: started

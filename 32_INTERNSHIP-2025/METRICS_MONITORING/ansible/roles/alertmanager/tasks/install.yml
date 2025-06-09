@@ -1,0 +1,92 @@
+---
+- name: Check if binary exist
+  stat:
+    path: "{{ alertmanager_binary }}"
+  register: binary_file
+
+- name: Check if config exist
+  stat:
+    path: "{{ alertmanager_install_dir }}"
+  register: config_folder
+
+- name: Verify if data folder was created
+  stat:
+    path: "{{ alertmanager_storage_path }}"
+  register: data_folder
+
+- name: Add group
+  ansible.builtin.group:
+    name: "{{ alertmanager_group }}"
+    system: yes
+    state: present
+
+- name: Create user for alertmanager
+  ansible.builtin.user:
+    name: "{{ alertmanager_user }}"
+    shell: /usr/sbin/nologin
+    system: yes
+    create_home: no
+
+- name: Download alertmanager from the doc
+  ansible.builtin.get_url:
+    url: " https://github.com/prometheus/alertmanager/releases/download/v{{ alertmanager_version }}/alertmanager-{{ alertmanager_version }}.{{ os }}-{{ cpu_arch }}.tar.gz"
+    dest: "/tmp/alertmanager-{{ alertmanager_version }}.tar.gz"
+    mode: '0644'
+  when: not config_folder.stat.exists
+
+- name: Extraction of the alertmanager.zip
+  ansible.builtin.unarchive:
+    src: "/tmp/alertmanager-{{ alertmanager_version }}.tar.gz"
+    dest: "/tmp/"
+    remote_src: yes
+  when: not config_folder.stat.exists
+
+- name: Remove alertmanager.zip
+  ansible.builtin.file:
+    path: "/tmp/alertmanager-{{ alertmanager_version }}.tar.gz"
+    state: absent
+  when: not config_folder.stat.exists
+
+- name: Move the folder alertmanager 
+  ansible.builtin.command: mv /tmp/alertmanager-{{ alertmanager_version }}.{{ os }}-{{ cpu_arch }} {{ alertmanager_install_dir }}
+  args:
+    creates: "{{ alertmanager_install_dir }}"
+  when: not config_folder.stat.exists
+
+- name: Changing the owner of the folder alertmanager
+  ansible.builtin.file:
+    path: "{{ alertmanager_install_dir }}"
+    owner: "{{ alertmanager_user }}"
+    group: "{{ alertmanager_group }}"
+    recurse: yes
+  when: not config_folder.stat.exists
+
+- name: Copy alertmanager binary
+  ansible.builtin.copy:
+    src: "{{ alertmanager_install_dir }}/alertmanager"
+    dest: "{{ alertmanager_binary }}"
+    remote_src: true
+  when: not binary_file.stat.exists or not config_folder.stat.exists
+
+- name: Remove binary from config file
+  ansible.builtin.file:
+    path: "{{ alertmanager_install_dir }}/alertmanager"
+    state: absent
+  when: not config_folder.stat.exists
+
+- name: Changing the owner of the alertmanager binary
+  ansible.builtin.file:
+    path: "{{ alertmanager_binary }}"
+    owner: "{{ alertmanager_user }}"
+    group: "{{ alertmanager_group }}"
+    mode: '0100'
+  when: not config_folder.stat.exists
+
+- name: Create data directory 
+  ansible.builtin.file:
+    path: "{{ alertmanager_storage_path }}"
+    state: directory
+    owner: "{{ alertmanager_user }}"
+    group: "{{ alertmanager_group }}"
+    mode: '0777'
+  when: not data_folder.stat.exists

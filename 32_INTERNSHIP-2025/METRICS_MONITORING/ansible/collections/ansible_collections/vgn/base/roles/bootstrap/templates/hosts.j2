@@ -1,0 +1,12 @@
+{% for line in (host_values | dict2items) %}
+{{ line.key }}        {{ line.value | join(' ') }}
+
+{% endfor %}
+
+{% if host_localhost %}
+127.0.0.1       localhost
+{% endif %}
+
+{% if host_fqdn %}
+{{ ansible_host }} {{ inventory_hostname }}
+{% endif %}

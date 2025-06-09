@@ -1,0 +1,26 @@
+---
+# Offline mode disables installation of requirements.yml
+offline: false
+
+# exclude_paths included in this file are parsed relative to this file's location
+# and not relative to the CWD of execution. CLI arguments passed to the --exclude
+# option will be parsed relative to the CWD of execution.
+exclude_paths:
+- collections/ansible_collections/community
+- collections/ansible_collections/ansible
+- collections/ansible_collections/freeipa
+- collections/ansible_collections/middleware_automation
+- roles/geerlingguy.gitlab
+- roles/riemers.gitlab-runner
+- roles/PowerDNS.pdns
+- roles/PowerDNS.pdns_recursor
+- roles/ansible-community.ansible-vault
+
+# This makes linter to fully ignore rules/tags listed below:
+skip_list:
+- yaml[line-length] # ssh key are too long
+- no-changed-when   # Commands should not change things if nothing needs doing
+
+# This makes the linter display but not fail for rules/tags listed below:
+warn_list:
+- experimental      # all rules tagged as experimental

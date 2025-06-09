@@ -1,0 +1,14 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for thanos_rule
+- block:
+    - name: "Install thanos rule"
+      include_tasks: install.yml
+
+    - name: "Deploying config file for thanos rule"
+      include_tasks: config.yml
+  when: thanos_rule_enabled | bool
+
+- name: "Remove thanos rule"
+  include_tasks: remove.yml
+  when: not (thanos_rule_enabled | bool)

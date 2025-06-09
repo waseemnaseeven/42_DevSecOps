@@ -1,0 +1,27 @@
+[Unit]
+Description=Thanos Version {{ thanos_version }}
+Documentation=https://thanos.io/tip/thanos/getting-started.md/
+After=network-online.target
+
+[Service]
+User={{ thanos_user }}
+Group={{ thanos_group }}
+Restart=on-failure
+ExecStart={{ thanos_binary }} compact \
+  --data-dir={{ thanos_data_dir }} \
+  --http-address=0.0.0.0:10907 \
+  --objstore.config-file={{ thanos_bucket_file }} \
+  --http.config="{{ thanos_install_dir }}/tls_config.yml" \
+  --retention.resolution-raw=30d \
+  --retention.resolution-5m=180d \
+  --retention.resolution-1h=1y \
+  --compact.concurrency=2 \
+  --compact.progress-interval=5m \
+  --enable-auto-gomemlimit \
+  --delete-delay=48h \
+  --wait \
+  --log.level=info \
+  --log.format=json 
+
+[Install]
+WantedBy=multi-user.target

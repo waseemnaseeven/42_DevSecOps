@@ -1,0 +1,27 @@
+ntp_servers:
+  - "10.15.3.246"
+
+vault_cert:
+
+  - owner: "thanos"
+    group: "thanos"
+    base_path: "/etc/thanos_ssl_http/"
+    issue_path: "rd/pki/monitoring/sign/services"
+    common_name: "thanoscompactorhttp.com"
+    cert_path: "thanos.crt"
+    key_path: "thanos.key"
+    ip_sans: "{{ ansible_host }}, {{ thanos_compactor_private_ip }}"
+    alt_names: "localhost"
+    # force_renew: true
+
+  - owner: "node_exporter"
+    group: "node_exporter"
+    base_path: "/etc/node_exporter_ssl/"
+    issue_path: "rd/pki/monitoring/sign/services"
+    common_name: "nodeexporterthanoscompactor.com"
+    cert_path: "node_exporter.crt"
+    key_path: "node_exporter.key"
+    ip_sans: 
+      - "{{ ansible_host }}"
+      - "{{ thanos_compactor_private_ip }}"
+    # force_renew: true

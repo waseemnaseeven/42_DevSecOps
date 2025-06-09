@@ -1,0 +1,7 @@
+---
+# defaults file for larueli.firewall
+ufw_default_in: deny
+ufw_default_out: allow
+ufw_default_rule: allow
+ufw_default_output_policy: "ACCEPT"
+ufw_default_input_policy: "DROP"

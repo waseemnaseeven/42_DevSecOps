@@ -1,0 +1,120 @@
+---
+- name: "Configuration du home pour {{ item }}"
+  become_user: "{{ item.name }}"
+  become: true
+  block:
+    - name: Check if LazyVim previously installed
+      ansible.builtin.stat:
+        path: ~{{ item.name }}/.config/nvim/.neoconf.json
+      register: stat_lazyvim_result
+
+    - name: Remove LazyVim
+      ansible.builtin.file:
+        path: "{{ _nvim_folder }}"
+        state: absent
+      loop:
+        - ~{{ item.name }}/.config/nvim
+        - ~{{ item.name }}/.local/state/nvim
+        - ~{{ item.name }}/.local/share/nvim
+      loop_control:
+        loop_var: _nvim_folder
+      when: stat_lazyvim_result.stat.exists
+
+    - name: Create config path
+      ansible.builtin.file:
+        path: ~{{ item.name }}/.config/nvim
+        state: directory
+
+    - name: Install NvChad
+      ansible.builtin.git:
+        repo: "https://github.com/NvChad/starter"
+        dest: ~{{ item.name }}/.config/nvim
+        clone: true
+        update: true
+
+    - name: "[{{ item.name }}] Make sure tmux folder exists"
+      ansible.builtin.file:
+        path: "~{{ item.name }}/.tmux/plugins"
+        state: directory
+        owner: "{{ item.name }}"
+        group: "{{ item.name }}"
+
+    - name: "[{{ item.name }}] Install tmux tpm"
+      ansible.builtin.git:
+        repo: "https://github.com/tmux-plugins/tpm"
+        dest: "~{{ item.name }}/.tmux/plugins/tpm"
+        clone: true
+        update: true
+
+    - name: "[{{ item.name }}] Make sure tmux powerline folder exists"
+      ansible.builtin.file:
+        path: "~{{ item.name }}/.config/tmux-powerline/themes"
+        state: directory
+        owner: "{{ item.name }}"
+        group: "{{ item.name }}"
+
+    - name: "[{{ item.name }}] TMUX Powerline config"
+      ansible.builtin.template:
+        src: "tmux-powerline-config.sh.j2"
+        dest: "~{{ item.name }}/.config/tmux-powerline/config.sh"
+        owner: "{{ item.name }}"
+        group: "{{ item.name }}"
+        mode: "u=rwx"
+
+    - name: "[{{ item.name }}] TMUX Powerline template"
+      ansible.builtin.template:
+        src: "tmux-powerline-theme.sh.j2"
+        dest: "~{{ item.name }}/.config/tmux-powerline/themes/tmux-powerline-theme.sh"
+        owner: "{{ item.name }}"
+        group: "{{ item.name }}"
+        mode: "u=rwx"
+
+    - name: "[{{ item.name }}] TMUX template"
+      ansible.builtin.template:
+        src: "tmux.conf.j2"
+        dest: "~{{ item.name }}/.tmux.conf"
+        owner: "{{ item.name }}"
+        group: "{{ item.name }}"
+        mode: "u=rwx"
+
+    - name: "[{{ item.name }}] gitconfig"
+      ansible.builtin.template:
+        dest: "~{{ item.name }}/.gitconfig"
+        src: gitconfig.j2
+        owner: "{{ item.name }}"
+        group: "{{ item.name }}"
+        mode: "u=rwx"
+
+    - name: "[{{ item.name }}] Make sure ssh folder exists"
+      ansible.builtin.file:
+        path: "~{{ item.name }}/.ssh"
+        state: directory
+        owner: "{{ item.name }}"
+        group: "{{ item.name }}"
+
+    - name: "[{{ item.name }}] sshconfig"
+      ansible.builtin.template:
+        dest: "~{{ item.name }}/.ssh/config"
+        src: sshconfig.j2
+        owner: "{{ item.name }}"
+        group: "{{ item.name }}"
+        mode: "u=rwx"
+      when: item.manage_ssh | default(false)
+
+    - name: "[{{ item.name }}] sshconfig - vm"
+      ansible.builtin.template:
+        dest: "~{{ item.name }}/.ssh/config_vm"
+        src: sshconfigvm.j2
+        owner: "{{ item.name }}"
+        group: "{{ item.name }}"
+        mode: "u=rwx"
+      when: item.manage_ssh_vm | default(false)
+
+    - name: "[{{ item.name }}] ssh known hosts"
+      ansible.builtin.template:
+        dest: "~{{ item.name }}/.ssh/known_hosts"
+        src: sshknownhosts.j2
+        owner: "{{ item.name }}"
+        group: "{{ item.name }}"
+        mode: "u=rwx"
+      when: item.manage_ssh | default(false)

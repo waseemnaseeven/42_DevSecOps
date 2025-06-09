@@ -1,0 +1,4 @@
+#!/bin/bash
+set -euo pipefail
+umount /mnt/{{ disk_name }}
+/usr/sbin/cryptsetup luksClose {{ disk_name }}

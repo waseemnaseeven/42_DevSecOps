@@ -1,0 +1,32 @@
+---
+- name: Install obs key
+  ansible.builtin.copy:
+    src: obs.asc
+    dest: "/etc/apt/keyrings/obs.asc"
+    mode: "0644"
+
+- name: Remove old obs repo
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/obs.list
+    state: absent
+
+- name: "Add obs repo"
+  ansible.builtin.deb822_repository:
+    types: "deb"
+    uris: https://ppa.launchpadcontent.net/obsproject/obs-studio/ubuntu
+    suites: "{{ obs_distribution_release }}"
+    components:
+      - main
+    signed_by: /etc/apt/keyrings/obs.asc
+    name: "obs"
+  register: obs_repo
+
+- name: Update cache
+  ansible.builtin.apt:
+    update_cache: true
+  when: obs_repo.changed
+
+- name: Install ObsStudio
+  ansible.builtin.apt:
+    name: obs-studio
+    state: present

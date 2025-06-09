@@ -1,0 +1,25 @@
+- name: Install NFS-Common
+  ansible.builtin.apt:
+    name: nfs-common
+
+- name: Create mountpoint
+  loop: "{{ pc_nfs_mounts }}"
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+
+- name: Deploy networkdispatcher nfs script
+  ansible.builtin.template:
+    src: 50-nfs-mount.j2
+    dest: /etc/NetworkManager/dispatcher.d/50-nfs-mount
+    mode: "0700"
+    owner: root
+    group: root
+
+- name: Deploy networkdispatcher nfs predown script
+  ansible.builtin.template:
+    src: 50-nfs-umount.j2
+    dest: /etc/NetworkManager/dispatcher.d/pre-down.d/50-nfs-umount
+    mode: "0700"
+    owner: root
+    group: root

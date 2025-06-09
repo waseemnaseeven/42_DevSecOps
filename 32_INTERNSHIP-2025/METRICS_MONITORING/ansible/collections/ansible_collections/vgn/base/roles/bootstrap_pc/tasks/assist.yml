@@ -1,0 +1,33 @@
+- name: Make sure packages installed
+  ansible.builtin.apt:
+    name: libsecret-tools
+    state: present
+
+- name: Deploy script
+  ansible.builtin.template:
+    src: remote-screen.j2
+    dest: /usr/local/bin/remote-screen
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy shortcut
+  ansible.builtin.copy:
+    content: |
+      [Desktop Entry]
+      Version=1.0
+      Exec=/usr/local/bin/remote-screen
+      Name=Assistance à distance
+      Keywords=help;
+      GenericName=Assistance à distance
+      Comment=OSKOUR
+      Encoding=UTF-8
+      Terminal=true
+      Type=Application
+      Categories=Documentation;
+      StartupNotify=false
+      Icon=org.gnome.Yelp
+    dest: /usr/share/applications/remotescreen.desktop
+    mode: "0644"
+    owner: root
+    group: root

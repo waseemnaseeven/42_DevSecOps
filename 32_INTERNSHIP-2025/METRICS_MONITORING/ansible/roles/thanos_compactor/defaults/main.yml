@@ -1,0 +1,18 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for thanos_compactor
+thanos_version: "0.38.0"
+thanos_install_dir: "/etc/thanos"
+thanos_binary: "/usr/local/bin/thanos"
+thanos_bucket_file: "/etc/thanos/bucket.yml"
+thanos_compactor_service_file: "/etc/systemd/system/compactor.service"
+thanos_data_dir: "/var/lib/compactor"
+thanos_user: "thanos"
+thanos_group: "thanos"
+thanos_compactor_enabled: true
+
+thanos_log_level: "info"
+
+thanos_crt_server_http: "/etc/thanos_ssl_http/thanos.crt"
+thanos_key_server_http: "/etc/thanos_ssl_http/thanos.key"
+thanos_ca_file: "/etc/thanos_ssl/ca.crt"

@@ -1,0 +1,37 @@
+- name: Set allowed methods
+  set_fact:
+    allowed_methods:
+      - unarchive
+      - get_url
+
+- name: Managing {{ item.key }}
+  block:
+    - name: No method set
+      ansible.builtin.fail:
+        msg: "No method set for {{ item.key }}."
+      when: item.value.method not in allowed_methods
+
+    - name: "Using unarchive"
+      when: item.value.method == "unarchive" or item.value.method == "get_url"
+      block:
+        - name: Remove {{ item.key }}
+          ansible.builtin.file:
+            path: "{{ item.value.dest | default('/usr/local/bin/'~item.key) }}"
+            state: absent
+
+        - name: "Registering {{ item.key }} removal"
+          ansible.builtin.lineinfile:
+            path: /var/versions
+            regexp: "^{{ item.key }}="
+            state: absent
+
+      rescue:
+        - name: "Registering {{ item.key }} failure"
+          ansible.builtin.lineinfile:
+            path: /var/versions
+            regexp: "^{{ item.key }}="
+            line: "{{ item.key }}=failure"
+
+        - name: Force failure
+          ansible.builtin.fail:
+            msg: "Installation of {{ item.key }} failed."

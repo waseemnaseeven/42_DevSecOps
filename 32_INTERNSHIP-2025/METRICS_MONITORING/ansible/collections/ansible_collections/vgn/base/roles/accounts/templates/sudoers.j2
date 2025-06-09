@@ -1,0 +1,22 @@
+Defaults	env_reset
+Defaults	mail_badpass
+Defaults	secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin"
+Defaults	use_pty
+Defaults env_keep += "ftp_proxy http_proxy https_proxy no_proxy SSH_CLIENT SSH_CONNECTION SSH_TTY TMUX LANG LC_ADDRESS LC_IDENTIFICATION LC_MEASUREMENT LC_MONETARY LC_NAME LC_NUMERIC LC_PAPER LC_TELEPHONE LC_TIME"
+
+root	ALL=(ALL:ALL) ALL
+
+{% for user in accounts_users %}
+{% if user.sudo is defined and user.sudo.enabled %}{{ user.name }} ALL=(ALL:ALL) {% if not user.sudo.ask_pass | default(false) %}NOPASSWD:{% endif %}{{ user.sudo.commands | default(['ALL']) | join(', ') }}{% endif %}
+
+{% endfor %}
+
+{% for group in accounts_groups %}
+{% if group.sudo is defined and group.sudo.enabled %}%{{ group.name }} ALL=(ALL:ALL) {% if not group.sudo.ask_pass | default(false) %}NOPASSWD:{% endif %}{{ group.value.sudo.commands | default(['ALL']) | join(', ') }}{% endif %}
+
+{% endfor %}
+
+{% for additional_sudoer in additional_sudoers %}
+{{ additional_sudoer }}
+
+{% endfor %}

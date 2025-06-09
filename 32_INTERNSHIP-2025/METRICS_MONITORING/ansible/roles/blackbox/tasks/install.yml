@@ -1,0 +1,79 @@
+- name: Check if binary exist
+  stat:
+    path: "{{ blackbox_binary }}"
+  register: binary_file
+
+- name: Check if config exist
+  stat:
+    path: "{{ blackbox_install_dir }}"
+  register: config_folder
+
+- name: Add group
+  ansible.builtin.group:
+    name: "{{ blackbox_group }}"
+    system: yes
+    state: present
+
+- name: Add user
+  ansible.builtin.user:
+    name: "{{ blackbox_user }}"
+    group: "{{ blackbox_group }}"
+    shell: /usr/sbin/nologin
+    create_home: no
+    system: yes
+    state: present
+
+- name: Download blackbox from the doc
+  ansible.builtin.get_url:
+    url: "https://github.com/prometheus/blackbox_exporter/releases/download/v{{ blackbox_version }}/blackbox_exporter-{{ blackbox_version }}.{{ os }}-{{ cpu_arch }}.tar.gz"
+    dest: "/tmp/blackbox_exporter-{{ blackbox_version }}.tar.gz"
+    mode: '0644'
+  when: not config_folder.stat.exists
+
+- name: Extraction of the blackbox.zip
+  ansible.builtin.unarchive:
+    src: "/tmp/blackbox_exporter-{{ blackbox_version }}.tar.gz"
+    dest: "/tmp/"
+    remote_src: yes
+  when: not config_folder.stat.exists
+
+- name: Remove blackbox.zip
+  ansible.builtin.file:
+    path: "/tmp/blackbox_exporter-{{ blackbox_version }}.tar.gz"
+    state: absent
+  when: not config_folder.stat.exists
+
+- name: Move the folder blackbox 
+  ansible.builtin.command: mv /tmp/blackbox_exporter-{{ blackbox_version }}.{{ os }}-{{ cpu_arch }} {{ blackbox_install_dir }}
+  args:
+    creates: "{{ blackbox_install_dir }}"
+  when: not config_folder.stat.exists
+
+- name: Changing the owner of the folder blackbox
+  ansible.builtin.file:
+    path: "{{ blackbox_install_dir }}"
+    owner: "{{ blackbox_user }}"
+    group: "{{ blackbox_group }}"
+    recurse: yes
+  when: not config_folder.stat.exists
+
+- name: Copy blackbox binary
+  ansible.builtin.copy:
+    src: "{{ blackbox_install_dir }}/blackbox_exporter"
+    dest: "{{ blackbox_binary }}"
+    remote_src: true
+  when: not binary_file.stat.exists or not config_folder.stat.exists
+
+- name: Remove binary from config file
+  ansible.builtin.file:
+    path: "{{ blackbox_install_dir }}/blackbox_exporter"
+    state: absent
+  when: not config_folder.stat.exists
+
+- name: Changing the owner of the blackbox binary
+  ansible.builtin.file:
+    path: "{{ blackbox_binary }}"
+    owner: "{{ blackbox_user }}"
+    group: "{{ blackbox_group }}"
+    mode: '0100'
+  when: not config_folder.stat.exists

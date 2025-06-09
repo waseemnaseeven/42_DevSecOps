@@ -1,0 +1,15 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for thanos_store
+- block:
+    - name: "Install thanos store"
+      include_tasks: install.yml
+  
+    - name: "Deploying config file for thanos store"
+      include_tasks: config.yml
+  
+  when: thanos_store_enabled | bool
+
+- name: "Remove thanos store"
+  include_tasks: remove.yml
+  when: not (thanos_store_enabled | bool)

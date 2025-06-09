@@ -1,0 +1,23 @@
+---
+- name: bootstrap_pc - Update dconf
+  ansible.builtin.shell:
+    cmd: "dconf update"
+
+- name: bootstrap_pc - Netplan apply
+  ansible.builtin.shell:
+    cmd: "netplan apply"
+
+- name: bootstrap_pc - Restart NetworkManager
+  ansible.builtin.systemd:
+    name: NetworkManager
+    state: restarted
+
+- name: bootstrap_pc - Restart polkit
+  ansible.builtin.systemd:
+    name: polkit
+    state: restarted
+
+- name: bootstrap_pc - Reload AppArmor
+  ansible.builtin.systemd:
+    name: apparmor
+    state: reloaded

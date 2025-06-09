@@ -1,0 +1,80 @@
+---
+- name: "Installation de Oh My ZSH pour {{ item }}"
+  become_user: "{{ item.name }}"
+  become: true
+  block:
+    - name: Create terminator config folder
+      ansible.builtin.file:
+        path: ~{{ item.name }}/.config/terminator
+        state: directory
+
+    - name: Create Mattermost config folder
+      ansible.builtin.file:
+        path: ~{{ item.name }}/.config/Mattermost
+        state: directory
+        mode: "0770"
+
+    - name: Deploy certificates
+      ansible.builtin.copy:
+        dest: ~{{ item.name }}/.config/Mattermost/certificate.json
+        content: |
+          {{ mattermost_certificates }}
+        mode: "0660"
+
+    - name: Create gtk-3.0 config folder
+      ansible.builtin.file:
+        path: ~{{ item.name }}/.config/gtk-3.0
+        state: directory
+
+    - ansible.builtin.lineinfile:
+        line: "{{ bookmark }}"
+        path: ~{{ item.name }}/.config/gtk-3.0/bookmarks
+        create: true
+      loop: "{{ item.nautilus_bookmarks | default([]) }}"
+      loop_control:
+        loop_var: bookmark
+
+    - name: Copy terminator config
+      ansible.builtin.template:
+        src: config_terminator.j2
+        dest: ~{{ item.name }}/.config/terminator/config
+
+    - name: Get terminal default profile
+      ansible.builtin.command:
+        cmd: "gsettings get org.gnome.Terminal.ProfilesList default"
+      changed_when: false
+      register: _terminal_profile
+
+    - name: Set font
+      community.general.dconf:
+        key: '/org/gnome/terminal/legacy/profiles:/:{{ _terminal_profile.stdout | replace("''", '''') }}/use-system-font'
+        value: "false"
+
+    - name: Set font
+      community.general.dconf:
+        key: '/org/gnome/terminal/legacy/profiles:/:{{ _terminal_profile.stdout | replace("''", '''') }}/font'
+        value: "'Hack Nerd Font Mono 12'"
+
+    - name: Create flameshot directory
+      ansible.builtin.file:
+        dest: "~{{ item.name }}/.config/flameshot"
+        state: directory
+        mode: 0700
+
+    - name: Create autostart directory
+      ansible.builtin.file:
+        dest: "~{{ item.name }}/.config/autostart"
+        state: directory
+        mode: 0700
+
+    - name: Set configuration to flameshot
+      ansible.builtin.template:
+        src: "flameshot.ini.j2"
+        dest: "~{{ item.name }}/.config/flameshot/flameshot.ini"
+        mode: 0700
+
+    - name: Make Flashot autostartable
+      ansible.builtin.copy:
+        src: Flameshot.desktop
+        dest: "~{{ item.name }}/.config/autostart/Flameshot.desktop"
+        mode: 0700

@@ -1,0 +1,16 @@
+[connection]
+id=Wired1
+uuid=06fb3070-74e9-433b-96c3-484704c52c39
+type=ethernet
+interface-name={{ ansible_default_ipv4.interface }}
+
+[ethernet]
+
+[ipv4]
+method=auto
+
+[ipv6]
+addr-gen-mode=default
+method=auto
+
+[proxy]

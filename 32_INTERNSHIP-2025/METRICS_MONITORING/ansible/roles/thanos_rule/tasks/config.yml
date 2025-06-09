@@ -1,0 +1,99 @@
+---
+- name: Verify if rules directory is installed
+  stat:
+    path: "{{ thanos_install_dir }}/rules"
+  register: rules_folder
+
+- name: Verify if data folder was created
+  stat:
+    path: "{{ thanos_data_dir }}"
+  register: data_folder
+
+- name: Create data directory to store metric locally
+  ansible.builtin.file:
+    state: directory
+    path: "{{ thanos_data_dir }}"
+    owner: "{{ thanos_user }}"
+    group: "{{ thanos_group }}"
+    mode: '0777'
+  when: not data_folder.stat.exists
+
+- name: Create rules directory
+  ansible.builtin.file:
+    path: "{{ thanos_install_dir }}/rules"
+    owner: "{{ thanos_user }}"
+    group: "{{ thanos_group }}"
+    recurse: yes
+  when: not rules_folder.stat.exists
+
+- name: Copy long-term alerts 
+  ansible.builtin.copy:
+    src: long_term_alerts.yml
+    dest: "{{ thanos_install_dir }}/rules/"
+    owner: "{{ thanos_user }}"
+    group: "{{ thanos_group }}"
+    mode: '0644' 
+
+- name: Copy ca-cert 
+  ansible.builtin.copy:
+    content: "{{ lookup('pipe', 'vault read -field=certificate rd/pki/monitoring/cert/ca') }}"
+    dest: "{{ thanos_ca_file }}"
+    owner: "{{ thanos_user }}"
+    group: "{{ thanos_group }}"
+    mode: '0644'
+
+- name: Deploy the tls config file (tls_config.yml) 
+  ansible.builtin.template:
+    src: tls_config.yml.j2
+    dest: "{{ thanos_install_dir }}/tls_config.yml"
+    owner: "{{ thanos_user }}"
+    group: "{{ thanos_group }}"
+    mode: '0644'
+
+- name: Deploy bucket config file (bucket.yml) 
+  ansible.builtin.template:
+    src: bucket.yml.j2
+    dest: "{{ thanos_bucket_file }}"
+    owner: "{{ thanos_user }}"
+    group: "{{ thanos_group }}"
+    mode: '0644'
+
+- name: Deploying the rule systemd service 
+  ansible.builtin.template:
+    src: rule.service.j2
+    dest: "{{ thanos_rule_service_file }}"
+    mode: '0644'
+
+- name: Deploying the query config 
+  ansible.builtin.template:
+    src: query_config.yml.j2
+    dest: "{{ thanos_rule_query_config }}"
+    mode: '0644'
+
+- name: Deploying the alertmanagers config 
+  ansible.builtin.template:
+    src: alertmanagers_config.yml.j2
+    dest: "{{ thanos_rule_alertmanagers_config }}"
+    mode: '0644'
+
+- name: Deploying the service discovery query config 
+  ansible.builtin.template:
+    src: sd_query.yml.j2
+    dest: "/etc/thanos/sd_query.yml"
+    mode: '0644'
+
+- name: Deploying the service discovery AM config 
+  ansible.builtin.template:
+    src: sd_alertmanagers.yml.j2
+    dest: "/etc/thanos/sd_alertmanagers.yml"
+    mode: '0644'
+
+- name: Launch and activate the systemd service
+  ansible.builtin.systemd_service:
+    name: rule.service
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+    force: false # Override existing symlinks
+  notify:
+    - Restart rule

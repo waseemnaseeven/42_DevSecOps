@@ -1,0 +1,5 @@
+# ANSIBLE MANAGED
+{% for repo in base_repos %}
+{{ repo.repo }}{% if repo.comment is defined %} # {{ repo.comment }}{% endif %}
+
+{% endfor %}

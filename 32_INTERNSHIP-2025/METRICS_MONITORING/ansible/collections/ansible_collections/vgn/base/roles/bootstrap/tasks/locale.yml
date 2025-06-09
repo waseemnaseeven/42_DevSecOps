@@ -1,0 +1,12 @@
+- name: Ensure locales are generated
+  community.general.locale_gen:
+    name: "{{ item }}"
+  loop: "{{ locales }}"
+
+- name: Configure locales
+  ansible.builtin.template:
+    src: locale
+    dest: /etc/default/locale
+    owner: root
+    group: root
+    mode: "0644"

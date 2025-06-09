@@ -1,0 +1,74 @@
+---
+- name: Include OS-specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ ansible_distribution }}.yml"
+    - "{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ ansible_os_family }}.yml"
+  tags:
+    - always
+
+- name: Install psutil
+  ansible.builtin.apt:
+    name:
+      - python3-psutil
+    state: present
+
+- name: Deploy VPN Ubuntu
+  ansible.builtin.template:
+    src: vpn.yaml.j2
+    dest: /etc/netplan/{{ item.1.name }}-{{ item.0.name }}.yaml
+    owner: root
+    group: root
+    mode: "0600"
+  loop: "{{ (pc_users_config | product(pc_users_vpns)) }}"
+  loop_control:
+    label: "{{ item.0.name }} - {{ item.1.name }}"
+  when: ansible_distribution_release == 'noble' and (item.1.state | default('present')) != 'absent'
+  notify:
+    - bootstrap_pc_users - netplan apply
+
+- name: Remove VPN Ubuntu
+  ansible.builtin.file:
+    path: /etc/netplan/{{ item.1.name }}-{{ item.0.name }}.yaml
+    state: absent
+  loop: "{{ (pc_users_config | product(pc_users_vpns)) }}"
+  loop_control:
+    label: "{{ item.0.name }} - {{ item.1.name }}"
+  when: ansible_distribution_release == 'noble' and (item.1.state | default('present')) == 'absent'
+  notify:
+    - bootstrap_pc_users - netplan apply
+
+- name: Deploy PNT 802.1x config
+  ansible.builtin.template:
+    src: ethernet.yaml.j2
+    dest: "/etc/netplan/{{ item.1.name }}-{{ item.0.name }}.yaml"
+    owner: root
+    group: root
+    mode: "0600"
+  loop: "{{ (pc_users_config | product(pc_users_ethernet)) }}"
+  loop_control:
+    label: "{{ item.0.name }} - {{ item.1.name }}"
+  notify:
+    - bootstrap_pc_users - netplan apply
+
+- name: Remove default wired connection
+  ansible.builtin.file:
+    path: "/var/run/NetworkManager/system-connections/Wired connection 1.nmconnection"
+    state: absent
+  notify:
+    - bootstrap_pc_users - Restart NetworkManager
+
+- name: Remove unwanted netplan
+  ansible.builtin.file:
+    dest: "/etc/netplan/50-cloud-init.yaml"
+    state: absent
+  notify:
+    - bootstrap_pc_users - netplan apply
+
+- name: Manage user configs
+  ansible.builtin.include_tasks: "user.yml"
+  loop: "{{ pc_users_config }}"
+  loop_control:
+    label: "{{ item.name }}"

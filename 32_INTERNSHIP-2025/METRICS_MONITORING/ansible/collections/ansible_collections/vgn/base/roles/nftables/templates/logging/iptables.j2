@@ -1,0 +1,18 @@
+# This file is managed by Ansible
+# Do not edit or delete
+
+{{ nft_log_file_path }}
+{
+	rotate 7
+	daily
+	missingok
+	notifempty
+	compress
+	delaycompress
+	sharedscripts
+	postrotate
+		invoke-rc.d rsyslog rotate >/dev/null 2>&1 || true
+	endscript
+}
+
+# EOF

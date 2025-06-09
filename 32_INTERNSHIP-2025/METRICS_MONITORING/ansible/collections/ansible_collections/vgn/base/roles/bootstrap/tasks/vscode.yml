@@ -1,0 +1,32 @@
+---
+- name: Add Microsoft GPG
+  ansible.builtin.copy:
+    src: packages.microsoft.gpg
+    dest: /etc/apt/keyrings/packages.microsoft.gpg
+    mode: "0644"
+
+- name: Remove old vscode repo
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/vscode.list
+    state: absent
+
+- name: Add vscode repo
+  ansible.builtin.deb822_repository:
+    name: "vscode"
+    types: deb
+    uris: "https://packages.microsoft.com/repos/code"
+    signed_by: /etc/apt/keyrings/packages.microsoft.gpg
+    suites: stable
+    components:
+      - main
+  register: vscode_repo
+
+- name: Update repositories cache
+  ansible.builtin.apt:
+    update_cache: true
+  when: vscode_repo.changed
+
+- name: Install VSCode
+  ansible.builtin.apt:
+    name: code
+    state: present

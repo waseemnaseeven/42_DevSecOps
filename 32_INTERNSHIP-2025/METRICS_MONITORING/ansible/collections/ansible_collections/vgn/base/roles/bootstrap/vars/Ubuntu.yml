@@ -1,0 +1,5 @@
+---
+update_ca_command: "update-ca-certificates -f"
+ca_store_path: "/usr/local/share/ca-certificates"
+
+_bootstrap_apt_main_source_list_file: /etc/apt/sources.list.d/ubuntu.sources

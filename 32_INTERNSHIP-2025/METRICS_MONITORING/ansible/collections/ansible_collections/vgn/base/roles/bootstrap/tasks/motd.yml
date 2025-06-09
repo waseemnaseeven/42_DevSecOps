@@ -1,0 +1,19 @@
+---
+- name: Install toilet
+  ansible.builtin.apt:
+    name: toilet
+
+- name: Delete default motd file
+  ansible.builtin.file:
+    name: "/etc/update-motd.d/{{ item }}"
+    state: absent
+  loop: "{{ bootstrap_motd_delete_files }}"
+
+- name: "Push motd files"
+  ansible.builtin.copy:
+    src: "motd/{{ item }}"
+    dest: "/etc/update-motd.d/{{ item }}"
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ bootstrap_motd_push_files }}"

@@ -1,0 +1,5 @@
+---
+oh_my_zsh_plugins_force:
+  - "zoxide"
+  - "zsh-autosuggestions"
+  - "zsh-syntax-highlighting"

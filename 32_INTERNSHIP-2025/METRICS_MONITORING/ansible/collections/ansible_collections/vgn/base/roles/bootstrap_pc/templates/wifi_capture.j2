@@ -1,0 +1,8 @@
+#!/bin/bash
+set -euo pipefail
+
+PATH="/usr/bin:/usr/sbin"
+
+wifi_interface=$(ip -br l | awk '{print $1}' | grep -E '^(wlan|wlp0)' | head -n 1)
+
+tcpdump -ni "${wifi_interface}" -U -w - | tee "/tmp/wifi-capture-$(/usr/bin/date +'%Y-%m-%dT%H:%M:%S%z').pcap" | tcpdump -nr -

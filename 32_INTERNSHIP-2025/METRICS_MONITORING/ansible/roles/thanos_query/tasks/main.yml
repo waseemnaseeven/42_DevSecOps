@@ -1,0 +1,15 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for thanos_query
+- block: 
+    - name: "Install thanos query"
+      include_tasks: install.yml
+
+    - name: "Deploying config file for thanos query"
+      include_tasks: config.yml
+
+  when: thanos_query_enabled | bool
+
+- name: "Remove thanos query"
+  include_tasks: remove.yml
+  when: not (thanos_query_enabled | bool)

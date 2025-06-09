@@ -1,0 +1,18 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for install_prometheus
+- block:
+    - name: "Install prometheus"
+      include_tasks: install.yml
+
+    - name: "Deploying config file for prometheus"
+      include_tasks: config.yml
+  when: prometheus_enabled | bool
+
+- name: "Configure sidecar for prometheus"
+  include_tasks: sidecar.yml
+  when: prometheus_sidecar_enabled | bool
+
+- name: "Remove prometheus"
+  include_tasks: remove.yml
+  when: not (prometheus_enabled | bool)

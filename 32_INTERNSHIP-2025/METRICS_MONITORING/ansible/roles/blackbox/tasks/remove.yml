@@ -1,0 +1,66 @@
+- name: Check if service exist
+  stat:
+    path: "{{ blackbox_service_file }}"
+  register: service_file
+
+- name: Check if binary exist
+  stat:
+    path: "{{ blackbox_binary }}"
+  register: binary_file
+
+- name: Check if config exist
+  stat:
+    path: "{{ blackbox_install_dir }}"
+  register: config_folder
+
+- name: Check if ssl_folder exist
+  stat:
+    path: "/etc/blackbox_ssl"
+  register: ssl_folder
+
+- name: Disable service
+  ansible.builtin.systemd_service:
+    state: "stopped"
+    name: blackbox_exporter.service
+    enabled: false
+  when: service_file.stat.exists
+  
+- name: Remove service
+  ansible.builtin.file:
+    path: "{{ blackbox_service_file }}"
+    state: absent
+  when: service_file.stat.exists
+
+- name: Refresh systemd
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  when: service_file.stat.exists
+
+- name: Remove binary
+  ansible.builtin.file:
+    path: "{{ blackbox_binary }}"
+    state: absent
+  when: binary_file.stat.exists
+
+- name: Remove blackbox config folder
+  ansible.builtin.file:
+    path: "{{ blackbox_install_dir }}"
+    state: absent
+  when: config_folder.stat.exists
+
+- name: Remove ssl 
+  ansible.builtin.file:
+    path: "/etc/blackbox_ssl"
+    state: absent
+  when: ssl_folder.stat.exists
+
+- name: Remove user
+  ansible.builtin.user:
+    name: "{{ blackbox_user }}"
+    state: absent
+    remove: yes
+
+- name: Remove group
+  ansible.builtin.group:
+    name: "{{ blackbox_group }}"
+    state: absent

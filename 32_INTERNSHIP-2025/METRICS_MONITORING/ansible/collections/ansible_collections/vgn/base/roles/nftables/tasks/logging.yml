@@ -1,0 +1,25 @@
+- name: Template the ulogd file
+  template:
+    src: logging/ulogd.conf.j2
+    dest: /etc/ulogd.conf
+    owner: root
+    group: root
+    mode: "0640"
+  notify: restart ulogd2
+
+- name: Template the rsyslog file
+  template:
+    src: logging/10-iptables.conf.j2
+    dest: /etc/rsyslog.d/10-iptables.conf
+    owner: root
+    group: root
+    mode: "0640"
+  notify: restart rsyslog
+
+- name: Template the logrotate file
+  template:
+    src: logging/iptables.j2
+    dest: /etc/logrotate.d/iptables
+    owner: root
+    group: root
+    mode: "0640"

@@ -1,0 +1,14 @@
+# Specify the dconf path
+[org/gnome/desktop/session]
+
+# Number of seconds of inactivity before the screen goes blank
+# Set to 0 seconds if you want to deactivate the screensaver.
+idle-delay=uint32 {{ screensaver_idle_delay }}
+
+# Specify the dconf path
+[org/gnome/desktop/screensaver]
+# Set this to true to lock the screen when the screensaver activates
+lock-enabled={{ screensaver_lock_enabled | to_json | replace("\"", "") }}
+
+# Number of seconds after the screen is blank before locking the screen
+lock-delay=uint32 0

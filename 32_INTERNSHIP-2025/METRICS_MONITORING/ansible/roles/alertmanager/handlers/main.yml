@@ -1,0 +1,9 @@
+#SPDX-License-Identifier: MIT-0
+---
+# handlers file for install_alertmanager
+- name: Restart alertmanager
+  ansible.builtin.systemd_service:
+    name: alertmanager
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
