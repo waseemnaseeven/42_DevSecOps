@@ -31,8 +31,11 @@ const KERNEL_CODE_SELECTOR: u16 = 1 << 3; // 1 << 3 = 0b0000_1000 = 8, privilege
 const KERNEL_DATA_SELECTOR: u16 = 2 << 3;
 const KERNEL_STACK_SELECTOR: u16 = 3 << 3; 
 
+/* 
+    User privilege with 0b11 
+*/
 #[allow(dead_code)]
-const USER_CODE_SELECTOR: u16 = (4 << 3) | 0b11; // | 0b11 
+const USER_CODE_SELECTOR: u16 = (4 << 3) | 0b11; 
 #[allow(dead_code)]
 const USER_DATA_SELECTOR: u16 = (5 << 3) | 0b11;
 #[allow(dead_code)]
@@ -47,6 +50,15 @@ extern "C" {
 #[derive(Clone, Copy)]
 struct GdtEntry(u64);
 
+/*
+   63                                32 31                               0
+   ┌───────────────────────────────────┬───────────────────────────────────┐
+   │ Base[31:24] | Flags | Limit[19:16]| Access | Base[23:16] | Base[15:0] │
+   ├──────────────┴────────────┴────────┴─────────┴─────────────┴──────────┤
+   │                Limit[15:0]                                            │
+   └───────────────────────────────────────────────────────────────────────┘
+
+*/
 impl GdtEntry {
     const fn new(base: u32, limit: u32, access: u8, flags: u8) -> Self {
         let mut value = 0u64;
@@ -75,10 +87,12 @@ const fn data_segment(ring: u8) -> GdtEntry {
 
 const fn stack_segment(ring: u8) -> GdtEntry {
     // Stack uses a dedicated descriptor so that we can change privilege level bits independently later.
-    GdtEntry::new(0, LIMIT_4GB, 0x92 | privilege_mask(ring), GRANULARITY_FLAGS)
+    GdtEntry::new(0, LIMIT_4GB, 0x96 | privilege_mask(ring), GRANULARITY_FLAGS)
 }
 
-/// Template table that we copy to physical 0x800 before loading it.
+/*
+    Template table that we copy to physical 0x800 before loading it.
+*/
 #[used]
 static GDT_TEMPLATE: [GdtEntry; 7] = [
     GdtEntry(0),
@@ -90,7 +104,9 @@ static GDT_TEMPLATE: [GdtEntry; 7] = [
     stack_segment(3),
 ];
 
-/// GDTR-compatible pointer (limit + base) passed to the `lgdt` instruction.
+/*
+    GDTR-compatible pointer (limit + base) passed to the `lgdt` instruction.
+*/
 #[repr(C, packed)]
 struct DescriptorTablePointer {
     limit: u16,
@@ -152,21 +168,28 @@ pub extern "C" fn _start_kernel() -> ! {
 
 extern "C" fn kernel_main() -> ! {
     println!("GDT successfully loaded");
-    // print_stack();
+    print_stack();
     loop {}
 }
 
 unsafe fn init_gdt_and_jump(entry: extern "C" fn() -> !) -> ! {
-    // Copy the descriptors to the low-memory area (0x800) required by the subject.
+    /*
+        Copy the 7 entries towards 0x800
+    */
     let gdt_destination = GDT_PHYS_ADDR as *mut GdtEntry;
     ptr::copy_nonoverlapping(GDT_TEMPLATE.as_ptr(), gdt_destination, GDT_TEMPLATE.len());
 
-    // Build a GDTR structure pointing to the freshly initialized table.
+    /*
+        Building a GDTR pointer
+    */
     let gdt_ptr = DescriptorTablePointer {
         limit: (core::mem::size_of::<[GdtEntry; 7]>() - 1) as u16,
         base: GDT_PHYS_ADDR,
     };
 
+    /*
+        `Pointeur de saut` 
+    */
     let entry_ptr = FarPointer {
         offset: entry as u32,
         selector: KERNEL_CODE_SELECTOR,
@@ -183,17 +206,17 @@ unsafe fn load_gdt_and_segments(
     let stack_top_ptr = &stack_top as *const u8 as u32;
 
     asm!(
-        "cli",
-        "lgdt [{gdt_ptr}]",
-        "mov ax, {data_sel}",
+        "cli", // deactivate interruptions
+        "lgdt [{gdt_ptr}]", // charging GDT on GDTR register
+        "mov ax, {data_sel}", // charging segment data ring 0
         "mov ds, ax",
         "mov es, ax",
         "mov fs, ax",
         "mov gs, ax",
-        "mov ax, {stack_sel}",
+        "mov ax, {stack_sel}", // charging segment stack ring 0
         "mov ss, ax",
-        "mov esp, {stack_top}",
-        "ljmp [{entry}]",
+        "mov esp, {stack_top}", // init again stack pointer
+        "ljmp [{entry}]", // saut validant le nouveau code segment et entre dans le noyau
         gdt_ptr = in(reg) gdt_ptr,
         entry = in(reg) entry,
         data_sel = const KERNEL_DATA_SELECTOR,
@@ -203,7 +226,7 @@ unsafe fn load_gdt_and_segments(
     );
 }
 
-/// Dump a portion of the kernel stack so we can visually inspect what lives there.
+
 fn print_stack() {
     let (bottom, top) = unsafe { stack_bounds() };
     let esp = current_stack_pointer();
@@ -221,7 +244,7 @@ fn print_stack() {
 
     let mut addr = esp;
     let mut count = 0;
-    const STACK_DUMP_ENTRIES: usize = 32;
+    const STACK_DUMP_ENTRIES: usize = 8;
     while addr < top && count < STACK_DUMP_ENTRIES {
         let value = unsafe { core::ptr::read(addr as *const u32) };
         println!("{:#010X}: {:#010X}", addr, value);
@@ -230,7 +253,9 @@ fn print_stack() {
     }
 }
 
-/// Translate the assembly labels into usable Rust addresses.
+/* 
+    Translate the assembly labels into usable Rust addresses
+*/
 unsafe fn stack_bounds() -> (u32, u32) {
     (
         &stack_bottom as *const u8 as u32,
@@ -238,7 +263,6 @@ unsafe fn stack_bounds() -> (u32, u32) {
     )
 }
 
-/// Snapshot the current value of ESP for the debug print.
 fn current_stack_pointer() -> u32 {
     let esp: u32;
     unsafe {
@@ -247,7 +271,6 @@ fn current_stack_pointer() -> u32 {
     esp
 }
 
-/// This function is called on panic.
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {

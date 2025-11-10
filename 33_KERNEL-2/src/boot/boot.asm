@@ -20,7 +20,7 @@ align 4
 section .bss
 align 16
 stack_bottom:                     ; Label for the start of the stack space
-    resb 16384                    ; Reserve 16 KiB for the stack
+    resb 16384                    ; Reserve 16 KiB for the kernel_stack
 stack_top:                        ; Label for the top of the stack
 
 ; .text section contains the executable code of the kernel
