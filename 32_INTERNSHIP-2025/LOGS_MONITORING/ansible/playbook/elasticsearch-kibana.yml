@@ -1,6 +1,0 @@
----
-- name: Deploy ElasticSearch and Kibana
-  hosts: localhost
-  roles:
-    - elasticsearch
-    - kibana
