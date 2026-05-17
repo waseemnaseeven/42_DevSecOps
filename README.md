@@ -14,4 +14,5 @@
 | [badass](https://github.com/waseemnaseeven/42_DevSecOps/29_BADASS) | GNS3, bash, docker, bgp, vxlan | January 2025 |  Network administration | 200 | 1,5 | ✅ |
 | [tokenizer](https://github.com/waseemnaseeven/42_DevSecOps/30_TOKENIZER) | solidity, javascript... | November 2025 | This project allows to learn the basics in web3. I've created a non-fungible token! | 100 | 2,0 | ✅ |
 | [tokenizart](https://github.com/waseemnaseeven/42_DevSecOps/31_TOKENIZART) | solidity, javascript... | November 2025 | Create a NFT | 100 | 2,0 | ✅ |
-| [internship-I](https://github.com/waseemnaseeven/42_DevSecOps/32_INTERNSHIP-2025) | ansible, terraform, monitoring | January 2025 | Design and automate an observability stack for metrics and logs with mTLS | 125 | 4 | ✅ |
+| [internship-I](https://github.com/waseemnaseeven/42_DevSecOps/32_INTERNSHIP-2025) | ansible, terraform, monitoring | January 2026 | Design and automate an observability stack for metrics and logs with mTLS | 125 | 4 | ✅ |
+| [cyber-piscine](https://github.com/waseemnaseeven/42_DevSecOps/33_CYBER-PISCINE) | python, asm, bash, gdb, docker, c | June 2026 | A lot of cybersecurity exercises : scrapper, onion, reverse, malware... | ... | 2,5 | ❌ |
